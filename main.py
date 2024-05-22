@@ -13,11 +13,13 @@ from selenium.webdriver.chrome.options import Options
 def change_map() -> None:
     global map
     global site_url
+    global where_am_i_click
     select_map = combobox.get()
     if map != select_map:
         site_url = f"https://tarkov-market.com/maps/{select_map}"
         map = select_map
         driver.get(site_url)
+        where_am_i_click=False
 
 def set_trigger(event):
     global trigger
@@ -25,6 +27,7 @@ def set_trigger(event):
     with open(txt_file_path, 'w') as file:
         file.write(trigger)
     label3.config(text=f'Now: \"{trigger}\"')
+    keyboard.add_hotkey(trigger, lambda: checkLocation())
         
 def get_latest_file(folder_path):
     files = glob.glob(os.path.join(folder_path, '*'))
@@ -60,29 +63,39 @@ def checkLocation():
             break
     
     if screenshot is None:
-        print("Error: Cant find Screenshot Files.")
         return
-
-    textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
-    textArea.click()
-    textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
-    textArea2.click()
-    textArea2.send_keys(Keys.DELETE)
-    textArea2.send_keys(screenshot.replace(".png",""))
-    changeMarker()
+    
+    global where_am_i_click
+    if where_am_i_click == False:
+        where_am_i_click = True
+        textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
+        textArea.click()
+        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
+        textArea2.click()
+        textArea2.send_keys(Keys.DELETE)
+        textArea2.send_keys(screenshot.replace(".png",""))
+        changeMarker()
+    else:
+        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
+        textArea2.click()
+        textArea2.send_keys(Keys.DELETE)
+        textArea2.send_keys(screenshot.replace(".png",""))
+        changeMarker()
 
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
 
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
 txt_file_path = 'key_data.txt'
+where_am_i_click = False    # where am i 클릭 되어 있으면 값만 입력하게끔
+
 
 # 스크린샷 및 위치 표시할 키 불러오기
 if os.path.exists(txt_file_path):   
     with open(txt_file_path, 'r') as file:
         trigger = file.read().strip()
 else:
-    trigger = None         
+    trigger = 'print screen'
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -93,8 +106,6 @@ driver.get(site_url)
 
 keyboard.add_hotkey(trigger, lambda: checkLocation())
 
-
-
 # 색상 변수
 bg_color = 'gray'
 box_color = '#333333'
@@ -103,7 +114,7 @@ text_color = 'white'
 # UI 생성
 window = Tk()
 window.geometry("500x600")
-window.title("EFT Where am I?   v1.0")
+window.title("EFT Where am I?   v1.1")
 window.resizable(False, False)
 window.configure(bg=bg_color)
 
@@ -167,7 +178,11 @@ label3 = Label(frame2, text=f'Now: \"{trigger}\"', font=('Helvetica', 16), bg=bo
 label3.grid(row=1, column=0, columnspan=3, pady=(0, 10))
 
 b2 = Button(frame2, text='Press to Record', command=lambda: keyboard.hook(set_trigger), font=('Helvetica', 16))
-b2.grid(row=2, column=0, columnspan=3, pady=(10, 10))
+b2.grid(row=2, column=0, pady=(10, 10))
+
+# 강제 실행 버튼 추가
+b_force = Button(frame2, text='Force Run', command=checkLocation, font=('Helvetica', 16))
+b_force.grid(row=2, column=1, pady=(10, 10), padx=(10, 0))
 
 b3 = Button(main_frame, text='How to use', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
 b3.grid(row=2, column=0, pady=(10, 10))
