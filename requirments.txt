@@ -1,0 +1,4 @@
+keyboard==0.13.5
+pyinstaller==6.6.0
+pyinstaller-hooks-contrib==2024.6
+selenium==4.20.0

@@ -1,4 +1,5 @@
 from tkinter import *
+import webbrowser
 import tkinter.ttk as ttk 
 import keyboard
 import os
@@ -99,7 +100,6 @@ bg_color = 'gray'
 box_color = '#333333'
 text_color = 'white'
 
-
 # UI 생성
 window = Tk()
 window.geometry("500x600")
@@ -132,6 +132,9 @@ def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
               x1, y1+radius,
               x1, y1]
     return canvas.create_polygon(points, **kwargs, smooth=True)
+
+def open_url(url):
+    webbrowser.open_new(url)
 
 canvas1 = Canvas(main_frame, width=480, height=200, bg=bg_color, highlightthickness=0)
 canvas1.grid(row=0, column=0, pady=(10, 20))
@@ -166,10 +169,10 @@ label3.grid(row=1, column=0, columnspan=3, pady=(0, 10))
 b2 = Button(frame2, text='Press to Record', command=lambda: keyboard.hook(set_trigger), font=('Helvetica', 16))
 b2.grid(row=2, column=0, columnspan=3, pady=(10, 10))
 
-label4 = Label(main_frame, text='How to use', font=('Helvetica', 12), bg=bg_color)
-label4.grid(row=2, column=0, pady=(10, 10))
+b3 = Button(main_frame, text='How to use', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
+b3.grid(row=2, column=0, pady=(10, 10))
 
-label5 = Label(main_frame, text='사용 방법', font=('Helvetica', 12), bg=bg_color)
-label5.grid(row=3, column=0)
+b4 = Button(main_frame, text='사용 방법', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README_ko_kr.md"))
+b4.grid(row=3, column=0)
 
 window.mainloop()
