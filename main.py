@@ -25,6 +25,7 @@ def set_trigger(event):
     with open(txt_file_path, 'w') as file:
         file.write(trigger)
     label3.config(text=f'Now: \"{trigger}\"')
+    keyboard.add_hotkey(trigger, lambda: checkLocation())
         
 def get_latest_file(folder_path):
     files = glob.glob(os.path.join(folder_path, '*'))
@@ -91,8 +92,6 @@ driver.implicitly_wait(3)
 driver.get(site_url)
 
 keyboard.add_hotkey(trigger, lambda: checkLocation())
-
-
 
 # 색상 변수
 bg_color = 'gray'
@@ -166,7 +165,11 @@ label3 = Label(frame2, text=f'Now: \"{trigger}\"', font=('Helvetica', 16), bg=bo
 label3.grid(row=1, column=0, columnspan=3, pady=(0, 10))
 
 b2 = Button(frame2, text='Press to Record', command=lambda: keyboard.hook(set_trigger), font=('Helvetica', 16))
-b2.grid(row=2, column=0, columnspan=3, pady=(10, 10))
+b2.grid(row=2, column=0, pady=(10, 10))
+
+# 강제 실행 버튼 추가
+b_force = Button(frame2, text='Force Run', command=checkLocation, font=('Helvetica', 16))
+b_force.grid(row=2, column=1, pady=(10, 10), padx=(10, 0))
 
 b3 = Button(main_frame, text='How to use', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
 b3.grid(row=2, column=0, pady=(10, 10))
