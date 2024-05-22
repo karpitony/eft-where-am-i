@@ -13,11 +13,13 @@ from selenium.webdriver.chrome.options import Options
 def change_map() -> None:
     global map
     global site_url
+    global where_am_i_click
     select_map = combobox.get()
     if map != select_map:
         site_url = f"https://tarkov-market.com/maps/{select_map}"
         map = select_map
         driver.get(site_url)
+        where_am_i_click=False
 
 def set_trigger(event):
     global trigger
@@ -62,20 +64,31 @@ def checkLocation():
     
     if screenshot is None:
         return
-
-    textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
-    textArea.click()
-    textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
-    textArea2.click()
-    textArea2.send_keys(Keys.DELETE)
-    textArea2.send_keys(screenshot.replace(".png",""))
-    changeMarker()
+    
+    global where_am_i_click
+    if where_am_i_click == False:
+        where_am_i_click = True
+        textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
+        textArea.click()
+        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
+        textArea2.click()
+        textArea2.send_keys(Keys.DELETE)
+        textArea2.send_keys(screenshot.replace(".png",""))
+        changeMarker()
+    else:
+        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
+        textArea2.click()
+        textArea2.send_keys(Keys.DELETE)
+        textArea2.send_keys(screenshot.replace(".png",""))
+        changeMarker()
 
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
 
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
 txt_file_path = 'key_data.txt'
+where_am_i_click = False    # where am i 클릭 되어 있으면 값만 입력하게끔
+
 
 # 스크린샷 및 위치 표시할 키 불러오기
 if os.path.exists(txt_file_path):   
@@ -101,7 +114,7 @@ text_color = 'white'
 # UI 생성
 window = Tk()
 window.geometry("500x600")
-window.title("EFT Where am I?   v1.0")
+window.title("EFT Where am I?   v1.1")
 window.resizable(False, False)
 window.configure(bg=bg_color)
 
