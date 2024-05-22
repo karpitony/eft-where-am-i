@@ -60,7 +60,6 @@ def checkLocation():
             break
     
     if screenshot is None:
-        print("Error: Cant find Screenshot Files.")
         return
 
     textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
@@ -82,7 +81,7 @@ if os.path.exists(txt_file_path):
     with open(txt_file_path, 'r') as file:
         trigger = file.read().strip()
 else:
-    trigger = None         
+    trigger = 'print screen'
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
