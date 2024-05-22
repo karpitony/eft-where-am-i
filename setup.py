@@ -1,7 +1,7 @@
 from cx_Freeze import setup, Executable
 
 name = "EFT Where am I"
-version = "1.0"
+version = "1.1"
 description = "Description of EFT Where am I"
 
 executables = [
