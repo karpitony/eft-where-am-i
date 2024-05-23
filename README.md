@@ -1,3 +1,7 @@
+[![GitHub release](https://img.shields.io/github/release/karpitony/eft-where-am-i.svg?logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
+[![GitHub downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/latest/total.svg?logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
+[![GitHub downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?logo=github)](https://github.com/karpitony/eft-where-am-i/releases)
+
 # eft-where-am-i
 - `Tarkov-Market`의 `Maps` 기능을 손쉽게 사용할 수 있도록 도와주는 Python + GUI 프로그램입니다.
 - [Rok님의 게시글 및 소스코드](https://gall.dcinside.com/m/eft/2143712)를 기반으로 작성했습니다.
