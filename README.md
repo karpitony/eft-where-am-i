@@ -1,5 +1,4 @@
-[![GitHub Release](https://img.shields.io/github/v/release/karpitony/eft-where-am-i?include_prereleases&logo=github)
-](https://github.com/karpitony/eft-where-am-i/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/karpitony/eft-where-am-i?include_prereleases&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?logo=github)](https://github.com/karpitony/eft-where-am-i/releases)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=round)](https://github.com/karpitony/eft-where-am-i/issues)
 [![GitHub License](https://img.shields.io/github/license/karpitony/eft-where-am-i)](./LICENSE)
