@@ -1,34 +1,32 @@
-from tkinter import *
-import webbrowser
-import tkinter.ttk as ttk 
-import keyboard
+import sys
 import os
 import glob
 import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
+import keyboard
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
+from PyQt5.QtGui import QFont
 
-def change_map() -> None:
+def change_map():
     global map
     global site_url
     global where_am_i_click
-    select_map = combobox.get()
+    select_map = combobox.currentText()
     if map != select_map:
         site_url = f"https://tarkov-market.com/maps/{select_map}"
         map = select_map
-        driver.get(site_url)
-        where_am_i_click=False
+        browser.setUrl(QUrl(site_url))
+        where_am_i_click = False
 
 def set_trigger(event):
     global trigger
     trigger = event.name
     with open(txt_file_path, 'w') as file:
         file.write(trigger)
-    label3.config(text=f'Now: \"{trigger}\"')
+    label3.setText(f'Now: \"{trigger}\"')
     keyboard.add_hotkey(trigger, checkLocation)
-        
+
 def get_latest_file(folder_path):
     files = glob.glob(os.path.join(folder_path, '*'))
     if not files:
@@ -39,14 +37,13 @@ def get_latest_file(folder_path):
 
 def changeMarker():
     styleList = [
-        ['background','#ff0000'],
-        ['height','30px'],
-        ['width','30px']
+        ['background', '#ff0000'],
+        ['height', '30px'],
+        ['width', '30px']
     ]
     for i in styleList:
-        driver.execute_script("document.getElementsByClassName('marker')[0].style.setProperty('"+i[0]+"','"+i[1]+"','important')")
+        browser.page().runJavaScript(f"document.getElementsByClassName('marker')[0].style.setProperty('{i[0]}', '{i[1]}', 'important')")
 
-# tarkov-market에 위치 확인하는 함수
 def checkLocation():
     time.sleep(1)
     paths = [
@@ -55,31 +52,32 @@ def checkLocation():
         os.path.expanduser('~') + "\\OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
         os.path.expanduser('~') + "\\OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
     ]
-    
+
     screenshot = None
     for path in paths:
         screenshot = get_latest_file(path)
         if screenshot:
             break
-    
+
     if screenshot is None:
         return
-    
+
     global where_am_i_click
     if where_am_i_click == False:
         where_am_i_click = True
-        textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
-        textArea.click()
-        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
-        textArea2.click()
-        textArea2.send_keys(Keys.DELETE)
-        textArea2.send_keys(screenshot.replace(".png",""))
+        browser.page().runJavaScript("""
+            document.querySelector('div[role="button"]').click();
+            document.querySelector('input[type="text"]').value = '';
+        """)
+        time.sleep(0.5)
+        browser.page().runJavaScript(f"""
+            document.querySelector('input[type="text"]').value = '{screenshot.replace(".png", "")}';
+        """)
         changeMarker()
     else:
-        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
-        textArea2.click()
-        textArea2.send_keys(Keys.DELETE)
-        textArea2.send_keys(screenshot.replace(".png",""))
+        browser.page().runJavaScript(f"""
+            document.querySelector('input[type="text"]').value = '{screenshot.replace(".png", "")}';
+        """)
         changeMarker()
 
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
@@ -87,18 +85,9 @@ mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreli
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
 txt_file_path = 'key_data.txt'
-where_am_i_click = False    # where am i 클릭 되어 있으면 값만 입력하게끔
+where_am_i_click = False
 
-
-chrome_options = Options()
-chrome_options.add_experimental_option("detach", True)
-chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
-driver = webdriver.Chrome(options=chrome_options)
-driver.implicitly_wait(3)
-driver.get(site_url)
-
-# 스크린샷 및 위치 표시할 키 불러오기
-if os.path.exists(txt_file_path):   
+if os.path.exists(txt_file_path):
     with open(txt_file_path, 'r') as file:
         trigger = file.read().strip()
 else:
@@ -106,88 +95,87 @@ else:
 
 keyboard.add_hotkey(trigger, checkLocation)
 
-# 색상 변수
-bg_color = 'gray'
-box_color = '#333333'
-text_color = 'white'
+class BrowserWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("EFT Where am I?   v1.2")
+        self.setGeometry(100, 100, 1200, 800)
+        self.setStyleSheet("background-color: gray; color: white;")
 
-# UI 생성
-window = Tk()
-window.geometry("500x600")
-window.title("EFT Where am I?   v1.2")
-window.resizable(False, False)
-window.configure(bg=bg_color)
+        global browser  # browser를 전역 변수로 설정
+        browser = QWebEngineView()
+        browser.setUrl(QUrl(site_url))
+        
+        # WebEngineSettings 수정
+        settings = browser.settings()
+        settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+        settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+        settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        settings.setAttribute(QWebEngineSettings.AllowRunningInsecureContent, True)
 
-main_frame = Frame(window, padx=10, pady=10, bg=bg_color)
-main_frame.pack(expand=True)
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
 
-def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
-    points = [x1+radius, y1,
-              x1+radius, y1,
-              x2-radius, y1,
-              x2-radius, y1,
-              x2, y1,
-              x2, y1+radius,
-              x2, y1+radius,
-              x2, y2-radius,
-              x2, y2-radius,
-              x2, y2,
-              x2-radius, y2,
-              x2-radius, y2,
-              x1+radius, y2,
-              x1+radius, y2,
-              x1, y2,
-              x1, y2-radius,
-              x1, y2-radius,
-              x1, y1+radius,
-              x1, y1+radius,
-              x1, y1]
-    return canvas.create_polygon(points, **kwargs, smooth=True)
+        main_layout = QVBoxLayout(central_widget)
+
+        top_layout = QHBoxLayout()
+        main_layout.addLayout(top_layout)
+
+        self.label1 = QLabel('Select The Map.\n맵을 선택해주세요.', self)
+        self.label1.setFont(QFont('Helvetica', 16))
+        top_layout.addWidget(self.label1)
+
+        global combobox  # combobox를 전역 변수로 설정
+        combobox = QComboBox(self)
+        combobox.addItems(mapList)
+        combobox.setCurrentText("ground-zero")
+        combobox.setFont(QFont('Helvetica', 16))
+        top_layout.addWidget(combobox)
+
+        self.b1 = QPushButton('Apply', self)
+        self.b1.setFont(QFont('Helvetica', 16))
+        self.b1.clicked.connect(change_map)
+        top_layout.addWidget(self.b1)
+
+        self.label2 = QLabel('Enter the key you use for screenshots.\n스크린샷으로 사용하는 키를 입력해주세요.', self)
+        self.label2.setFont(QFont('Helvetica', 16))
+        top_layout.addWidget(self.label2)
+
+        global label3  # label3를 전역 변수로 설정
+        label3 = QLabel(f'Now: \"{trigger}\"', self)
+        label3.setFont(QFont('Helvetica', 16))
+        top_layout.addWidget(label3)
+
+        self.b2 = QPushButton('Press to Record', self)
+        self.b2.setFont(QFont('Helvetica', 16))
+        self.b2.clicked.connect(lambda: keyboard.hook(set_trigger))
+        top_layout.addWidget(self.b2)
+
+        self.b_force = QPushButton('Force Run', self)
+        self.b_force.setFont(QFont('Helvetica', 16))
+        self.b_force.clicked.connect(checkLocation)
+        top_layout.addWidget(self.b_force)
+
+        self.b3 = QPushButton('How to use', self)
+        self.b3.setFont(QFont('Helvetica', 12, QFont.Bold))
+        self.b3.setStyleSheet("color: #0645AD;")
+        self.b3.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
+        top_layout.addWidget(self.b3)
+
+        self.b4 = QPushButton('사용 방법', self)
+        self.b4.setFont(QFont('Helvetica', 12, QFont.Bold))
+        self.b4.setStyleSheet("color: #0645AD;")
+        self.b4.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README_ko_kr.md"))
+        top_layout.addWidget(self.b4)
+
+        main_layout.addWidget(browser)
 
 def open_url(url):
     webbrowser.open_new(url)
 
-canvas1 = Canvas(main_frame, width=480, height=200, bg=bg_color, highlightthickness=0)
-canvas1.grid(row=0, column=0, pady=(10, 20))
-create_rounded_rectangle(canvas1, 10, 10, 470, 190, radius=20, fill=box_color)
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
 
-frame1 = Frame(canvas1, bg=box_color)
-frame1.place(relx=0.5, rely=0.5, anchor=CENTER)
-
-label1 = Label(frame1, text='Select The Map.\n맵을 선택해주세요.', font=('Helvetica', 16), bg=box_color, fg=text_color)
-label1.grid(row=0, column=0, columnspan=3, pady=(10, 10))
-
-combobox = ttk.Combobox(frame1, values=mapList, state="readonly", font=('Helvetica', 16))   
-combobox.set("ground-zero") 
-combobox.grid(row=1, column=0, columnspan=2, pady=(0, 10))
-
-b1 = Button(frame1, text='적용', command=change_map, font=('Helvetica', 16))
-b1.grid(row=1, column=2, padx=(10, 0))
-
-canvas2 = Canvas(main_frame, width=480, height=200, bg=bg_color, highlightthickness=0)
-canvas2.grid(row=1, column=0, pady=(0, 20))
-create_rounded_rectangle(canvas2, 10, 10, 470, 190, radius=20, fill=box_color)
-
-frame2 = Frame(canvas2, bg=box_color)
-frame2.place(relx=0.5, rely=0.5, anchor=CENTER)
-
-label2 = Label(frame2, text='Enter the key you use for screenshots.\n스크린샷으로 사용하는 키를 입력해주세요.', font=('Helvetica', 16), bg=box_color, fg=text_color)
-label2.grid(row=0, column=0, columnspan=3, pady=(10, 10))
-
-label3 = Label(frame2, text=f'Now: \"{trigger}\"', font=('Helvetica', 16), bg=box_color, fg=text_color)
-label3.grid(row=1, column=0, columnspan=3, pady=(0, 10))
-
-b2 = Button(frame2, text='Press to Record', command=lambda: keyboard.hook(set_trigger), font=('Helvetica', 16))
-b2.grid(row=2, column=0, pady=(10, 10))
-
-# 강제 실행 버튼 추가
-b_force = Button(frame2, text='Force Run', command=checkLocation, font=('Helvetica', 16))
-b_force.grid(row=2, column=1, pady=(10, 10), padx=(10, 0))
-
-b3 = Button(main_frame, text='How to use', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
-b3.grid(row=2, column=0, pady=(10, 10))
-
-b4 = Button(main_frame, text='사용 방법', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README_ko_kr.md"))
-b4.grid(row=3, column=0)
-
-window.mainloop()
+    window = BrowserWindow()
+    window.show()
+    sys.exit(app.exec_())
