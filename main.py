@@ -27,7 +27,7 @@ def set_trigger(event):
     with open(txt_file_path, 'w') as file:
         file.write(trigger)
     label3.config(text=f'Now: \"{trigger}\"')
-    keyboard.add_hotkey(trigger, lambda: checkLocation())
+    keyboard.add_hotkey(trigger, checkLocation)
         
 def get_latest_file(folder_path):
     files = glob.glob(os.path.join(folder_path, '*'))
@@ -90,13 +90,6 @@ txt_file_path = 'key_data.txt'
 where_am_i_click = False    # where am i 클릭 되어 있으면 값만 입력하게끔
 
 
-# 스크린샷 및 위치 표시할 키 불러오기
-if os.path.exists(txt_file_path):   
-    with open(txt_file_path, 'r') as file:
-        trigger = file.read().strip()
-else:
-    trigger = 'print screen'
-
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
@@ -104,7 +97,14 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.implicitly_wait(3)
 driver.get(site_url)
 
-keyboard.add_hotkey(trigger, lambda: checkLocation())
+# 스크린샷 및 위치 표시할 키 불러오기
+if os.path.exists(txt_file_path):   
+    with open(txt_file_path, 'r') as file:
+        trigger = file.read().strip()
+else:
+    trigger = 'print screen'
+
+keyboard.add_hotkey(trigger, checkLocation)
 
 # 색상 변수
 bg_color = 'gray'
@@ -114,7 +114,7 @@ text_color = 'white'
 # UI 생성
 window = Tk()
 window.geometry("500x600")
-window.title("EFT Where am I?   v1.1")
+window.title("EFT Where am I?   v1.2")
 window.resizable(False, False)
 window.configure(bg=bg_color)
 
