@@ -3,7 +3,7 @@ import os
 import glob
 import time
 import keyboard
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
@@ -118,55 +118,68 @@ class BrowserWindow(QMainWindow):
 
         main_layout = QVBoxLayout(central_widget)
 
-        top_layout = QHBoxLayout()
-        main_layout.addLayout(top_layout)
+        # 첫 번째 줄
+        top_layout_1 = QHBoxLayout()
+        main_layout.addLayout(top_layout_1)
 
-        self.label1 = QLabel('Select The Map.\n맵을 선택해주세요.', self)
-        self.label1.setFont(QFont('Helvetica', 16))
-        top_layout.addWidget(self.label1)
+        # 맵 선택
+        map_layout = QVBoxLayout()
+        map_label = QLabel('Select The Map.\n맵을 선택해주세요.', self)
+        map_label.setFont(QFont('Helvetica', 16))
+        map_label.setAlignment(Qt.AlignCenter)
+        map_layout.addWidget(map_label)
 
         global combobox  # combobox를 전역 변수로 설정
         combobox = QComboBox(self)
         combobox.addItems(mapList)
         combobox.setCurrentText("ground-zero")
         combobox.setFont(QFont('Helvetica', 16))
-        top_layout.addWidget(combobox)
+        map_layout.addWidget(combobox)
 
         self.b1 = QPushButton('Apply', self)
         self.b1.setFont(QFont('Helvetica', 16))
         self.b1.clicked.connect(change_map)
-        top_layout.addWidget(self.b1)
+        map_layout.addWidget(self.b1)
+        top_layout_1.addLayout(map_layout)
 
-        self.label2 = QLabel('Enter the key you use for screenshots.\n스크린샷으로 사용하는 키를 입력해주세요.', self)
-        self.label2.setFont(QFont('Helvetica', 16))
-        top_layout.addWidget(self.label2)
+        # 스크린샷 키 설정
+        key_layout = QVBoxLayout()
+        key_label = QLabel('Enter the key you use for screenshots.\n스크린샷으로 사용하는 키를 입력해주세요.', self)
+        key_label.setFont(QFont('Helvetica', 16))
+        key_label.setAlignment(Qt.AlignCenter)
+        key_layout.addWidget(key_label)
 
         global label3  # label3를 전역 변수로 설정
         label3 = QLabel(f'Now: \"{trigger}\"', self)
         label3.setFont(QFont('Helvetica', 16))
-        top_layout.addWidget(label3)
+        label3.setAlignment(Qt.AlignCenter)
+        key_layout.addWidget(label3)
 
         self.b2 = QPushButton('Press to Record', self)
         self.b2.setFont(QFont('Helvetica', 16))
         self.b2.clicked.connect(lambda: keyboard.hook(set_trigger))
-        top_layout.addWidget(self.b2)
+        key_layout.addWidget(self.b2)
+        top_layout_1.addLayout(key_layout)
 
-        self.b_force = QPushButton('Force Run', self)
-        self.b_force.setFont(QFont('Helvetica', 16))
-        self.b_force.clicked.connect(checkLocation)
-        top_layout.addWidget(self.b_force)
-
+        # 사용 설명서
+        usage_layout = QVBoxLayout()
         self.b3 = QPushButton('How to use', self)
         self.b3.setFont(QFont('Helvetica', 12, QFont.Bold))
         self.b3.setStyleSheet("color: #0645AD;")
         self.b3.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
-        top_layout.addWidget(self.b3)
+        usage_layout.addWidget(self.b3)
 
         self.b4 = QPushButton('사용 방법', self)
         self.b4.setFont(QFont('Helvetica', 12, QFont.Bold))
         self.b4.setStyleSheet("color: #0645AD;")
         self.b4.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README_ko_kr.md"))
-        top_layout.addWidget(self.b4)
+        usage_layout.addWidget(self.b4)
+
+        self.b_force = QPushButton('Force Run', self)
+        self.b_force.setFont(QFont('Helvetica', 16))
+        self.b_force.clicked.connect(checkLocation)
+        usage_layout.addWidget(self.b_force)
+        top_layout_1.addLayout(usage_layout)
 
         main_layout.addWidget(browser)
 
