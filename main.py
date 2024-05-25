@@ -3,6 +3,7 @@ import os
 import glob
 import time
 import keyboard
+import webbrowser
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
@@ -42,7 +43,15 @@ def changeMarker():
         ['width', '30px']
     ]
     for i in styleList:
-        browser.page().runJavaScript(f"document.getElementsByClassName('marker')[0].style.setProperty('{i[0]}', '{i[1]}', 'important')")
+        js_code = f"""
+            var marker = document.getElementsByClassName('marker')[0];
+            if (marker) {{
+                marker.style.setProperty('{i[0]}', '{i[1]}', 'important');
+            }} else {{
+                console.log('Marker not found');
+            }}
+        """
+        browser.page().runJavaScript(js_code)
 
 def checkLocation():
     time.sleep(1)
@@ -65,19 +74,41 @@ def checkLocation():
     global where_am_i_click
     if where_am_i_click == False:
         where_am_i_click = True
-        browser.page().runJavaScript("""
-            document.querySelector('div[role="button"]').click();
-            document.querySelector('input[type="text"]').value = '';
-        """)
+        js_code = """
+            var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');
+            if (button) {
+                button.click();
+                console.log('Button clicked');
+            } else {
+                console.log('Button not found');
+            }
+        """
+        browser.page().runJavaScript(js_code)
         time.sleep(0.5)
-        browser.page().runJavaScript(f"""
-            document.querySelector('input[type="text"]').value = '{screenshot.replace(".png", "")}';
-        """)
+        js_code = f"""
+            var input = document.querySelector('input[type="text"]');
+            if (input) {{
+                input.value = '{screenshot.replace(".png", "")}';
+                input.dispatchEvent(new Event('input'));
+                console.log('Input value set');
+            }} else {{
+                console.log('Input not found');
+            }}
+        """
+        browser.page().runJavaScript(js_code)
         changeMarker()
     else:
-        browser.page().runJavaScript(f"""
-            document.querySelector('input[type="text"]').value = '{screenshot.replace(".png", "")}';
-        """)
+        js_code = f"""
+            var input = document.querySelector('input[type="text"]');
+            if (input) {{
+                input.value = '{screenshot.replace(".png", "")}';
+                input.dispatchEvent(new Event('input'));
+                console.log('Input value set');
+            }} else {{
+                console.log('Input not found');
+            }}
+        """
+        browser.page().runJavaScript(js_code)
         changeMarker()
 
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
@@ -99,7 +130,7 @@ class BrowserWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("EFT Where am I?   v1.2")
-        self.setGeometry(100, 100, 1200, 800)
+        self.setGeometry(100, 100, 1200, 1000)
         self.setStyleSheet("background-color: gray; color: white;")
 
         global browser  # browser를 전역 변수로 설정
@@ -125,7 +156,7 @@ class BrowserWindow(QMainWindow):
         # 맵 선택
         map_layout = QVBoxLayout()
         map_label = QLabel('Select The Map.\n맵을 선택해주세요.', self)
-        map_label.setFont(QFont('Helvetica', 16))
+        map_label.setFont(QFont('Helvetica', 16, QFont.Bold))
         map_label.setAlignment(Qt.AlignCenter)
         map_layout.addWidget(map_label)
 
@@ -134,6 +165,7 @@ class BrowserWindow(QMainWindow):
         combobox.addItems(mapList)
         combobox.setCurrentText("ground-zero")
         combobox.setFont(QFont('Helvetica', 16))
+        combobox.setStyleSheet("background-color: white; color: black;")
         map_layout.addWidget(combobox)
 
         self.b1 = QPushButton('Apply', self)
@@ -145,7 +177,7 @@ class BrowserWindow(QMainWindow):
         # 스크린샷 키 설정
         key_layout = QVBoxLayout()
         key_label = QLabel('Enter the key you use for screenshots.\n스크린샷으로 사용하는 키를 입력해주세요.', self)
-        key_label.setFont(QFont('Helvetica', 16))
+        key_label.setFont(QFont('Helvetica', 16, QFont.Bold))
         key_label.setAlignment(Qt.AlignCenter)
         key_layout.addWidget(key_label)
 
