@@ -1,6 +1,6 @@
 [![GitHub Release](https://img.shields.io/github/v/release/karpitony/eft-where-am-i?include_prereleases&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
 [![GitHub total downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?include_prerelease&logo=github)](https://github.com/karpitony/eft-where-am-i/releases)
-[![GitHub latest downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?include_prerelease/latest&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
+[![GitHub latest downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/latest/total.svg?include_prerelease/latest&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
 [![GitHub License](https://img.shields.io/github/license/karpitony/eft-where-am-i)](./LICENSE)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
