@@ -1,7 +1,6 @@
 [![GitHub Release](https://img.shields.io/github/v/release/karpitony/eft-where-am-i?include_prereleases&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
 [![GitHub total downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?include_prerelease&logo=github)](https://github.com/karpitony/eft-where-am-i/releases)
 [![GitHub latest downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?include_prerelease/latest&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=round)](https://github.com/karpitony/eft-where-am-i/issues)
 [![GitHub License](https://img.shields.io/github/license/karpitony/eft-where-am-i)](./LICENSE)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
@@ -10,7 +9,7 @@
 # eft-where-am-i
 - `Tarkov-Market`의 `Maps` 기능을 손쉽게 사용할 수 있도록 도와주는 Python + GUI 프로그램입니다.
 - [Rok님의 게시글 및 소스코드](https://gall.dcinside.com/m/eft/2143712)를 기반으로 작성했습니다.
-- 본 프로그램은 `MIT 라이선스`이며 **본 프로그램으로 인한 어떠한 피해에도 책임지지 않습니다.**
+- 본 프로그램은 `MIT 라이선스`이며 **본 프로그램으로 인한 어떠한 피해**(가능성은 거의 없지만 EFT에 의한 제재 등)**에 대하여 책임지지 않습니다.**
 
 ## 사용 방법
 **1. 맵을 골라주세요.**
