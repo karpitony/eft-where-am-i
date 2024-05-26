@@ -4,6 +4,9 @@ import os
 
 name = "EFT Where am I"
 version = "1.2"
+author = 'karpitony'
+author_email = 'watemark1017@gmail.com'
+url = 'https://github.com/karpitony/eft-where-am-i'
 description = "A Python program to easily get directions in Tarkov"
 
 # 필요한 DLL 파일 경로 추가
@@ -12,12 +15,16 @@ dll_files = [
     ("C:/Windows/SysWOW64/VCRUNTIME140.dll", "VCRUNTIME140.dll")  # 추가 DLL 파일
 ]
 
-# 패키지와 파일 포함 옵션 설정
 options = {
     'build_exe': {
         'packages': ["PyQt5", "PyQt5.QtWebEngineWidgets", "os", "glob", "time", "sys"],
         'include_files': dll_files,
         'excludes': [],
+    },
+    'bdist_msi': {
+        'upgrade_code': 'GUID',  # GUID 사용
+        'add_to_path': False,
+        'initial_target_dir': r'[ProgramFilesFolder]\EFTWhereAmI',
     }
 }
 
@@ -32,6 +39,9 @@ executables = [
 setup(
     name=name,
     version=version,
+    author=author,
+    author_email=author_email,
+    url=url,
     description=description,
     options=options,
     executables=executables
