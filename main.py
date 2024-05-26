@@ -3,23 +3,10 @@ import os
 import glob
 import time
 import webbrowser
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
-
-
-def fullscreen():
-    time.sleep(1)
-    js_code = """
-        var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
-        if (button) {
-            button.click();
-        } else {
-            console.log('Fullscreen button not found');
-        }
-    """
-    browser.page().runJavaScript(js_code)
 
 
 def change_map():
@@ -32,7 +19,7 @@ def change_map():
         site_url = f"https://tarkov-market.com/maps/{select_map}"
         map = select_map
         browser.setUrl(QUrl(site_url))
-        where_am_i_click = False     
+        where_am_i_click = False
 
 
 def get_latest_file(folder_path):
@@ -89,6 +76,7 @@ def checkLocation():
             var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');
             if (button) {
                 button.click();
+                console.log('Button clicked');
             } else {
                 console.log('Button not found');
             }
@@ -100,6 +88,7 @@ def checkLocation():
             if (input) {{
                 input.value = '{screenshot.replace(".png", "")}';
                 input.dispatchEvent(new Event('input'));
+                console.log('Input value set');
             }} else {{
                 console.log('Input not found');
             }}
@@ -121,8 +110,34 @@ def checkLocation():
         changeMarker()
 
 
+def fullscreen():
+    js_code = """
+        var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
+        if (button) {
+            button.click();
+            console.log('Fullscreen button clicked');
+        } else {
+            console.log('Fullscreen button not found');
+        }
+    """
+    browser.page().runJavaScript(js_code)
+
+
+def pannelControl():
+    js_code = """
+        var button = document.evaluate('//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (button) {
+            button.click();
+            console.log('Panel control button clicked');
+        } else {
+            console.log('Panel control button not found');
+        }
+    """
+    browser.page().runJavaScript(js_code)
+
 
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
+
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
 txt_file_path = 'key_data.txt'
@@ -132,15 +147,15 @@ where_am_i_click = False
 class BrowserWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("EFT Where am I?   v1.2")
+        self.setWindowTitle("EFT Where am I? (ver.1.2)")
         self.setGeometry(100, 100, 1200, 1000)
         self.setStyleSheet("background-color: gray; color: white;")
 
-        global browser  # browser를 전역 변수로 설정
+        global browser
         browser = QWebEngineView()
         browser.setUrl(QUrl(site_url))
+        browser.loadFinished.connect(self.on_load_finished)
         
-        # WebEngineSettings 수정
         settings = browser.settings()
         settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
         settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
@@ -152,54 +167,75 @@ class BrowserWindow(QMainWindow):
 
         main_layout = QVBoxLayout(central_widget)
 
-        # 첫 번째 줄
         top_layout_1 = QHBoxLayout()
         main_layout.addLayout(top_layout_1)
 
-        # 맵 선택
-        map_layout = QVBoxLayout()
+        left_layout = QVBoxLayout()
         map_label = QLabel('Select The Map.\n맵을 선택해주세요.', self)
         map_label.setFont(QFont('Helvetica', 15, QFont.Bold))
         map_label.setAlignment(Qt.AlignCenter)
-        map_layout.addWidget(map_label)
+        left_layout.addWidget(map_label)
 
-        global combobox  # combobox를 전역 변수로 설정
+        global combobox
         combobox = QComboBox(self)
         combobox.addItems(mapList)
         combobox.setCurrentText("ground-zero")
         combobox.setFont(QFont('Helvetica', 16))
         combobox.setStyleSheet("background-color: white; color: black;")
-        map_layout.addWidget(combobox)
+        left_layout.addWidget(combobox)
 
         self.b1 = QPushButton('Apply (적용)', self)
         self.b1.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b1.clicked.connect(change_map)
-        map_layout.addWidget(self.b1)
-        top_layout_1.addLayout(map_layout)
+        left_layout.addWidget(self.b1)
+        top_layout_1.addLayout(left_layout)
 
-        # 사용 설명서
-        usage_layout = QVBoxLayout()
+
+        center_layout = QVBoxLayout()
+        self.b_panel_control = QPushButton('Hide/Show Pannels', self)
+        self.b_panel_control.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b_panel_control.clicked.connect(pannelControl)
+        center_layout.addWidget(self.b_panel_control)
+
+        self.b_fullscreen = QPushButton('Full Screen', self)
+        self.b_fullscreen.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b_fullscreen.clicked.connect(fullscreen)
+        center_layout.addWidget(self.b_fullscreen)
+
+        self.b_force = QPushButton('Run (실행)', self)
+        self.b_force.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b_force.clicked.connect(checkLocation)
+        center_layout.addWidget(self.b_force)
+        top_layout_1.addLayout(center_layout)
+
+
+        right_layout = QVBoxLayout()
         self.b3 = QPushButton('How to use', self)
         self.b3.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b3.setStyleSheet("color: #0645AD;")
         self.b3.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
-        usage_layout.addWidget(self.b3)
+        right_layout.addWidget(self.b3)
 
         self.b4 = QPushButton('사용 방법', self)
         self.b4.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b4.setStyleSheet("color: #0645AD;")
         self.b4.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README_ko_kr.md"))
-        usage_layout.addWidget(self.b4)
+        right_layout.addWidget(self.b4)
 
-        self.b_force = QPushButton('Run (실행)', self)
-        self.b_force.setFont(QFont('Helvetica', 16, QFont.Bold))
-        self.b_force.clicked.connect(checkLocation)
-        usage_layout.addWidget(self.b_force)
-        top_layout_1.addLayout(usage_layout)
+        self.b5 = QPushButton('Bug Report', self)
+        self.b5.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b5.setStyleSheet("color: #0645AD;")
+        self.b5.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/issues"))
+        right_layout.addWidget(self.b5)
+
+        top_layout_1.addLayout(right_layout)
 
         main_layout.addWidget(browser)
 
-        
+    @pyqtSlot(bool)
+    def on_load_finished(self, ok):
+        if ok:
+            fullscreen()
 
 def open_url(url):
     webbrowser.open_new(url)
