@@ -1,10 +1,10 @@
 from cx_Freeze import setup, Executable
-import os
 import sys
+import os
 
 name = "EFT Where am I"
 version = "1.2"
-description = "Description of EFT Where am I"
+description = "A Python program to easily get directions in Tarkov"
 
 # 필요한 DLL 파일 경로 추가
 dll_files = [
@@ -15,8 +15,7 @@ dll_files = [
 # 패키지와 파일 포함 옵션 설정
 options = {
     'build_exe': {
-        'packages': ["tkinter", "webbrowser", "keyboard", "os", "glob", "time", "selenium"],
-        'includes': ["tkinter.ttk"],
+        'packages': ["PyQt5", "PyQt5.QtWebEngineWidgets", "os", "glob", "time", "sys"],
         'include_files': dll_files,
         'excludes': [],
     }
