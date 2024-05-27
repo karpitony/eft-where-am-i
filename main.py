@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
 
+
+# 맵 URL을 선택된 맵에 따라 변경하는 함수
 def change_map():
     global map
     global site_url
@@ -20,7 +22,9 @@ def change_map():
         browser.setUrl(QUrl(site_url))
         where_am_i_click = False
 
-def get_latest_file(folder_path):
+
+# 폴더에서 가장 최근 파일을 가져오는 함수
+def get_latest_files(folder_path):
     files = glob.glob(os.path.join(folder_path, '*'))
     
     if not files:
@@ -29,7 +33,8 @@ def get_latest_file(folder_path):
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
 
-def changeMarker(screenshot):
+# 맵의 마커 스타일을 변경하는 함수
+def change_marker():
     styleList = [
         ['background', '#ff0000'],
         ['height', '30px'],
@@ -47,15 +52,11 @@ def changeMarker(screenshot):
         """
         browser.page().runJavaScript(js_code)
 
-def checkLocation(paths):
-    screenshot = None
-    for path in paths:
-        screenshot = get_latest_file(path)
-        if screenshot:
-            break
-
-    if screenshot is None:
-        return
+# 최신 스크린샷을 찾아 위치를 확인하는 함수
+def check_location():
+    screenshot = ''
+    path = check_right_path()
+    screenshot = get_latest_files(path)
 
     global where_am_i_click
     if where_am_i_click == False:
@@ -82,7 +83,7 @@ def checkLocation(paths):
             }}
         """
         browser.page().runJavaScript(js_code)
-        changeMarker(screenshot)
+        change_marker()
     else:
         js_code = f"""
             var input = document.querySelector('input[type="text"]');
@@ -95,7 +96,8 @@ def checkLocation(paths):
             }}
         """
         browser.page().runJavaScript(js_code)
-        changeMarker(screenshot)
+        change_marker()
+
 
 def fullscreen():
     js_code = """
@@ -109,6 +111,7 @@ def fullscreen():
     """
     browser.page().runJavaScript(js_code)
 
+
 def pannelControl():
     js_code = """
         var button = document.evaluate('//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -121,12 +124,16 @@ def pannelControl():
     """
     browser.page().runJavaScript(js_code)
 
+
+# 자동 감지 기능을 시작하는 함수
 def start_auto_detection(paths):
     global auto_detection_thread
     if not auto_detection_thread.isRunning():
         auto_detection_thread.paths = paths
         auto_detection_thread.start()
 
+
+# 자동 감지 스레드 클래스
 class AutoDetectionThread(QThread):
     new_file_detected = pyqtSignal(list)
 
@@ -153,17 +160,23 @@ class AutoDetectionThread(QThread):
 
             time.sleep(2)
 
-def read_paths_from_file(file_path):
+# 파일에서 경로를 읽어오는 함수
+def check_right_path() -> str :
     home_directory = os.path.expanduser('~')
-    paths = []
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as file:
-            for line in file:
-                path = os.path.join(home_directory, line.strip())
-                if os.path.exists(path):
-                    paths.append(path)
-    return paths
+    paths = ''
+    with open("file_path.txt", 'r', encoding='utf-8') as file:
+        for line in file:
+            path = os.path.join(home_directory, line.strip())
+            if os.path.exists(path):
+                paths.append(path)
+    
+    path = ''
+    for item in paths:
+        if os.path.isdir(f"{home_directory}{item}"):
+            path = f"{home_directory}{item}"
+    return path
 
+# 언어를 설정하는 함수
 def set_language(language):
     global translator
     if translator.load(f"translation/app_{language}.qm"):
@@ -171,6 +184,11 @@ def set_language(language):
         QCoreApplication.installTranslator(translator)
         window.retranslateUi()
 
+# 웹사이트 URL을 설정하는 함수
+def open_url(url):
+    webbrowser.open_new(url)
+
+# GUI 설정
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
 
 map = "ground-zero"
@@ -188,7 +206,6 @@ class BrowserWindow(QMainWindow):
         global browser
         browser = QWebEngineView()
         browser.setUrl(QUrl(site_url))
-        browser.loadFinished.connect(self.on_load_finished)
         
         settings = browser.settings()
         settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
@@ -253,7 +270,7 @@ class BrowserWindow(QMainWindow):
 
         self.b_force = QPushButton(self.tr('Force Run'), self)
         self.b_force.setFont(QFont('Helvetica', 16, QFont.Bold))
-        self.b_force.clicked.connect(lambda: checkLocation(read_paths_from_file(txt_file_path)))
+        self.b_force.clicked.connect(lambda: check_location())
         center_layout.addWidget(self.b_force)
         top_layout_1.addLayout(center_layout)
 
@@ -264,7 +281,7 @@ class BrowserWindow(QMainWindow):
 
         right_layout = QVBoxLayout()
 
-        # Language selection layout
+        # 언어 선택 레이아웃
         language_layout = QHBoxLayout()
         self.language_combobox = QComboBox(self)
         self.language_combobox.addItem("English", "en")
@@ -300,13 +317,8 @@ class BrowserWindow(QMainWindow):
         set_language(language)
 
     @pyqtSlot(bool)
-    def on_load_finished(self, ok):
-        if self.auto_detect_checkbox.isChecked():
-            checkLocation(read_paths_from_file(txt_file_path))
-
-    @pyqtSlot(bool)
     def toggle_auto_detection(self, checked):
-        paths = read_paths_from_file(txt_file_path)
+        paths = check_right_path(txt_file_path)
         if checked:
             start_auto_detection(paths)
 
@@ -322,9 +334,6 @@ class BrowserWindow(QMainWindow):
         self.b5.setText(self.tr('Bug Report'))
         self.language_apply_button.setText(self.tr('Apply Language'))
 
-def open_url(url):
-    webbrowser.open_new(url)
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
@@ -335,7 +344,7 @@ if __name__ == "__main__":
     QCoreApplication.installTranslator(translator)
 
     auto_detection_thread = AutoDetectionThread()
-    auto_detection_thread.new_file_detected.connect(lambda x: checkLocation(x))
+    auto_detection_thread.new_file_detected.connect(lambda : check_location())
     
     window = BrowserWindow()
     window.show()
