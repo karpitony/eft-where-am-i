@@ -3,11 +3,10 @@ import os
 import glob
 import time
 import webbrowser
-from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QThread, pyqtSignal, QTranslator, QLocale, QCoreApplication
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QThread, pyqtSignal, QTranslator, QLocale, QCoreApplication, QFileSystemWatcher
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox, QCheckBox, QFrame
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
-
 
 # 맵 URL을 선택된 맵에 따라 변경하는 함수
 def change_map():
@@ -22,7 +21,6 @@ def change_map():
         browser.setUrl(QUrl(site_url))
         where_am_i_click = False
 
-
 # 폴더에서 가장 최근 파일을 가져오는 함수
 def get_latest_files():
     files = glob.glob(os.path.join(screenshot_path, '*'))
@@ -32,7 +30,6 @@ def get_latest_files():
     else:
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
-
 
 # 맵의 마커 스타일을 변경하는 함수
 def change_marker():
@@ -53,11 +50,8 @@ def change_marker():
         """
         browser.page().runJavaScript(js_code)
 
-
 # 최신 스크린샷을 찾아 위치를 확인하는 함수
 def check_location():
-    screenshot = ''
-    
     screenshot = get_latest_files()
 
     global where_am_i_click
@@ -100,7 +94,6 @@ def check_location():
         browser.page().runJavaScript(js_code)
         change_marker()
 
-
 def fullscreen():
     js_code = """
         var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
@@ -112,7 +105,6 @@ def fullscreen():
         }
     """
     browser.page().runJavaScript(js_code)
-
 
 def pannelControl():
     js_code = """
@@ -126,57 +118,36 @@ def pannelControl():
     """
     browser.page().runJavaScript(js_code)
 
-
 # 자동 감지 기능을 시작하는 함수
-def start_auto_detection(paths):
-    global auto_detection_thread
-    if not auto_detection_thread.isRunning():
-        auto_detection_thread.paths = paths
-        auto_detection_thread.start()
+def start_auto_detection():
+    global watcher
+    if watcher is not None:
+        watcher.addPath(screenshot_path)
 
+# 자동 감지 파일 시스템 감시자 설정
+class FileSystemWatcher(QFileSystemWatcher):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.directoryChanged.connect(self.directory_changed)
+        self.fileChanged.connect(self.file_changed)
 
-# 자동 감지 스레드 클래스
-class AutoDetectionThread(QThread):
-    new_file_detected = pyqtSignal(list)
+    def directory_changed(self, path):
+        check_location()
 
-    def __init__(self):
-        super().__init__()
-        self.paths = []
-        self.previous_files = {}
-
-    def run(self):
-        while True:
-            current_files = {}
-            for path in self.paths:
-                if os.path.exists(path):
-                    files = glob.glob(os.path.join(path, '*'))
-                    current_files[path] = set(files)
-
-            for path, files in current_files.items():
-                if path in self.previous_files:
-                    new_files = files - self.previous_files[path]
-                    if new_files:
-                        latest_file = max(new_files, key=os.path.getmtime)
-                        self.new_file_detected.emit([latest_file])
-                self.previous_files[path] = files
-
-            time.sleep(2)
-
-
-
+    def file_changed(self, path):
+        check_location()
 
 # 언어를 설정하는 함수
 def set_language(language):
     global translator
-    if translator.load(f"translation/app_{language}.qm"):
-        app.installTranslator(translator)
-        QCoreApplication.installTranslator(translator)
-        window.retranslateUi()
-
+    if not translator.load(f"translations/app_{language}.qm"):
+        print(f"Failed to load translation file: translations/app_{language}.qm")
+        return
+    app.installTranslator(translator)
+    window.retranslateUi()
 
 def open_url(url):
     webbrowser.open_new(url)
-
 
 # 기본적인 변수 세팅
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
@@ -197,7 +168,6 @@ for item in paths:
     if os.path.isdir(full_path):
         screenshot_path = full_path
         break  # 첫 번째 존재하는 디렉터리를 찾으면 종료
-
 
 class BrowserWindow(QMainWindow):
     def __init__(self):
@@ -318,11 +288,12 @@ class BrowserWindow(QMainWindow):
     def apply_language(self):
         language = self.language_combobox.currentData()
         set_language(language)
+        self.retranslateUi()
 
     @pyqtSlot(bool)
     def toggle_auto_detection(self, checked):
         if checked:
-            start_auto_detection(screenshot_path)
+            start_auto_detection()
 
     def retranslateUi(self):
         self.setWindowTitle(self.tr("EFT Where am I? (ver.1.2)"))
@@ -341,13 +312,12 @@ if __name__ == "__main__":
 
     translator = QTranslator()
     locale = QLocale.system().name()
-    translator.load(f"translations/app_{locale}.qm")
+    if not translator.load(f"translations/app_{locale}.qm"):
+        print(f"Failed to load translation file: translations/app_{locale}.qm")
     app.installTranslator(translator)
-    QCoreApplication.installTranslator(translator)
 
-    auto_detection_thread = AutoDetectionThread()
-    auto_detection_thread.new_file_detected.connect(lambda : check_location())
-    
+    watcher = FileSystemWatcher()
+
     window = BrowserWindow()
     window.show()
 
