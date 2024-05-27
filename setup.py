@@ -28,7 +28,7 @@ options = {
         'excludes': [],
     },
     'bdist_msi': {
-        'upgrade_code': ''  # GUID 사용
+        'upgrade_code': 'guid',  # GUID 사용
         'add_to_path': False,
         'initial_target_dir': r'[ProgramFilesFolder]\EFTWhereAmI',
     }
