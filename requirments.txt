@@ -1,4 +1,3 @@
-keyboard==0.13.5
 cx-Freeze==7.0.0
 PyQt5==5.15.4
 PyQtWebEngine==5.15.4
