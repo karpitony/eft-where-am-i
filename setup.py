@@ -11,18 +11,24 @@ description = "A Python program to easily get directions in Tarkov"
 
 # 필요한 DLL 파일 경로 추가
 dll_files = [
-    ("C:/Windows/SysWOW64/MSVCP140.dll", "MSVCP140.dll"),  # Visual C++ 재배포 가능 패키지 DLL
-    ("C:/Windows/SysWOW64/VCRUNTIME140.dll", "VCRUNTIME140.dll")  # 추가 DLL 파일
+    ("C:/Windows/System32/MSVCP140.dll", "MSVCP140.dll"),  # Visual C++ 재배포 가능 패키지 DLL
+    ("C:/Windows/System32/VCRUNTIME140.dll", "VCRUNTIME140.dll")  # 추가 DLL 파일
+]
+
+# 추가로 포함할 파일과 폴더를 지정
+include_files = dll_files + [
+    ('translation/', 'translation/'),  # 번역 파일 폴더 포함
+    ('file_path.txt', 'file_path.txt'),  # file_path.txt 파일 포함
 ]
 
 options = {
     'build_exe': {
         'packages': ["PyQt5", "PyQt5.QtWebEngineWidgets", "os", "glob", "time", "sys"],
-        'include_files': dll_files,
+        'include_files': include_files,
         'excludes': [],
     },
     'bdist_msi': {
-        'upgrade_code': 'GUID',  # GUID 사용
+        'upgrade_code': 'guid',  # GUID 사용
         'add_to_path': False,
         'initial_target_dir': r'[ProgramFilesFolder]\EFTWhereAmI',
     }
