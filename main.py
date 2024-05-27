@@ -4,15 +4,14 @@ import glob
 import time
 import json
 import webbrowser
-from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QTranslator, QLocale, QCoreApplication, QFileSystemWatcher
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QLocale, QCoreApplication, QFileSystemWatcher
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox, QCheckBox, QFrame
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
 
-# 설정 파일 경로
+# 설정 파일(settings.json) 관련
 settings_file = "settings.json"
 
-# 기본 설정 로드
 def load_settings():
     if os.path.exists(settings_file):
         with open(settings_file, 'r', encoding='utf-8') as file:
@@ -28,13 +27,22 @@ def load_settings():
         ]
     }
 
-# 설정 저장
 def save_settings(settings):
     with open(settings_file, 'w', encoding='utf-8') as file:
         json.dump(settings, file, ensure_ascii=False, indent=4)
 
-# 설정 로드
+def load_translations(language):
+    translation_file = f"translations/{language}.json"
+    if os.path.exists(translation_file):
+        with open(translation_file, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    return {}
+
 app_settings = load_settings()
+translations = load_translations(app_settings["language"])
+
+def tr(text):
+    return translations.get(text, text)
 
 def change_map():
     global map
@@ -157,15 +165,6 @@ class FileSystemWatcher(QFileSystemWatcher):
         print(f"File changed: {path}")
         check_location()
 
-# 언어를 설정하는 함수
-def set_language(language):
-    global translator
-    if not translator.load(f"translations/app_{language}.qm"):
-        print(f"Failed to load translation file: translations/app_{language}.qm")
-        return
-    app.installTranslator(translator)
-    window.retranslateUi()
-
 def open_url(url):
     webbrowser.open_new(url)
 
@@ -192,7 +191,7 @@ if screenshot_path is None:
 class BrowserWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("EFT Where am I? (ver.1.2)")
+        self.setWindowTitle(tr("EFT Where am I? (ver.1.2)"))
         self.setGeometry(100, 100, 1200, 1000)
         self.setStyleSheet("background-color: gray; color: white;")
 
@@ -215,7 +214,7 @@ class BrowserWindow(QMainWindow):
         main_layout.addLayout(top_layout_1)
 
         left_layout = QVBoxLayout()
-        self.map_label = QLabel(self.tr('Select The Map.'), self)
+        self.map_label = QLabel(tr('Select The Map.'), self)
         self.map_label.setFont(QFont('Helvetica', 18, QFont.Bold))
         self.map_label.setAlignment(Qt.AlignCenter)
         left_layout.addWidget(self.map_label)
@@ -229,14 +228,14 @@ class BrowserWindow(QMainWindow):
         combobox.setStyleSheet("background-color: white; color: black;")
         combobox_layout.addWidget(combobox)
 
-        self.b1 = QPushButton(self.tr('Apply'), self)
+        self.b1 = QPushButton(tr('Apply'), self)
         self.b1.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b1.clicked.connect(change_map)
         combobox_layout.addWidget(self.b1)
 
         left_layout.addLayout(combobox_layout)
 
-        self.auto_detect_checkbox = QCheckBox(self.tr('Auto Screenshot Detection'), self)
+        self.auto_detect_checkbox = QCheckBox(tr('Auto Screenshot Detection'), self)
         self.auto_detect_checkbox.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.auto_detect_checkbox.setStyleSheet("margin: 0 auto;")
         self.auto_detect_checkbox.setLayoutDirection(Qt.LeftToRight)
@@ -252,17 +251,17 @@ class BrowserWindow(QMainWindow):
         top_layout_1.addWidget(left_separator)
 
         center_layout = QVBoxLayout()
-        self.b_panel_control = QPushButton(self.tr('Hide/Show Pannels'), self)
+        self.b_panel_control = QPushButton(tr('Hide/Show Pannels'), self)
         self.b_panel_control.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b_panel_control.clicked.connect(pannelControl)
         center_layout.addWidget(self.b_panel_control)
 
-        self.b_fullscreen = QPushButton(self.tr('Full Screen'), self)
+        self.b_fullscreen = QPushButton(tr('Full Screen'), self)
         self.b_fullscreen.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b_fullscreen.clicked.connect(fullscreen)
         center_layout.addWidget(self.b_fullscreen)
 
-        self.b_force = QPushButton(self.tr('Force Run'), self)
+        self.b_force = QPushButton(tr('Force Run'), self)
         self.b_force.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b_force.clicked.connect(lambda: check_location())
         center_layout.addWidget(self.b_force)
@@ -275,28 +274,28 @@ class BrowserWindow(QMainWindow):
 
         right_layout = QVBoxLayout()
 
-        # 언어 선택 레이아웃
         language_layout = QHBoxLayout()
         self.language_combobox = QComboBox(self)
         self.language_combobox.addItem("English", "en")
         self.language_combobox.addItem("한국어", "ko")
         self.language_combobox.setFont(QFont('Helvetica', 16))
+        self.language_combobox.setCurrentIndex(0 if app_settings["language"] == "en" else 1)
         language_layout.addWidget(self.language_combobox)
 
-        self.language_apply_button = QPushButton(self.tr('Apply Language'), self)
+        self.language_apply_button = QPushButton(tr('Apply Language'), self)
         self.language_apply_button.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.language_apply_button.clicked.connect(self.apply_language)
         language_layout.addWidget(self.language_apply_button)
 
         right_layout.addLayout(language_layout)
 
-        self.b3 = QPushButton(self.tr('How to use'), self)
+        self.b3 = QPushButton(tr('How to use'), self)
         self.b3.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b3.setStyleSheet("color: #0645AD;")
         self.b3.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
         right_layout.addWidget(self.b3)
 
-        self.b5 = QPushButton(self.tr('Bug Report'), self)
+        self.b5 = QPushButton(tr('Bug Report'), self)
         self.b5.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b5.setStyleSheet("color: #0645AD;")
         self.b5.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/issues"))
@@ -313,7 +312,8 @@ class BrowserWindow(QMainWindow):
         language = self.language_combobox.currentData()
         app_settings["language"] = language
         save_settings(app_settings)
-        set_language(language)
+        global translations
+        translations = load_translations(language)
         self.retranslateUi()
 
     @pyqtSlot(bool)
@@ -324,25 +324,22 @@ class BrowserWindow(QMainWindow):
             start_auto_detection()
 
     def retranslateUi(self):
-        self.setWindowTitle(self.tr("EFT Where am I? (ver.1.2)"))
-        self.map_label.setText(self.tr('Select The Map.'))
-        self.b1.setText(self.tr('Apply'))
-        self.auto_detect_checkbox.setText(self.tr('Auto Screenshot Detection'))
-        self.b_panel_control.setText(self.tr('Hide/Show Pannels'))
-        self.b_fullscreen.setText(self.tr('Full Screen'))
-        self.b_force.setText(self.tr('Force Run'))
-        self.b3.setText(self.tr('How to use'))
-        self.b5.setText(self.tr('Bug Report'))
-        self.language_apply_button.setText(self.tr('Apply Language'))
+        self.setWindowTitle(tr("EFT Where am I? (ver.1.2)"))
+        self.map_label.setText(tr('Select The Map.'))
+        self.b1.setText(tr('Apply'))
+        self.auto_detect_checkbox.setText(tr('Auto Screenshot Detection'))
+        self.b_panel_control.setText(tr('Hide/Show Pannels'))
+        self.b_fullscreen.setText(tr('Full Screen'))
+        self.b_force.setText(tr('Force Run'))
+        self.b3.setText(tr('How to use'))
+        self.b5.setText(tr('Bug Report'))
+        self.language_apply_button.setText(tr('Apply Language'))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    translator = QTranslator()
     locale = app_settings["language"]
-    if not translator.load(f"translations/app_{locale}.qm"):
-        print(f"Failed to load translation file: translations/app_{locale}.qm")
-    app.installTranslator(translator)
+    translations = load_translations(locale)
 
     watcher = FileSystemWatcher()
 
