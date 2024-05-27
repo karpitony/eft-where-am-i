@@ -4,10 +4,9 @@ import glob
 import time
 import webbrowser
 from PyQt5.QtCore import Qt, QUrl, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox, QCheckBox, QFrame
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
-
 
 def change_map():
     global map
@@ -21,7 +20,6 @@ def change_map():
         browser.setUrl(QUrl(site_url))
         where_am_i_click = False
 
-
 def get_latest_file(folder_path):
     files = glob.glob(os.path.join(folder_path, '*'))
     
@@ -30,7 +28,6 @@ def get_latest_file(folder_path):
     else:
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
-
 
 def changeMarker():
     styleList = [
@@ -49,7 +46,6 @@ def changeMarker():
             }}
         """
         browser.page().runJavaScript(js_code)
-
 
 def checkLocation():
     time.sleep(1)
@@ -109,7 +105,6 @@ def checkLocation():
         browser.page().runJavaScript(js_code)
         changeMarker()
 
-
 def fullscreen():
     js_code = """
         var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
@@ -121,7 +116,6 @@ def fullscreen():
         }
     """
     browser.page().runJavaScript(js_code)
-
 
 def pannelControl():
     js_code = """
@@ -135,14 +129,12 @@ def pannelControl():
     """
     browser.page().runJavaScript(js_code)
 
-
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
 
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
 txt_file_path = 'key_data.txt'
 where_am_i_click = False
-
 
 class BrowserWindow(QMainWindow):
     def __init__(self):
@@ -176,20 +168,33 @@ class BrowserWindow(QMainWindow):
         map_label.setAlignment(Qt.AlignCenter)
         left_layout.addWidget(map_label)
 
+        combobox_layout = QHBoxLayout()
         global combobox
         combobox = QComboBox(self)
         combobox.addItems(mapList)
         combobox.setCurrentText("ground-zero")
         combobox.setFont(QFont('Helvetica', 16))
         combobox.setStyleSheet("background-color: white; color: black;")
-        left_layout.addWidget(combobox)
+        combobox_layout.addWidget(combobox)
 
         self.b1 = QPushButton('Apply (적용)', self)
         self.b1.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.b1.clicked.connect(change_map)
-        left_layout.addWidget(self.b1)
+        combobox_layout.addWidget(self.b1)
+
+        left_layout.addLayout(combobox_layout)
+
+        self.auto_detect_checkbox = QCheckBox('자동 스크린샷 파일 감지', self)
+        self.auto_detect_checkbox.setFont(QFont('Helvetica', 16, QFont.Bold))
+        left_layout.addWidget(self.auto_detect_checkbox)
+
         top_layout_1.addLayout(left_layout)
 
+        # Adding vertical separator
+        left_separator = QFrame()
+        left_separator.setFrameShape(QFrame.VLine)
+        left_separator.setFrameShadow(QFrame.Sunken)
+        top_layout_1.addWidget(left_separator)
 
         center_layout = QVBoxLayout()
         self.b_panel_control = QPushButton('Hide/Show Pannels', self)
@@ -208,6 +213,11 @@ class BrowserWindow(QMainWindow):
         center_layout.addWidget(self.b_force)
         top_layout_1.addLayout(center_layout)
 
+        # Adding vertical separator
+        center_separator = QFrame()
+        center_separator.setFrameShape(QFrame.VLine)
+        center_separator.setFrameShadow(QFrame.Sunken)
+        top_layout_1.addWidget(center_separator)
 
         right_layout = QVBoxLayout()
         self.b3 = QPushButton('How to use', self)
@@ -234,8 +244,8 @@ class BrowserWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def on_load_finished(self, ok):
-        if ok:
-            fullscreen()
+        if self.auto_detect_checkbox.isChecked():
+            checkLocation()
 
 def open_url(url):
     webbrowser.open_new(url)
