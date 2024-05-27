@@ -2,13 +2,40 @@ import sys
 import os
 import glob
 import time
+import json
 import webbrowser
-from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QThread, pyqtSignal, QTranslator, QLocale, QCoreApplication, QFileSystemWatcher
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QTranslator, QLocale, QCoreApplication, QFileSystemWatcher
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox, QCheckBox, QFrame
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
 
-# 맵 URL을 선택된 맵에 따라 변경하는 함수
+# 설정 파일 경로
+settings_file = "settings.json"
+
+# 기본 설정 로드
+def load_settings():
+    if os.path.exists(settings_file):
+        with open(settings_file, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    return {
+        "auto_screenshot_detection": False,
+        "language": "en",
+        "screenshot_paths": [
+            "Documents\\Escape from Tarkov\\Screenshots\\",
+            "문서\\Escape from Tarkov\\Screenshots\\",
+            "OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
+            "OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
+        ]
+    }
+
+# 설정 저장
+def save_settings(settings):
+    with open(settings_file, 'w', encoding='utf-8') as file:
+        json.dump(settings, file, ensure_ascii=False, indent=4)
+
+# 설정 로드
+app_settings = load_settings()
+
 def change_map():
     global map
     global site_url
@@ -53,9 +80,11 @@ def change_marker():
 # 최신 스크린샷을 찾아 위치를 확인하는 함수
 def check_location():
     screenshot = get_latest_files()
+    if not screenshot:
+        return
 
     global where_am_i_click
-    if where_am_i_click == False:
+    if not where_am_i_click:
         where_am_i_click = True
         js_code = """
             var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');
@@ -68,31 +97,19 @@ def check_location():
         """
         browser.page().runJavaScript(js_code)
         time.sleep(0.5)
-        js_code = f"""
-            var input = document.querySelector('input[type="text"]');
-            if (input) {{
-                input.value = '{screenshot.replace(".png", "")}';
-                input.dispatchEvent(new Event('input'));
-                console.log('Input value set');
-            }} else {{
-                console.log('Input not found');
-            }}
-        """
-        browser.page().runJavaScript(js_code)
-        change_marker()
-    else:
-        js_code = f"""
-            var input = document.querySelector('input[type="text"]');
-            if (input) {{
-                input.value = '{screenshot.replace(".png", "")}';
-                input.dispatchEvent(new Event('input'));
-                console.log('Input value set');
-            }} else {{
-                console.log('Input not found');
-            }}
-        """
-        browser.page().runJavaScript(js_code)
-        change_marker()
+
+    js_code = f"""
+        var input = document.querySelector('input[type="text"]');
+        if (input) {{
+            input.value = '{screenshot.replace(".png", "")}';
+            input.dispatchEvent(new Event('input'));
+            console.log('Input value set');
+        }} else {{
+            console.log('Input not found');
+        }}
+    """
+    browser.page().runJavaScript(js_code)
+    change_marker()
 
 def fullscreen():
     js_code = """
@@ -118,13 +135,14 @@ def pannelControl():
     """
     browser.page().runJavaScript(js_code)
 
-# 자동 감지 기능을 시작하는 함수
+# 폴링 시작하는 함수
 def start_auto_detection():
     global watcher
     if watcher is not None:
         watcher.addPath(screenshot_path)
+        print(f"Started watching {screenshot_path}")
 
-# 자동 감지 파일 시스템 감시자 설정
+# 폴링
 class FileSystemWatcher(QFileSystemWatcher):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -132,9 +150,11 @@ class FileSystemWatcher(QFileSystemWatcher):
         self.fileChanged.connect(self.file_changed)
 
     def directory_changed(self, path):
+        print(f"Directory changed: {path}")
         check_location()
 
     def file_changed(self, path):
+        print(f"File changed: {path}")
         check_location()
 
 # 언어를 설정하는 함수
@@ -157,17 +177,17 @@ site_url = f"https://tarkov-market.com/maps/{map}"
 where_am_i_click = False
 
 home_directory = os.path.expanduser('~')
-paths = []
-with open("file_path.txt", 'r', encoding='utf-8') as file:
-    for line in file:
-        paths.append(line.strip())
+screenshot_path = None
 
-screenshot_path = 'can`t find directory'
-for item in paths:
-    full_path = os.path.join(home_directory, item)
+# 여러 경로 중에서 존재하는 경로 찾기
+for relative_path in app_settings.get("screenshot_paths", []):
+    full_path = os.path.join(home_directory, relative_path)
     if os.path.isdir(full_path):
         screenshot_path = full_path
         break  # 첫 번째 존재하는 디렉터리를 찾으면 종료
+
+if screenshot_path is None:
+    screenshot_path = 'can`t find directory'
 
 class BrowserWindow(QMainWindow):
     def __init__(self):
@@ -180,11 +200,11 @@ class BrowserWindow(QMainWindow):
         browser = QWebEngineView()
         browser.setUrl(QUrl(site_url))
         
-        settings = browser.settings()
-        settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
-        settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
-        settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        settings.setAttribute(QWebEngineSettings.AllowRunningInsecureContent, True)
+        browser_settings = browser.settings()
+        browser_settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+        browser_settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+        browser_settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        browser_settings.setAttribute(QWebEngineSettings.AllowRunningInsecureContent, True)
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -220,6 +240,7 @@ class BrowserWindow(QMainWindow):
         self.auto_detect_checkbox.setFont(QFont('Helvetica', 16, QFont.Bold))
         self.auto_detect_checkbox.setStyleSheet("margin: 0 auto;")
         self.auto_detect_checkbox.setLayoutDirection(Qt.LeftToRight)
+        self.auto_detect_checkbox.setChecked(app_settings["auto_screenshot_detection"])
         self.auto_detect_checkbox.toggled.connect(self.toggle_auto_detection)
         left_layout.addWidget(self.auto_detect_checkbox)
 
@@ -285,13 +306,20 @@ class BrowserWindow(QMainWindow):
 
         main_layout.addWidget(browser)
 
+        if app_settings["auto_screenshot_detection"]:
+            start_auto_detection()
+
     def apply_language(self):
         language = self.language_combobox.currentData()
+        app_settings["language"] = language
+        save_settings(app_settings)
         set_language(language)
         self.retranslateUi()
 
     @pyqtSlot(bool)
     def toggle_auto_detection(self, checked):
+        app_settings["auto_screenshot_detection"] = checked
+        save_settings(app_settings)
         if checked:
             start_auto_detection()
 
@@ -311,7 +339,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     translator = QTranslator()
-    locale = QLocale.system().name()
+    locale = app_settings["language"]
     if not translator.load(f"translations/app_{locale}.qm"):
         print(f"Failed to load translation file: translations/app_{locale}.qm")
     app.installTranslator(translator)
