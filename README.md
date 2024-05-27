@@ -9,25 +9,29 @@
 # eft-where-am-i
 [한국어](README_ko_kr.md)
 
-- A Python + GUI program that helps you easily use the `Maps` feature of `Tarkov-Market`.
-- Based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
-- This program is licensed under the `MIT License` and **we are not responsible for any damages**(though the possibility is very low, including sanctions by EFT) **caused by this program**.
+- This is a Python + GUI program that helps you easily use the Maps feature of `Tarkov-Market`.
+- It is based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
+- This program is licensed under the `MIT License` and **we are not responsible for any damage** (though highly unlikely, such as penalties from EFT) **caused by using this program**.
 
-## How to use
-**1. Choose a map.**
+## How to Use
+**1. Select a map.**
 
 <img src="assets/screenshot02.png" alt="screenshot02" width="800">
 
 After selecting a map, make sure to click the `Apply` button!
+<br />
 
-**2. Take a screenshot inside the Tarkov raid.**
-The default screenshot key in Tarkov is `PrtSc`. Please take note.
+**2. Take a screenshot while inside a Tarkov raid.**
+- The default screenshot key in Tarkov is `PrtSc`.
+- If you check the `Auto Screenshot Detection` checkbox, your location will automatically update each time you take a screenshot.
+- If you check the `Auto Screenshot Detection` checkbox, you can skip step 3.
+<br />
 
-**3. Press the `Run` button.**
+**3. Click the `Force Run` button.**
 
 <img src="assets/screenshot03.png" alt="screenshot03" width="800">
 
-Your location will be marked on the map as a red dot.
+A red dot will appear on the map to indicate your location.
 
-- If you want to know your updated location after moving, repeat steps 2 and 3.
-- Use the `Hide/Show Panels` or `Full Screen` buttons to view the map more clearly.
+- To update your location after moving, repeat steps 2 and 3.
+- You can click the `Hide/Show Panels` or `Full Screen` buttons to view the map more clearly.

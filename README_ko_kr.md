@@ -14,16 +14,20 @@
 ## 사용 방법
 **1. 맵을 골라주세요.**
 
-<img src="assets/screenshot02.png" alt="screenshot02" width="800">
+<img src="assets/screenshot02_ko.png" alt="screenshot02_ko" width="800">
 
 맵을 고른 후 꼭 `적용` 버튼을 눌러주세요!
+<br />
 
 **2. 타르코프 레이드 안에서 스크린샷을 찍어주세요.**
-타르코프의 기본 스크린샷 키는 `PrtSc`입니다. 참고하세요.
+- 타르코프의 기본 스크린샷 키는 `PrtSc`입니다.
+- `자동 스크린샷 감지` 체크박스를 체크하면 스크린샷을 찍을때마다 자동으로 위치가 업데이트 됩니다.
+- `자동 스크린샷 감지` 체크박스를 체크하면 3번은 하실 필요가 없습니다.
+<br />
 
-**3. `Run (실행)` 버튼을 눌러주세요.**
+**3. `강제 실행` 버튼을 눌러주세요.**
 
-<img src="assets/screenshot03.png" alt="screenshot03" width="800">
+<img src="assets/screenshot03_ko.png" alt="screenshot03_ko" width="800">
 
 빨간 점의 형태로 맵에 표시됩니다.
 
