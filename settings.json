@@ -1,5 +1,5 @@
 {
-    "auto_screenshot_detection": true,
+    "auto_screenshot_detection": false,
     "language": "en",
     "screenshot_paths": [
         "Documents\\Escape from Tarkov\\Screenshots\\",
