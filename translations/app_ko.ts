@@ -4,47 +4,47 @@
 <context>
     <name>BrowserWindow</name>
     <message>
-        <location filename="main.py" line="208"/>
+        <location filename="main.py" line="228"/>
         <source>Select The Map.</source>
         <translation type="맵을 선택해주세요."></translation>
     </message>
     <message>
-        <location filename="main.py" line="222"/>
+        <location filename="main.py" line="242"/>
         <source>Apply</source>
         <translation type="적용"></translation>
     </message>
     <message>
-        <location filename="main.py" line="229"/>
+        <location filename="main.py" line="249"/>
         <source>Auto Screenshot Detection</source>
         <translation type="스크린샷 파일 자동 감지"></translation>
     </message>
     <message>
-        <location filename="main.py" line="244"/>
+        <location filename="main.py" line="264"/>
         <source>Hide/Show Pannels</source>
         <translation type="패널 숨기기/보이기"></translation>
     </message>
     <message>
-        <location filename="main.py" line="249"/>
+        <location filename="main.py" line="269"/>
         <source>Full Screen</source>
         <translation type="전체 화면"></translation>
     </message>
     <message>
-        <location filename="main.py" line="254"/>
+        <location filename="main.py" line="274"/>
         <source>Force Run</source>
         <translation type="강제 실행"></translation>
     </message>
     <message>
-        <location filename="main.py" line="275"/>
+        <location filename="main.py" line="295"/>
         <source>Apply Language</source>
         <translation type="언어 적용"></translation>
     </message>
     <message>
-        <location filename="main.py" line="282"/>
+        <location filename="main.py" line="302"/>
         <source>How to use</source>
         <translation type="사용 방법"></translation>
     </message>
     <message>
-        <location filename="main.py" line="288"/>
+        <location filename="main.py" line="308"/>
         <source>Bug Report</source>
         <translation type="버그 제보"></translation>
     </message>
