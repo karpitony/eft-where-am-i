@@ -24,14 +24,15 @@ def change_map():
 
 
 # 폴더에서 가장 최근 파일을 가져오는 함수
-def get_latest_files(folder_path):
-    files = glob.glob(os.path.join(folder_path, '*'))
+def get_latest_files():
+    files = glob.glob(os.path.join(screenshot_path, '*'))
     
     if not files:
         return None
     else:
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
+
 
 # 맵의 마커 스타일을 변경하는 함수
 def change_marker():
@@ -52,11 +53,12 @@ def change_marker():
         """
         browser.page().runJavaScript(js_code)
 
+
 # 최신 스크린샷을 찾아 위치를 확인하는 함수
 def check_location():
     screenshot = ''
-    path = check_right_path()
-    screenshot = get_latest_files(path)
+    
+    screenshot = get_latest_files()
 
     global where_am_i_click
     if where_am_i_click == False:
@@ -160,21 +162,8 @@ class AutoDetectionThread(QThread):
 
             time.sleep(2)
 
-# 파일에서 경로를 읽어오는 함수
-def check_right_path() -> str :
-    home_directory = os.path.expanduser('~')
-    paths = ''
-    with open("file_path.txt", 'r', encoding='utf-8') as file:
-        for line in file:
-            path = os.path.join(home_directory, line.strip())
-            if os.path.exists(path):
-                paths.append(path)
-    
-    path = ''
-    for item in paths:
-        if os.path.isdir(f"{home_directory}{item}"):
-            path = f"{home_directory}{item}"
-    return path
+
+
 
 # 언어를 설정하는 함수
 def set_language(language):
@@ -184,17 +173,31 @@ def set_language(language):
         QCoreApplication.installTranslator(translator)
         window.retranslateUi()
 
-# 웹사이트 URL을 설정하는 함수
+
 def open_url(url):
     webbrowser.open_new(url)
 
-# GUI 설정
+
+# 기본적인 변수 세팅
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
 
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
-txt_file_path = 'file_path.txt'
 where_am_i_click = False
+
+home_directory = os.path.expanduser('~')
+paths = []
+with open("file_path.txt", 'r', encoding='utf-8') as file:
+    for line in file:
+        paths.append(line.strip())
+
+screenshot_path = 'can`t find directory'
+for item in paths:
+    full_path = os.path.join(home_directory, item)
+    if os.path.isdir(full_path):
+        screenshot_path = full_path
+        break  # 첫 번째 존재하는 디렉터리를 찾으면 종료
+
 
 class BrowserWindow(QMainWindow):
     def __init__(self):
@@ -318,9 +321,8 @@ class BrowserWindow(QMainWindow):
 
     @pyqtSlot(bool)
     def toggle_auto_detection(self, checked):
-        paths = check_right_path(txt_file_path)
         if checked:
-            start_auto_detection(paths)
+            start_auto_detection(screenshot_path)
 
     def retranslateUi(self):
         self.setWindowTitle(self.tr("EFT Where am I? (ver.1.2)"))
@@ -339,7 +341,7 @@ if __name__ == "__main__":
 
     translator = QTranslator()
     locale = QLocale.system().name()
-    translator.load(f"translation/app_{locale}.qm")
+    translator.load(f"translations/app_{locale}.qm")
     app.installTranslator(translator)
     QCoreApplication.installTranslator(translator)
 
