@@ -1,193 +1,363 @@
-from tkinter import *
-import webbrowser
-import tkinter.ttk as ttk 
-import keyboard
+import sys
 import os
 import glob
 import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
+import json
+import webbrowser
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QFileSystemWatcher
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox, QCheckBox, QFrame
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
+from PyQt5.QtGui import QFont
 
-def change_map() -> None:
+
+# 설정 파일(settings.json) 관련
+settings_file = "settings.json"
+
+def load_settings():
+    if os.path.exists(settings_file):
+        with open(settings_file, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    return {
+        "auto_screenshot_detection": False,
+        "language": "en",
+        "screenshot_paths": [
+            "Documents\\Escape from Tarkov\\Screenshots\\",
+            "문서\\Escape from Tarkov\\Screenshots\\",
+            "OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
+            "OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
+        ]
+    }
+
+def save_settings(settings):
+    with open(settings_file, 'w', encoding='utf-8') as file:
+        json.dump(settings, file, ensure_ascii=False, indent=4)
+
+def load_translations(language):
+    translation_file = f"translations/{language}.json"
+    if os.path.exists(translation_file):
+        with open(translation_file, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    return {}
+
+app_settings = load_settings()
+translations = load_translations(app_settings["language"])
+
+def tr(text):
+    return translations.get(text, text)
+
+
+
+def change_map():
     global map
     global site_url
     global where_am_i_click
-    select_map = combobox.get()
+    select_map = combobox.currentText()
+    
     if map != select_map:
         site_url = f"https://tarkov-market.com/maps/{select_map}"
         map = select_map
-        driver.get(site_url)
-        where_am_i_click=False
+        browser.setUrl(QUrl(site_url))
+        where_am_i_click = False
 
-def set_trigger(event):
-    global trigger
-    trigger = event.name
-    with open(txt_file_path, 'w') as file:
-        file.write(trigger)
-    label3.config(text=f'Now: \"{trigger}\"')
-    keyboard.add_hotkey(trigger, checkLocation)
-        
-def get_latest_file(folder_path):
-    files = glob.glob(os.path.join(folder_path, '*'))
+
+# 폴더에서 가장 최근 파일을 가져오는 함수
+def get_latest_files():
+    files = glob.glob(os.path.join(screenshot_path, '*'))
+    
     if not files:
         return None
     else:
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
 
-def changeMarker():
+
+# 맵의 마커 스타일을 변경하는 함수
+def change_marker():
     styleList = [
-        ['background','#ff0000'],
-        ['height','30px'],
-        ['width','30px']
+        ['background', '#ff0000'],
+        ['height', '30px'],
+        ['width', '30px']
     ]
+    
     for i in styleList:
-        driver.execute_script("document.getElementsByClassName('marker')[0].style.setProperty('"+i[0]+"','"+i[1]+"','important')")
+        js_code = f"""
+            var marker = document.getElementsByClassName('marker')[0];
+            if (marker) {{
+                marker.style.setProperty('{i[0]}', '{i[1]}', 'important');
+            }} else {{
+                console.log('Marker not found');
+            }}
+        """
+        browser.page().runJavaScript(js_code)
 
-# tarkov-market에 위치 확인하는 함수
-def checkLocation():
-    time.sleep(1)
-    paths = [
-        os.path.expanduser('~') + "\\Documents\\Escape from Tarkov\\Screenshots\\",
-        os.path.expanduser('~') + "\\문서\\Escape from Tarkov\\Screenshots\\",
-        os.path.expanduser('~') + "\\OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
-        os.path.expanduser('~') + "\\OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
-    ]
-    
-    screenshot = None
-    for path in paths:
-        screenshot = get_latest_file(path)
-        if screenshot:
-            break
-    
-    if screenshot is None:
+
+# 최신 스크린샷을 찾아 위치를 확인하는 함수
+def check_location():
+    screenshot = get_latest_files()
+    if not screenshot:
         return
-    
+
     global where_am_i_click
-    if where_am_i_click == False:
+    if not where_am_i_click:
         where_am_i_click = True
-        textArea = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/button')
-        textArea.click()
-        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
-        textArea2.click()
-        textArea2.send_keys(Keys.DELETE)
-        textArea2.send_keys(screenshot.replace(".png",""))
-        changeMarker()
-    else:
-        textArea2 = driver.find_element(By.XPATH,'//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[2]/input')
-        textArea2.click()
-        textArea2.send_keys(Keys.DELETE)
-        textArea2.send_keys(screenshot.replace(".png",""))
-        changeMarker()
+        js_code = """
+            var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');
+            if (button) {
+                button.click();
+                console.log('Button clicked');
+            } else {
+                console.log('Button not found');
+            }
+        """
+        browser.page().runJavaScript(js_code)
+        time.sleep(0.5)
 
-mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
+    js_code = f"""
+        var input = document.querySelector('input[type="text"]');
+        if (input) {{
+            input.value = '{screenshot.replace(".png", "")}';
+            input.dispatchEvent(new Event('input'));
+            console.log('Input value set');
+        }} else {{
+            console.log('Input not found');
+        }}
+    """
+    browser.page().runJavaScript(js_code)
+    change_marker()
 
-map = "ground-zero"
-site_url = f"https://tarkov-market.com/maps/{map}"
-txt_file_path = 'key_data.txt'
-where_am_i_click = False    # where am i 클릭 되어 있으면 값만 입력하게끔
+
+def fullscreen():
+    js_code = """
+        var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
+        if (button) {
+            button.click();
+            console.log('Fullscreen button clicked');
+        } else {
+            console.log('Fullscreen button not found');
+        }
+    """
+    browser.page().runJavaScript(js_code)
 
 
-chrome_options = Options()
-chrome_options.add_experimental_option("detach", True)
-chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
-driver = webdriver.Chrome(options=chrome_options)
-driver.implicitly_wait(3)
-driver.get(site_url)
+def pannelControl():
+    js_code = """
+        var button = document.evaluate('//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (button) {
+            button.click();
+            console.log('Panel control button clicked');
+        } else {
+            console.log('Panel control button not found');
+        }
+    """
+    browser.page().runJavaScript(js_code)
 
-# 스크린샷 및 위치 표시할 키 불러오기
-if os.path.exists(txt_file_path):   
-    with open(txt_file_path, 'r') as file:
-        trigger = file.read().strip()
-else:
-    trigger = 'print screen'
 
-keyboard.add_hotkey(trigger, checkLocation)
+# 폴링 시작하는 함수
+def start_auto_detection():
+    global watcher
+    if watcher is not None:
+        watcher.addPath(screenshot_path)
+        print(f"Started watching {screenshot_path}")
 
-# 색상 변수
-bg_color = 'gray'
-box_color = '#333333'
-text_color = 'white'
 
-# UI 생성
-window = Tk()
-window.geometry("500x600")
-window.title("EFT Where am I?   v1.2")
-window.resizable(False, False)
-window.configure(bg=bg_color)
+# 폴링
+class FileSystemWatcher(QFileSystemWatcher):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.directoryChanged.connect(self.directory_changed)
+        self.fileChanged.connect(self.file_changed)
 
-main_frame = Frame(window, padx=10, pady=10, bg=bg_color)
-main_frame.pack(expand=True)
+    def directory_changed(self, path):
+        print(f"Directory changed: {path}")
+        check_location()
 
-def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
-    points = [x1+radius, y1,
-              x1+radius, y1,
-              x2-radius, y1,
-              x2-radius, y1,
-              x2, y1,
-              x2, y1+radius,
-              x2, y1+radius,
-              x2, y2-radius,
-              x2, y2-radius,
-              x2, y2,
-              x2-radius, y2,
-              x2-radius, y2,
-              x1+radius, y2,
-              x1+radius, y2,
-              x1, y2,
-              x1, y2-radius,
-              x1, y2-radius,
-              x1, y1+radius,
-              x1, y1+radius,
-              x1, y1]
-    return canvas.create_polygon(points, **kwargs, smooth=True)
+    def file_changed(self, path):
+        print(f"File changed: {path}")
+        check_location()
 
 def open_url(url):
     webbrowser.open_new(url)
 
-canvas1 = Canvas(main_frame, width=480, height=200, bg=bg_color, highlightthickness=0)
-canvas1.grid(row=0, column=0, pady=(10, 20))
-create_rounded_rectangle(canvas1, 10, 10, 470, 190, radius=20, fill=box_color)
 
-frame1 = Frame(canvas1, bg=box_color)
-frame1.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-label1 = Label(frame1, text='Select The Map.\n맵을 선택해주세요.', font=('Helvetica', 16), bg=box_color, fg=text_color)
-label1.grid(row=0, column=0, columnspan=3, pady=(10, 10))
+# 기본적인 변수 세팅
+mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
 
-combobox = ttk.Combobox(frame1, values=mapList, state="readonly", font=('Helvetica', 16))   
-combobox.set("ground-zero") 
-combobox.grid(row=1, column=0, columnspan=2, pady=(0, 10))
+map = "ground-zero"
+site_url = f"https://tarkov-market.com/maps/{map}"
+where_am_i_click = False
 
-b1 = Button(frame1, text='적용', command=change_map, font=('Helvetica', 16))
-b1.grid(row=1, column=2, padx=(10, 0))
+home_directory = os.path.expanduser('~')
+screenshot_path = None
 
-canvas2 = Canvas(main_frame, width=480, height=200, bg=bg_color, highlightthickness=0)
-canvas2.grid(row=1, column=0, pady=(0, 20))
-create_rounded_rectangle(canvas2, 10, 10, 470, 190, radius=20, fill=box_color)
+# 여러 경로 중에서 존재하는 경로 찾기
+for relative_path in app_settings.get("screenshot_paths", []):
+    full_path = os.path.join(home_directory, relative_path)
+    if os.path.isdir(full_path):
+        screenshot_path = full_path
+        break  # 첫 번째 존재하는 디렉터리를 찾으면 종료
 
-frame2 = Frame(canvas2, bg=box_color)
-frame2.place(relx=0.5, rely=0.5, anchor=CENTER)
+if screenshot_path is None:
+    screenshot_path = 'can`t find directory'
 
-label2 = Label(frame2, text='Enter the key you use for screenshots.\n스크린샷으로 사용하는 키를 입력해주세요.', font=('Helvetica', 16), bg=box_color, fg=text_color)
-label2.grid(row=0, column=0, columnspan=3, pady=(10, 10))
 
-label3 = Label(frame2, text=f'Now: \"{trigger}\"', font=('Helvetica', 16), bg=box_color, fg=text_color)
-label3.grid(row=1, column=0, columnspan=3, pady=(0, 10))
 
-b2 = Button(frame2, text='Press to Record', command=lambda: keyboard.hook(set_trigger), font=('Helvetica', 16))
-b2.grid(row=2, column=0, pady=(10, 10))
+class BrowserWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle(tr("EFT Where am I? (ver.1.2)"))
+        self.setGeometry(100, 100, 1200, 1000)
+        self.setStyleSheet("background-color: gray; color: white;")
 
-# 강제 실행 버튼 추가
-b_force = Button(frame2, text='Force Run', command=checkLocation, font=('Helvetica', 16))
-b_force.grid(row=2, column=1, pady=(10, 10), padx=(10, 0))
+        global browser
+        browser = QWebEngineView()
+        browser.setUrl(QUrl(site_url))
+        
+        browser_settings = browser.settings()
+        browser_settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+        browser_settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+        browser_settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        browser_settings.setAttribute(QWebEngineSettings.AllowRunningInsecureContent, True)
 
-b3 = Button(main_frame, text='How to use', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
-b3.grid(row=2, column=0, pady=(10, 10))
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
 
-b4 = Button(main_frame, text='사용 방법', font=('Helvetica', 12, 'bold'), bg=bg_color, fg="#0645AD", command=lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README_ko_kr.md"))
-b4.grid(row=3, column=0)
+        main_layout = QVBoxLayout(central_widget)
 
-window.mainloop()
+        top_layout_1 = QHBoxLayout()
+        main_layout.addLayout(top_layout_1)
+
+        left_layout = QVBoxLayout()
+        self.map_label = QLabel(tr('Select The Map.'), self)
+        self.map_label.setFont(QFont('Helvetica', 18, QFont.Bold))
+        self.map_label.setAlignment(Qt.AlignCenter)
+        left_layout.addWidget(self.map_label)
+
+        combobox_layout = QHBoxLayout()
+        global combobox
+        combobox = QComboBox(self)
+        combobox.addItems(mapList)
+        combobox.setCurrentText("ground-zero")
+        combobox.setFont(QFont('Helvetica', 16))
+        combobox.setStyleSheet("background-color: white; color: black;")
+        combobox_layout.addWidget(combobox)
+
+        self.b1 = QPushButton(tr('Apply'), self)
+        self.b1.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b1.clicked.connect(change_map)
+        combobox_layout.addWidget(self.b1)
+
+        left_layout.addLayout(combobox_layout)
+
+        self.auto_detect_checkbox = QCheckBox(tr('Auto Screenshot Detection'), self)
+        self.auto_detect_checkbox.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.auto_detect_checkbox.setStyleSheet("margin: 0 auto;")
+        self.auto_detect_checkbox.setLayoutDirection(Qt.LeftToRight)
+        self.auto_detect_checkbox.setChecked(app_settings["auto_screenshot_detection"])
+        self.auto_detect_checkbox.toggled.connect(self.toggle_auto_detection)
+        left_layout.addWidget(self.auto_detect_checkbox)
+
+        top_layout_1.addLayout(left_layout)
+
+        left_separator = QFrame()
+        left_separator.setFrameShape(QFrame.VLine)
+        left_separator.setFrameShadow(QFrame.Sunken)
+        top_layout_1.addWidget(left_separator)
+
+        center_layout = QVBoxLayout()
+        self.b_panel_control = QPushButton(tr('Hide/Show Pannels'), self)
+        self.b_panel_control.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b_panel_control.clicked.connect(pannelControl)
+        center_layout.addWidget(self.b_panel_control)
+
+        self.b_fullscreen = QPushButton(tr('Full Screen'), self)
+        self.b_fullscreen.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b_fullscreen.clicked.connect(fullscreen)
+        center_layout.addWidget(self.b_fullscreen)
+
+        self.b_force = QPushButton(tr('Force Run'), self)
+        self.b_force.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b_force.clicked.connect(lambda: check_location())
+        center_layout.addWidget(self.b_force)
+        top_layout_1.addLayout(center_layout)
+
+        center_separator = QFrame()
+        center_separator.setFrameShape(QFrame.VLine)
+        center_separator.setFrameShadow(QFrame.Sunken)
+        top_layout_1.addWidget(center_separator)
+
+        right_layout = QVBoxLayout()
+
+        language_layout = QHBoxLayout()
+        self.language_combobox = QComboBox(self)
+        self.language_combobox.addItem("English", "en")
+        self.language_combobox.addItem("한국어", "ko")
+        self.language_combobox.setFont(QFont('Helvetica', 16))
+        self.language_combobox.setCurrentIndex(0 if app_settings["language"] == "en" else 1)
+        language_layout.addWidget(self.language_combobox)
+
+        self.language_apply_button = QPushButton(tr('Apply Language'), self)
+        self.language_apply_button.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.language_apply_button.clicked.connect(self.apply_language)
+        language_layout.addWidget(self.language_apply_button)
+
+        right_layout.addLayout(language_layout)
+
+        self.b3 = QPushButton(tr('How to use'), self)
+        self.b3.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b3.setStyleSheet("color: #0645AD;")
+        self.b3.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/blob/main/README.md"))
+        right_layout.addWidget(self.b3)
+
+        self.b5 = QPushButton(tr('Bug Report'), self)
+        self.b5.setFont(QFont('Helvetica', 16, QFont.Bold))
+        self.b5.setStyleSheet("color: #0645AD;")
+        self.b5.clicked.connect(lambda: open_url("https://github.com/karpitony/eft-where-am-i/issues"))
+        right_layout.addWidget(self.b5)
+
+        top_layout_1.addLayout(right_layout)
+
+        main_layout.addWidget(browser)
+
+        if app_settings["auto_screenshot_detection"]:
+            start_auto_detection()
+
+    def apply_language(self):
+        language = self.language_combobox.currentData()
+        app_settings["language"] = language
+        save_settings(app_settings)
+        global translations
+        translations = load_translations(language)
+        self.retranslateUi()
+
+    @pyqtSlot(bool)
+    def toggle_auto_detection(self, checked):
+        app_settings["auto_screenshot_detection"] = checked
+        save_settings(app_settings)
+        if checked:
+            start_auto_detection()
+
+    def retranslateUi(self):
+        self.setWindowTitle(tr("EFT Where am I? (ver.1.2)"))
+        self.map_label.setText(tr('Select The Map.'))
+        self.b1.setText(tr('Apply'))
+        self.auto_detect_checkbox.setText(tr('Auto Screenshot Detection'))
+        self.b_panel_control.setText(tr('Hide/Show Pannels'))
+        self.b_fullscreen.setText(tr('Full Screen'))
+        self.b_force.setText(tr('Force Run'))
+        self.b3.setText(tr('How to use'))
+        self.b5.setText(tr('Bug Report'))
+        self.language_apply_button.setText(tr('Apply Language'))
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    locale = app_settings["language"]
+    translations = load_translations(locale)
+
+    watcher = FileSystemWatcher()
+
+    window = BrowserWindow()
+    window.show()
+
+    sys.exit(app.exec_())
