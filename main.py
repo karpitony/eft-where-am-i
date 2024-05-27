@@ -4,10 +4,11 @@ import glob
 import time
 import json
 import webbrowser
-from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QLocale, QCoreApplication, QFileSystemWatcher
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QFileSystemWatcher
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QComboBox, QCheckBox, QFrame
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtGui import QFont
+
 
 # 설정 파일(settings.json) 관련
 settings_file = "settings.json"
@@ -44,6 +45,8 @@ translations = load_translations(app_settings["language"])
 def tr(text):
     return translations.get(text, text)
 
+
+
 def change_map():
     global map
     global site_url
@@ -56,6 +59,7 @@ def change_map():
         browser.setUrl(QUrl(site_url))
         where_am_i_click = False
 
+
 # 폴더에서 가장 최근 파일을 가져오는 함수
 def get_latest_files():
     files = glob.glob(os.path.join(screenshot_path, '*'))
@@ -65,6 +69,7 @@ def get_latest_files():
     else:
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
+
 
 # 맵의 마커 스타일을 변경하는 함수
 def change_marker():
@@ -84,6 +89,7 @@ def change_marker():
             }}
         """
         browser.page().runJavaScript(js_code)
+
 
 # 최신 스크린샷을 찾아 위치를 확인하는 함수
 def check_location():
@@ -119,6 +125,7 @@ def check_location():
     browser.page().runJavaScript(js_code)
     change_marker()
 
+
 def fullscreen():
     js_code = """
         var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
@@ -130,6 +137,7 @@ def fullscreen():
         }
     """
     browser.page().runJavaScript(js_code)
+
 
 def pannelControl():
     js_code = """
@@ -143,12 +151,14 @@ def pannelControl():
     """
     browser.page().runJavaScript(js_code)
 
+
 # 폴링 시작하는 함수
 def start_auto_detection():
     global watcher
     if watcher is not None:
         watcher.addPath(screenshot_path)
         print(f"Started watching {screenshot_path}")
+
 
 # 폴링
 class FileSystemWatcher(QFileSystemWatcher):
@@ -167,6 +177,8 @@ class FileSystemWatcher(QFileSystemWatcher):
 
 def open_url(url):
     webbrowser.open_new(url)
+
+
 
 # 기본적인 변수 세팅
 mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
@@ -187,6 +199,8 @@ for relative_path in app_settings.get("screenshot_paths", []):
 
 if screenshot_path is None:
     screenshot_path = 'can`t find directory'
+
+
 
 class BrowserWindow(QMainWindow):
     def __init__(self):
