@@ -11,7 +11,8 @@
 
 - This is a Python + GUI program that helps you easily use the Maps feature of `Tarkov-Market`.
 - It is based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
-- This program is licensed under the `MIT License` and **we are not responsible for any damage** (though highly unlikely, such as penalties from EFT) **caused by using this program**.
+- This program is licensed under the `MIT License`.
+- Use at your risk.
 
 ## How to Use
 **1. Select a map.**
@@ -21,9 +22,9 @@
 After selecting a map, make sure to click the `Apply` button!
 <br />
 
-**2. Take a screenshot while inside a Tarkov raid.**
-- The default screenshot key in Tarkov is `PrtSc`.
-- If you check the `Auto Screenshot Detection` checkbox, your location will automatically update each time you take a screenshot.
+**2. Take a screenshot during EFT raids.**
+- The default screenshot key is `PrtSc`.
+- If you check the `Auto Screenshot Detection` checkbox, your location will be automatically updated each time you take a screenshot.
 - If you check the `Auto Screenshot Detection` checkbox, you can skip step 3.
 <br />
 
@@ -31,7 +32,7 @@ After selecting a map, make sure to click the `Apply` button!
 
 <img src="assets/screenshot03.png" alt="screenshot03" width="800">
 
-A red dot will appear on the map to indicate your location.
+A red dot indicating your location will appear on the map.
 
-- To update your location after moving, repeat steps 2 and 3.
-- You can click the `Hide/Show Panels` or `Full Screen` buttons to view the map more clearly.
+- To update your location, repeat steps 2 and 3.
+- You can use the `Hide/Show Panels` or `Full Screen` buttons to view the map more clearly.
