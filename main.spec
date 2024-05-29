@@ -7,8 +7,8 @@ a = Analysis(
     pathex=['.'],
     binaries=[],
     datas=[
-        ('translations/', 'translations/'),  # 번역 파일 폴더 포함
-        ('settings.json', 'settings.json'),  # settings.json 파일 포함
+        ('translations/', 'translations/'),  # Include the translations folder
+        ('settings.json', 'settings.json'),  # Include the settings.json file
     ],
     hiddenimports=[
         'PyQt5.QtCore',
@@ -40,7 +40,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # 콘솔 창을 띄우지 않음
+    console=False,  # Do not open a console window
 )
 
 coll = COLLECT(
@@ -54,13 +54,13 @@ coll = COLLECT(
     name='EFT Where am I',
 )
 
-app = BUNDLE(
+bundle = BUNDLE(
     coll,
     name='EFT Where am I',
     bundle_identifier=None,
 )
 
-exe = EXE(
+exe_onefile = EXE(
     pyz,
     a.scripts,
     [],
@@ -72,6 +72,6 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # 콘솔 창을 띄우지 않음
-    onefile=False  # Enable onefile option
+    console=False,  # Do not open a console window
+    onefile=True  # Enable onefile option
 )

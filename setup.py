@@ -2,9 +2,6 @@ from cx_Freeze import setup, Executable
 import os
 import sys
 
-# PyQt5 플러그인 경로 설정
-qt_plugin_path = r'C:\Users\USER\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\Qt\plugins'
-os.environ['QT_PLUGIN_PATH'] = qt_plugin_path
 
 name = "EFT Where am I"
 version = "1.2"
@@ -28,8 +25,8 @@ include_files = dll_files + [
 # 빌드 옵션 설정
 options = {
     "build_exe": {
-        "packages": ["os", "glob", "time", "sys", "json", "webbrowser", "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "PyQt5.QtWebEngineWidgets", "PyQt5.QtWebEngineCore"],
-        "includes": [],
+        "packages": ["os", "glob", "time", "sys", "json", "webbrowser", "PyQt5" ],
+        "includes": ["PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "PyQt5.QtWebEngineWidgets", "PyQt5.QtWebEngineCore"],
         "include_files": include_files,
         "excludes": [],
         "include_msvcr": True,  # Windows에서 필요한 경우 MSVC 런타임 라이브러리 포함
