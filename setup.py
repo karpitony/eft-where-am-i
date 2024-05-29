@@ -23,16 +23,24 @@ include_files = dll_files + [
 ]
 
 # 빌드 옵션 설정
-options = {
-    "build_exe": {
-        "packages": ["os", "glob", "time", "sys", "json", "webbrowser", "PyQt5" ],
-        "includes": ["PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "PyQt5.QtWebEngineWidgets", "PyQt5.QtWebEngineCore"],
-        "include_files": include_files,
-        "excludes": [],
-        "include_msvcr": True,  # Windows에서 필요한 경우 MSVC 런타임 라이브러리 포함
-        "silent": True,
-        "zip_include_packages": ["PyQt5"]
-    }
+build_exe_options = {
+    "packages": ["os", "glob", "time", "sys"],
+    "includes": [
+        "PyQt5",
+        "PyQt5.QtCore",
+        "PyQt5.QtGui",
+        "PyQt5.QtWidgets",
+        "PyQt5.QtWebEngineWidgets",
+        "PyQt5.QtWebEngineCore"
+    ],
+    "include_files": [
+        ('translations/', 'translations/'),  # 번역 파일 폴더 포함
+        ('settings.json', 'settings.json')  # settings.json 파일 포함
+    ],
+    "excludes": ["tkinter", "unittest"],
+    "include_msvcr": True,  # Windows에서 필요한 경우 MSVC 런타임 라이브러리 포함
+    "silent": True,
+    "zip_include_packages": ["encodings", "PyQt5"],
 }
 
 # Windows에서 GUI 애플리케이션을 빌드할 때 base 설정
@@ -45,9 +53,9 @@ executables = [
 ]
 
 setup(
-    name=name,
-    version=version,
-    description=description,
-    options=options,
-    executables=executables
+    name = "EFT Where am I",
+    version = "1.2",
+    description = "A Python program to easily get locations in Tarkov",
+    options = { "build_exe": build_exe_options },
+    executables = [ Executable("main.py", base=base, target_name="EFT_Where_am_I.exe") ]
 )
