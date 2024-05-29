@@ -37,15 +37,13 @@ def load_translations(language):
     if os.path.exists(translation_file):
         with open(translation_file, 'r', encoding='utf-8') as file:
             return json.load(file)
-    return {}
+    return dict()
 
 app_settings = load_settings()
 translations = load_translations(app_settings["language"])
 
 def tr(text):
     return translations.get(text, text)
-
-
 
 def change_map():
     global map
@@ -64,12 +62,11 @@ def change_map():
 def get_latest_files():
     files = glob.glob(os.path.join(screenshot_path, '*'))
     
-    if not files:
-        return None
-    else:
+    if files:
         latest_file = max(files, key=os.path.getmtime)
         return os.path.basename(latest_file)
-
+    else:
+        return None
 
 # 맵의 마커 스타일을 변경하는 함수
 def change_marker():
@@ -81,7 +78,7 @@ def change_marker():
     
     for i in styleList:
         js_code = f"""
-            var marker = document.getElementsByClassName('marker')[0];
+            const marker = document.getElementsByClassName('marker')[0];
             if (marker) {{
                 marker.style.setProperty('{i[0]}', '{i[1]}', 'important');
             }} else {{
@@ -101,7 +98,7 @@ def check_location():
     if not where_am_i_click:
         where_am_i_click = True
         js_code = """
-            var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');
+            const button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');
             if (button) {
                 button.click();
                 console.log('Button clicked');
@@ -113,14 +110,14 @@ def check_location():
         time.sleep(0.5)
 
     js_code = f"""
-        var input = document.querySelector('input[type="text"]');
-        if (input) {{
+        const input = document.querySelector('input[type="text"]');
+        if (input) {
             input.value = '{screenshot.replace(".png", "")}';
             input.dispatchEvent(new Event('input'));
             console.log('Input value set');
-        }} else {{
+        } else {
             console.log('Input not found');
-        }}
+        }
     """
     browser.page().runJavaScript(js_code)
     change_marker()
@@ -128,7 +125,7 @@ def check_location():
 
 def fullscreen():
     js_code = """
-        var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
+        const button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');
         if (button) {
             button.click();
             console.log('Fullscreen button clicked');
@@ -141,7 +138,7 @@ def fullscreen():
 
 def pannelControl():
     js_code = """
-        var button = document.evaluate('//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        const button = document.evaluate('//*[@id="__nuxt"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         if (button) {
             button.click();
             console.log('Panel control button clicked');
@@ -181,7 +178,18 @@ def open_url(url):
 
 
 # 기본적인 변수 세팅
-mapList = ['ground-zero', 'factory', 'customs', 'interchange', 'woods', 'shoreline', 'lighthouse', 'reserve', 'streets', 'lab']
+mapList = [
+    'ground-zero',
+    'factory',
+    'customs',
+    'interchange',
+    'woods',
+    'shoreline',
+    'lighthouse',
+    'reserve',
+    'streets',
+    'lab'
+]
 
 map = "ground-zero"
 site_url = f"https://tarkov-market.com/maps/{map}"
@@ -199,8 +207,6 @@ for relative_path in app_settings.get("screenshot_paths", []):
 
 if screenshot_path is None:
     screenshot_path = 'can`t find directory'
-
-
 
 class BrowserWindow(QMainWindow):
     def __init__(self):
