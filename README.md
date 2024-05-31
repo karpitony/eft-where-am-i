@@ -12,6 +12,12 @@
 - It is based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
 - This program is licensed under the `MIT License`.
 - Use at your risk.
+<br />
+
+1. [How to Use](#how-to-use)
+2. [For devs](#for-devs)
+    1. [Requirments](#requirements)
+    2. [Insatllation](#installation)
 
 ## How to Use
 
@@ -38,14 +44,14 @@ A red dot indicating your location will appear on the map.
 - To update your location, repeat steps 2 and 3.
 - You can use the `Hide/Show Panels` or `Full Screen` buttons to view the map more clearly.
 
-# For devs
+## For devs
 
-## Requirements
+### Requirements
 
 - Python 3
 - Anaconda (for virtual environment. not required. Use at your favor)
 
-## Installation
+### Installation
 
 If you use anaconda
 
