@@ -1,0 +1,3 @@
+cx_freeze==7.0.0
+pyqt==5.15.4
+pyqtwebengine==5.15.4
