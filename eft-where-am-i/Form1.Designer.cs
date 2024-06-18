@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.SelectTheMap_Lable = new System.Windows.Forms.Label();
             this.Map_ComboBox = new System.Windows.Forms.ComboBox();
             this.MapApply_Button = new System.Windows.Forms.Button();
@@ -50,28 +51,29 @@
             // SelectTheMap_Lable
             // 
             this.SelectTheMap_Lable.AutoSize = true;
-            this.SelectTheMap_Lable.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.SelectTheMap_Lable.Location = new System.Drawing.Point(91, 6);
+            this.SelectTheMap_Lable.Font = new System.Drawing.Font("굴림", 18F);
+            this.SelectTheMap_Lable.Location = new System.Drawing.Point(89, 11);
             this.SelectTheMap_Lable.Name = "SelectTheMap_Lable";
-            this.SelectTheMap_Lable.Size = new System.Drawing.Size(166, 22);
+            this.SelectTheMap_Lable.Size = new System.Drawing.Size(174, 24);
             this.SelectTheMap_Lable.TabIndex = 0;
             this.SelectTheMap_Lable.Text = "Select The Map";
             this.SelectTheMap_Lable.Click += new System.EventHandler(this.SelectTheMap_Click);
             // 
             // Map_ComboBox
             // 
+            this.Map_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Map_ComboBox.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
             this.Map_ComboBox.FormattingEnabled = true;
-            this.Map_ComboBox.Location = new System.Drawing.Point(3, 45);
+            this.Map_ComboBox.Location = new System.Drawing.Point(3, 50);
             this.Map_ComboBox.Name = "Map_ComboBox";
-            this.Map_ComboBox.Size = new System.Drawing.Size(198, 29);
+            this.Map_ComboBox.Size = new System.Drawing.Size(214, 29);
             this.Map_ComboBox.TabIndex = 1;
             this.Map_ComboBox.SelectedIndexChanged += new System.EventHandler(this.Map_ComboBox_SelectedIndexChanged);
             // 
             // MapApply_Button
             // 
             this.MapApply_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.MapApply_Button.Location = new System.Drawing.Point(207, 41);
+            this.MapApply_Button.Location = new System.Drawing.Point(223, 47);
             this.MapApply_Button.Name = "MapApply_Button";
             this.MapApply_Button.Size = new System.Drawing.Size(129, 35);
             this.MapApply_Button.TabIndex = 2;
@@ -83,19 +85,20 @@
             // 
             this.HowtouseLinkLabel.AutoSize = true;
             this.HowtouseLinkLabel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.HowtouseLinkLabel.Location = new System.Drawing.Point(60, 64);
+            this.HowtouseLinkLabel.Location = new System.Drawing.Point(61, 59);
             this.HowtouseLinkLabel.Name = "HowtouseLinkLabel";
             this.HowtouseLinkLabel.Size = new System.Drawing.Size(129, 22);
             this.HowtouseLinkLabel.TabIndex = 3;
             this.HowtouseLinkLabel.TabStop = true;
             this.HowtouseLinkLabel.Text = "How to Use";
+            this.HowtouseLinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.HowtouseLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.HowtouseLinkLabel_LinkClicked);
             // 
             // AutoScreenshot_CheckBox
             // 
             this.AutoScreenshot_CheckBox.AutoSize = true;
             this.AutoScreenshot_CheckBox.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.AutoScreenshot_CheckBox.Location = new System.Drawing.Point(26, 86);
+            this.AutoScreenshot_CheckBox.Location = new System.Drawing.Point(24, 94);
             this.AutoScreenshot_CheckBox.Name = "AutoScreenshot_CheckBox";
             this.AutoScreenshot_CheckBox.Size = new System.Drawing.Size(301, 26);
             this.AutoScreenshot_CheckBox.TabIndex = 4;
@@ -107,30 +110,32 @@
             // 
             this.BugReport_LinkLabel.AutoSize = true;
             this.BugReport_LinkLabel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.BugReport_LinkLabel.Location = new System.Drawing.Point(64, 90);
+            this.BugReport_LinkLabel.Location = new System.Drawing.Point(64, 95);
             this.BugReport_LinkLabel.Name = "BugReport_LinkLabel";
             this.BugReport_LinkLabel.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.BugReport_LinkLabel.Size = new System.Drawing.Size(122, 22);
             this.BugReport_LinkLabel.TabIndex = 5;
             this.BugReport_LinkLabel.TabStop = true;
             this.BugReport_LinkLabel.Text = "Bug Report";
+            this.BugReport_LinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.BugReport_LinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BugReport_LinkLabel_LinkClicked);
             // 
             // panel1
             // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.Controls.Add(this.LaguageApply_Button);
             this.panel1.Controls.Add(this.LanguageSelect_Combobox);
             this.panel1.Controls.Add(this.HowtouseLinkLabel);
             this.panel1.Controls.Add(this.BugReport_LinkLabel);
-            this.panel1.Location = new System.Drawing.Point(923, 12);
+            this.panel1.Location = new System.Drawing.Point(913, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(259, 128);
+            this.panel1.Size = new System.Drawing.Size(259, 129);
             this.panel1.TabIndex = 6;
             // 
             // LaguageApply_Button
             // 
             this.LaguageApply_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.LaguageApply_Button.Location = new System.Drawing.Point(158, 26);
+            this.LaguageApply_Button.Location = new System.Drawing.Point(158, 16);
             this.LaguageApply_Button.Name = "LaguageApply_Button";
             this.LaguageApply_Button.Size = new System.Drawing.Size(101, 29);
             this.LaguageApply_Button.TabIndex = 7;
@@ -143,7 +148,7 @@
             this.LanguageSelect_Combobox.AllowDrop = true;
             this.LanguageSelect_Combobox.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
             this.LanguageSelect_Combobox.FormattingEnabled = true;
-            this.LanguageSelect_Combobox.Location = new System.Drawing.Point(3, 27);
+            this.LanguageSelect_Combobox.Location = new System.Drawing.Point(3, 16);
             this.LanguageSelect_Combobox.Name = "LanguageSelect_Combobox";
             this.LanguageSelect_Combobox.Size = new System.Drawing.Size(149, 29);
             this.LanguageSelect_Combobox.TabIndex = 6;
@@ -155,17 +160,18 @@
             this.panel2.Controls.Add(this.MapApply_Button);
             this.panel2.Controls.Add(this.AutoScreenshot_CheckBox);
             this.panel2.Controls.Add(this.Map_ComboBox);
-            this.panel2.Location = new System.Drawing.Point(12, 12);
+            this.panel2.Location = new System.Drawing.Point(12, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(355, 128);
+            this.panel2.Size = new System.Drawing.Size(355, 129);
             this.panel2.TabIndex = 7;
             // 
             // HideShowPannel_Button
             // 
+            this.HideShowPannel_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.HideShowPannel_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.HideShowPannel_Button.Location = new System.Drawing.Point(373, 12);
+            this.HideShowPannel_Button.Location = new System.Drawing.Point(373, 3);
             this.HideShowPannel_Button.Name = "HideShowPannel_Button";
-            this.HideShowPannel_Button.Size = new System.Drawing.Size(223, 45);
+            this.HideShowPannel_Button.Size = new System.Drawing.Size(223, 42);
             this.HideShowPannel_Button.TabIndex = 8;
             this.HideShowPannel_Button.Text = "Hide/Show Pannels";
             this.HideShowPannel_Button.UseVisualStyleBackColor = true;
@@ -173,8 +179,9 @@
             // 
             // FullScreen_Button
             // 
+            this.FullScreen_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.FullScreen_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.FullScreen_Button.Location = new System.Drawing.Point(373, 56);
+            this.FullScreen_Button.Location = new System.Drawing.Point(373, 45);
             this.FullScreen_Button.Name = "FullScreen_Button";
             this.FullScreen_Button.Size = new System.Drawing.Size(223, 42);
             this.FullScreen_Button.TabIndex = 9;
@@ -184,8 +191,9 @@
             // 
             // ForceRun_Button
             // 
+            this.ForceRun_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ForceRun_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.ForceRun_Button.Location = new System.Drawing.Point(373, 98);
+            this.ForceRun_Button.Location = new System.Drawing.Point(373, 87);
             this.ForceRun_Button.Name = "ForceRun_Button";
             this.ForceRun_Button.Size = new System.Drawing.Size(223, 42);
             this.ForceRun_Button.TabIndex = 10;
@@ -196,11 +204,13 @@
             // webView2
             // 
             this.webView2.AllowExternalDrop = true;
+            this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Location = new System.Drawing.Point(12, 146);
+            this.webView2.Location = new System.Drawing.Point(12, 135);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1160, 803);
+            this.webView2.Size = new System.Drawing.Size(1160, 814);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 11;
             this.webView2.ZoomFactor = 1D;
@@ -216,8 +226,9 @@
             this.Controls.Add(this.HideShowPannel_Button);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "EFT Where am I? (v2.0)";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
