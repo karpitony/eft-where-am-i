@@ -9,6 +9,7 @@
 - `Tarkov-Market`의 `Maps` 기능을 손쉽게 사용할 수 있도록 도와주는 Python + GUI 프로그램입니다.
 - [Rok님의 게시글 및 소스코드](https://gall.dcinside.com/m/eft/2143712)를 기반으로 작성했습니다.
 - 본 프로그램은 `MIT 라이선스`이며 **본 프로그램으로 인한 어떠한 피해**(가능성은 거의 없지만 EFT에 의한 제재 등)**에 대하여 책임지지 않습니다.**
+- [Map icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/map)
 <br />
 
 1. [사용 방법](#사용-방법)

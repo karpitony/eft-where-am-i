@@ -12,6 +12,7 @@
 - It is based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
 - This program is licensed under the `MIT License`.
 - Use at your risk.
+- [Map icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/map)
 <br />
 
 1. [How to Use](#how-to-use)
