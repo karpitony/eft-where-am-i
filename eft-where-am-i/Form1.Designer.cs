@@ -29,182 +29,180 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.SelectTheMap_Lable = new System.Windows.Forms.Label();
-            this.Map_ComboBox = new System.Windows.Forms.ComboBox();
-            this.MapApply_Button = new System.Windows.Forms.Button();
-            this.HowtouseLinkLabel = new System.Windows.Forms.LinkLabel();
-            this.AutoScreenshot_CheckBox = new System.Windows.Forms.CheckBox();
-            this.BugReport_LinkLabel = new System.Windows.Forms.LinkLabel();
+            this.lblSelectTheMap = new System.Windows.Forms.Label();
+            this.cmbMapSelect = new System.Windows.Forms.ComboBox();
+            this.btnMapApply = new System.Windows.Forms.Button();
+            this.lblHowToUse = new System.Windows.Forms.LinkLabel();
+            this.cktAutoScreenshot = new System.Windows.Forms.CheckBox();
+            this.lblBugReport = new System.Windows.Forms.LinkLabel();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.LaguageApply_Button = new System.Windows.Forms.Button();
-            this.LanguageSelect_Combobox = new System.Windows.Forms.ComboBox();
+            this.btnLaguageApply = new System.Windows.Forms.Button();
+            this.cmbLanguageSelect = new System.Windows.Forms.ComboBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.HideShowPannel_Button = new System.Windows.Forms.Button();
-            this.FullScreen_Button = new System.Windows.Forms.Button();
-            this.ForceRun_Button = new System.Windows.Forms.Button();
+            this.btnHideShowPannel = new System.Windows.Forms.Button();
+            this.btnFullScreen = new System.Windows.Forms.Button();
+            this.btnForceRun = new System.Windows.Forms.Button();
             this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
             this.SuspendLayout();
             // 
-            // SelectTheMap_Lable
+            // lblSelectTheMap
             // 
-            this.SelectTheMap_Lable.AutoSize = true;
-            this.SelectTheMap_Lable.Font = new System.Drawing.Font("굴림", 18F);
-            this.SelectTheMap_Lable.Location = new System.Drawing.Point(89, 11);
-            this.SelectTheMap_Lable.Name = "SelectTheMap_Lable";
-            this.SelectTheMap_Lable.Size = new System.Drawing.Size(174, 24);
-            this.SelectTheMap_Lable.TabIndex = 0;
-            this.SelectTheMap_Lable.Text = "Select The Map";
-            this.SelectTheMap_Lable.Click += new System.EventHandler(this.SelectTheMap_Click);
+            this.lblSelectTheMap.AutoSize = true;
+            this.lblSelectTheMap.Font = new System.Drawing.Font("굴림", 18F);
+            this.lblSelectTheMap.Location = new System.Drawing.Point(89, 11);
+            this.lblSelectTheMap.Name = "lblSelectTheMap";
+            this.lblSelectTheMap.Size = new System.Drawing.Size(174, 24);
+            this.lblSelectTheMap.TabIndex = 0;
+            this.lblSelectTheMap.Text = "Select The Map";
             // 
-            // Map_ComboBox
+            // cmbMapSelect
             // 
-            this.Map_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Map_ComboBox.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.Map_ComboBox.FormattingEnabled = true;
-            this.Map_ComboBox.Location = new System.Drawing.Point(3, 50);
-            this.Map_ComboBox.Name = "Map_ComboBox";
-            this.Map_ComboBox.Size = new System.Drawing.Size(214, 29);
-            this.Map_ComboBox.TabIndex = 1;
-            this.Map_ComboBox.SelectedIndexChanged += new System.EventHandler(this.Map_ComboBox_SelectedIndexChanged);
+            this.cmbMapSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMapSelect.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.cmbMapSelect.FormattingEnabled = true;
+            this.cmbMapSelect.Location = new System.Drawing.Point(3, 50);
+            this.cmbMapSelect.Name = "cmbMapSelect";
+            this.cmbMapSelect.Size = new System.Drawing.Size(214, 29);
+            this.cmbMapSelect.TabIndex = 1;
             // 
-            // MapApply_Button
+            // btnMapApply
             // 
-            this.MapApply_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.MapApply_Button.Location = new System.Drawing.Point(223, 47);
-            this.MapApply_Button.Name = "MapApply_Button";
-            this.MapApply_Button.Size = new System.Drawing.Size(129, 35);
-            this.MapApply_Button.TabIndex = 2;
-            this.MapApply_Button.Text = "Apply";
-            this.MapApply_Button.UseVisualStyleBackColor = true;
-            this.MapApply_Button.Click += new System.EventHandler(this.MapApply_Button_Click);
+            this.btnMapApply.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.btnMapApply.Location = new System.Drawing.Point(223, 47);
+            this.btnMapApply.Name = "btnMapApply";
+            this.btnMapApply.Size = new System.Drawing.Size(129, 35);
+            this.btnMapApply.TabIndex = 2;
+            this.btnMapApply.Text = "Apply";
+            this.btnMapApply.UseVisualStyleBackColor = true;
+            this.btnMapApply.Click += new System.EventHandler(this.btnMapApply_Click);
             // 
-            // HowtouseLinkLabel
+            // lblHowToUse
             // 
-            this.HowtouseLinkLabel.AutoSize = true;
-            this.HowtouseLinkLabel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.HowtouseLinkLabel.Location = new System.Drawing.Point(61, 59);
-            this.HowtouseLinkLabel.Name = "HowtouseLinkLabel";
-            this.HowtouseLinkLabel.Size = new System.Drawing.Size(129, 22);
-            this.HowtouseLinkLabel.TabIndex = 3;
-            this.HowtouseLinkLabel.TabStop = true;
-            this.HowtouseLinkLabel.Text = "How to Use";
-            this.HowtouseLinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.HowtouseLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.HowtouseLinkLabel_LinkClicked);
+            this.lblHowToUse.AutoSize = true;
+            this.lblHowToUse.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.lblHowToUse.Location = new System.Drawing.Point(61, 59);
+            this.lblHowToUse.Name = "lblHowToUse";
+            this.lblHowToUse.Size = new System.Drawing.Size(129, 22);
+            this.lblHowToUse.TabIndex = 3;
+            this.lblHowToUse.TabStop = true;
+            this.lblHowToUse.Text = "How to Use";
+            this.lblHowToUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblHowToUse.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblHowtouse_LinkClicked);
             // 
-            // AutoScreenshot_CheckBox
+            // cktAutoScreenshot
             // 
-            this.AutoScreenshot_CheckBox.AutoSize = true;
-            this.AutoScreenshot_CheckBox.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.AutoScreenshot_CheckBox.Location = new System.Drawing.Point(24, 94);
-            this.AutoScreenshot_CheckBox.Name = "AutoScreenshot_CheckBox";
-            this.AutoScreenshot_CheckBox.Size = new System.Drawing.Size(301, 26);
-            this.AutoScreenshot_CheckBox.TabIndex = 4;
-            this.AutoScreenshot_CheckBox.Text = "Auto Screenshot Detection";
-            this.AutoScreenshot_CheckBox.UseVisualStyleBackColor = true;
-            this.AutoScreenshot_CheckBox.CheckedChanged += new System.EventHandler(this.AutoScreenshot_CheckBox_CheckedChanged);
+            this.cktAutoScreenshot.AutoSize = true;
+            this.cktAutoScreenshot.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.cktAutoScreenshot.Location = new System.Drawing.Point(24, 94);
+            this.cktAutoScreenshot.Name = "cktAutoScreenshot";
+            this.cktAutoScreenshot.Size = new System.Drawing.Size(301, 26);
+            this.cktAutoScreenshot.TabIndex = 4;
+            this.cktAutoScreenshot.Text = "Auto Screenshot Detection";
+            this.cktAutoScreenshot.UseVisualStyleBackColor = true;
+            this.cktAutoScreenshot.CheckedChanged += new System.EventHandler(this.chkAutoScreenshot_CheckedChanged);
             // 
-            // BugReport_LinkLabel
+            // lblBugReport
             // 
-            this.BugReport_LinkLabel.AutoSize = true;
-            this.BugReport_LinkLabel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.BugReport_LinkLabel.Location = new System.Drawing.Point(64, 95);
-            this.BugReport_LinkLabel.Name = "BugReport_LinkLabel";
-            this.BugReport_LinkLabel.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.BugReport_LinkLabel.Size = new System.Drawing.Size(122, 22);
-            this.BugReport_LinkLabel.TabIndex = 5;
-            this.BugReport_LinkLabel.TabStop = true;
-            this.BugReport_LinkLabel.Text = "Bug Report";
-            this.BugReport_LinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.BugReport_LinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BugReport_LinkLabel_LinkClicked);
+            this.lblBugReport.AutoSize = true;
+            this.lblBugReport.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.lblBugReport.Location = new System.Drawing.Point(64, 95);
+            this.lblBugReport.Name = "lblBugReport";
+            this.lblBugReport.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.lblBugReport.Size = new System.Drawing.Size(122, 22);
+            this.lblBugReport.TabIndex = 5;
+            this.lblBugReport.TabStop = true;
+            this.lblBugReport.Text = "Bug Report";
+            this.lblBugReport.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblBugReport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblBugReport_LinkClicked);
             // 
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Controls.Add(this.LaguageApply_Button);
-            this.panel1.Controls.Add(this.LanguageSelect_Combobox);
-            this.panel1.Controls.Add(this.HowtouseLinkLabel);
-            this.panel1.Controls.Add(this.BugReport_LinkLabel);
+            this.panel1.Controls.Add(this.btnLaguageApply);
+            this.panel1.Controls.Add(this.cmbLanguageSelect);
+            this.panel1.Controls.Add(this.lblHowToUse);
+            this.panel1.Controls.Add(this.lblBugReport);
             this.panel1.Location = new System.Drawing.Point(913, 0);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(259, 129);
             this.panel1.TabIndex = 6;
             // 
-            // LaguageApply_Button
+            // btnLaguageApply
             // 
-            this.LaguageApply_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.LaguageApply_Button.Location = new System.Drawing.Point(158, 16);
-            this.LaguageApply_Button.Name = "LaguageApply_Button";
-            this.LaguageApply_Button.Size = new System.Drawing.Size(101, 29);
-            this.LaguageApply_Button.TabIndex = 7;
-            this.LaguageApply_Button.Text = "Apply";
-            this.LaguageApply_Button.UseVisualStyleBackColor = true;
-            this.LaguageApply_Button.Click += new System.EventHandler(this.LaguageApply_Button_Click);
+            this.btnLaguageApply.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.btnLaguageApply.Location = new System.Drawing.Point(158, 16);
+            this.btnLaguageApply.Name = "btnLaguageApply";
+            this.btnLaguageApply.Size = new System.Drawing.Size(101, 29);
+            this.btnLaguageApply.TabIndex = 7;
+            this.btnLaguageApply.Text = "Apply";
+            this.btnLaguageApply.UseVisualStyleBackColor = true;
+            this.btnLaguageApply.Click += new System.EventHandler(this.btnLaguageApply_Click);
             // 
-            // LanguageSelect_Combobox
+            // cmbLanguageSelect
             // 
-            this.LanguageSelect_Combobox.AllowDrop = true;
-            this.LanguageSelect_Combobox.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.LanguageSelect_Combobox.FormattingEnabled = true;
-            this.LanguageSelect_Combobox.Location = new System.Drawing.Point(3, 16);
-            this.LanguageSelect_Combobox.Name = "LanguageSelect_Combobox";
-            this.LanguageSelect_Combobox.Size = new System.Drawing.Size(149, 29);
-            this.LanguageSelect_Combobox.TabIndex = 6;
-            this.LanguageSelect_Combobox.SelectedIndexChanged += new System.EventHandler(this.LanguageSelect_Combobox_SelectedIndexChanged);
+            this.cmbLanguageSelect.AllowDrop = true;
+            this.cmbLanguageSelect.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.cmbLanguageSelect.FormattingEnabled = true;
+            this.cmbLanguageSelect.Location = new System.Drawing.Point(3, 16);
+            this.cmbLanguageSelect.Name = "cmbLanguageSelect";
+            this.cmbLanguageSelect.Size = new System.Drawing.Size(149, 29);
+            this.cmbLanguageSelect.TabIndex = 6;
             // 
             // panel2
             // 
-            this.panel2.Controls.Add(this.SelectTheMap_Lable);
-            this.panel2.Controls.Add(this.MapApply_Button);
-            this.panel2.Controls.Add(this.AutoScreenshot_CheckBox);
-            this.panel2.Controls.Add(this.Map_ComboBox);
+            this.panel2.Controls.Add(this.lblSelectTheMap);
+            this.panel2.Controls.Add(this.btnMapApply);
+            this.panel2.Controls.Add(this.cktAutoScreenshot);
+            this.panel2.Controls.Add(this.cmbMapSelect);
             this.panel2.Location = new System.Drawing.Point(12, 0);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(355, 129);
             this.panel2.TabIndex = 7;
             // 
-            // HideShowPannel_Button
+            // btnHideShowPannel
             // 
-            this.HideShowPannel_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.HideShowPannel_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.HideShowPannel_Button.Location = new System.Drawing.Point(373, 3);
-            this.HideShowPannel_Button.Name = "HideShowPannel_Button";
-            this.HideShowPannel_Button.Size = new System.Drawing.Size(223, 42);
-            this.HideShowPannel_Button.TabIndex = 8;
-            this.HideShowPannel_Button.Text = "Hide/Show Pannels";
-            this.HideShowPannel_Button.UseVisualStyleBackColor = true;
-            this.HideShowPannel_Button.Click += new System.EventHandler(this.HideShowPannel_Button_Click);
+            this.btnHideShowPannel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnHideShowPannel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.btnHideShowPannel.Location = new System.Drawing.Point(373, 3);
+            this.btnHideShowPannel.Name = "btnHideShowPannel";
+            this.btnHideShowPannel.Size = new System.Drawing.Size(223, 42);
+            this.btnHideShowPannel.TabIndex = 8;
+            this.btnHideShowPannel.Text = "Hide/Show Pannels";
+            this.btnHideShowPannel.UseVisualStyleBackColor = true;
+            this.btnHideShowPannel.Click += new System.EventHandler(this.btnHideShowPannel_Click);
             // 
-            // FullScreen_Button
+            // btnFullScreen
             // 
-            this.FullScreen_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.FullScreen_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.FullScreen_Button.Location = new System.Drawing.Point(373, 45);
-            this.FullScreen_Button.Name = "FullScreen_Button";
-            this.FullScreen_Button.Size = new System.Drawing.Size(223, 42);
-            this.FullScreen_Button.TabIndex = 9;
-            this.FullScreen_Button.Text = "Full Screen";
-            this.FullScreen_Button.UseVisualStyleBackColor = true;
-            this.FullScreen_Button.Click += new System.EventHandler(this.FullScreen_Button_Click);
+            this.btnFullScreen.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnFullScreen.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.btnFullScreen.Location = new System.Drawing.Point(373, 45);
+            this.btnFullScreen.Name = "btnFullScreen";
+            this.btnFullScreen.Size = new System.Drawing.Size(223, 42);
+            this.btnFullScreen.TabIndex = 9;
+            this.btnFullScreen.Text = "Full Screen";
+            this.btnFullScreen.UseVisualStyleBackColor = true;
+            this.btnFullScreen.Click += new System.EventHandler(this.btnFullScreen_Click);
             // 
-            // ForceRun_Button
+            // btnForceRun
             // 
-            this.ForceRun_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ForceRun_Button.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.ForceRun_Button.Location = new System.Drawing.Point(373, 87);
-            this.ForceRun_Button.Name = "ForceRun_Button";
-            this.ForceRun_Button.Size = new System.Drawing.Size(223, 42);
-            this.ForceRun_Button.TabIndex = 10;
-            this.ForceRun_Button.Text = "Force Run";
-            this.ForceRun_Button.UseVisualStyleBackColor = true;
-            this.ForceRun_Button.Click += new System.EventHandler(this.ForceRun_Button_Click);
+            this.btnForceRun.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnForceRun.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.btnForceRun.Location = new System.Drawing.Point(373, 87);
+            this.btnForceRun.Name = "btnForceRun";
+            this.btnForceRun.Size = new System.Drawing.Size(223, 42);
+            this.btnForceRun.TabIndex = 10;
+            this.btnForceRun.Text = "Force Run";
+            this.btnForceRun.UseVisualStyleBackColor = true;
+            this.btnForceRun.Click += new System.EventHandler(this.btnForceRun_Click);
             // 
             // webView2
             // 
             this.webView2.AllowExternalDrop = true;
-            this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
@@ -221,9 +219,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1184, 961);
             this.Controls.Add(this.webView2);
-            this.Controls.Add(this.ForceRun_Button);
-            this.Controls.Add(this.FullScreen_Button);
-            this.Controls.Add(this.HideShowPannel_Button);
+            this.Controls.Add(this.btnForceRun);
+            this.Controls.Add(this.btnFullScreen);
+            this.Controls.Add(this.btnHideShowPannel);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -241,19 +239,19 @@
 
         #endregion
 
-        private System.Windows.Forms.Label SelectTheMap_Lable;
-        private System.Windows.Forms.ComboBox Map_ComboBox;
-        private System.Windows.Forms.Button MapApply_Button;
-        private System.Windows.Forms.LinkLabel HowtouseLinkLabel;
-        private System.Windows.Forms.CheckBox AutoScreenshot_CheckBox;
-        private System.Windows.Forms.LinkLabel BugReport_LinkLabel;
+        private System.Windows.Forms.Label lblSelectTheMap;
+        private System.Windows.Forms.ComboBox cmbMapSelect;
+        private System.Windows.Forms.Button btnMapApply;
+        private System.Windows.Forms.LinkLabel lblHowToUse;
+        private System.Windows.Forms.CheckBox cktAutoScreenshot;
+        private System.Windows.Forms.LinkLabel lblBugReport;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Button HideShowPannel_Button;
-        private System.Windows.Forms.Button FullScreen_Button;
-        private System.Windows.Forms.Button ForceRun_Button;
-        private System.Windows.Forms.Button LaguageApply_Button;
-        private System.Windows.Forms.ComboBox LanguageSelect_Combobox;
+        private System.Windows.Forms.Button btnHideShowPannel;
+        private System.Windows.Forms.Button btnFullScreen;
+        private System.Windows.Forms.Button btnForceRun;
+        private System.Windows.Forms.Button btnLaguageApply;
+        private System.Windows.Forms.ComboBox cmbLanguageSelect;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
     }
 }
