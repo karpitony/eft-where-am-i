@@ -242,10 +242,12 @@
             this.checkBoxHide.Text = ">";
             this.checkBoxHide.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkBoxHide.UseVisualStyleBackColor = true;
+            this.checkBoxHide.CheckedChanged += new System.EventHandler(this.checkBoxHide_CheckedChanged);
             // 
             // timerSliding
             // 
-            this.timerSliding.Interval = 10;
+            this.timerSliding.Interval = 5;
+            this.timerSliding.Tick += new System.EventHandler(this.timerSliding_Tick);
             // 
             // groupBox4
             // 
@@ -294,11 +296,11 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(1384, 1061);
+            this.Controls.Add(this.panelSideMenu);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.panelSideMenu);
             this.Controls.Add(this.webView2);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
