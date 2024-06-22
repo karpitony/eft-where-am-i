@@ -109,7 +109,7 @@ def check_location():
         browser.page().runJavaScript(js_code)
         time.sleep(0.5)
 
-    js_code = f"""
+    js_code = """
         const input = document.querySelector('input[type="text"]');
         if (input) {
             input.value = '{screenshot.replace(".png", "")}';
