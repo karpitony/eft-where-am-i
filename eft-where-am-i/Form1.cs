@@ -117,7 +117,7 @@ namespace eft_where_am_i_chasrp
             }
 
             var latestFile = files.First();
-            return latestFile.Name; // 가장 최근에 수정된 파일 이름 반환
+            return latestFile.Name;
         }
         private async Task ExecuteJavaScriptAsync(string script)
         {
@@ -148,7 +148,7 @@ namespace eft_where_am_i_chasrp
                     "    console.log('Button not found');\n" +
                     "}";
                 await ExecuteJavaScriptAsync(jsCodeClick);
-                await Task.Delay(500);  // Wait for the button click action to complete
+                await Task.Delay(500);
             }
 
             string jsInputCode =
@@ -193,7 +193,7 @@ namespace eft_where_am_i_chasrp
             {
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
                 webView2.Source = new Uri(siteUrl);
-                whereAmIClick = false; // Reset the click state when map changes
+                whereAmIClick = false;
             }
         }
 
@@ -210,11 +210,11 @@ namespace eft_where_am_i_chasrp
                 {
                     watcher = new FileSystemWatcher();
                     watcher.Path = screenshotPath;
-                    watcher.Filter = "*.png"; // 감시할 파일 유형 설정
+                    watcher.Filter = "*.png";
                     watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
 
                     watcher.Created += OnScreenshotCreated;
-                    watcher.EnableRaisingEvents = true; // 감시 시작
+                    watcher.EnableRaisingEvents = true;
                 }
             }
             else

@@ -125,7 +125,7 @@
             this.panel1.Controls.Add(this.cmbLanguageSelect);
             this.panel1.Controls.Add(this.lblHowToUse);
             this.panel1.Controls.Add(this.lblBugReport);
-            this.panel1.Location = new System.Drawing.Point(913, 0);
+            this.panel1.Location = new System.Drawing.Point(1113, 0);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(259, 129);
             this.panel1.TabIndex = 6;
@@ -208,7 +208,7 @@
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
             this.webView2.Location = new System.Drawing.Point(12, 135);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1160, 814);
+            this.webView2.Size = new System.Drawing.Size(1360, 1014);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 11;
             this.webView2.ZoomFactor = 1D;
@@ -217,7 +217,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1184, 961);
+            this.ClientSize = new System.Drawing.Size(1384, 1161);
             this.Controls.Add(this.webView2);
             this.Controls.Add(this.btnForceRun);
             this.Controls.Add(this.btnFullScreen);
