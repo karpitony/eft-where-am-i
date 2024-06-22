@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.lblSelectTheMap = new System.Windows.Forms.Label();
             this.cmbMapSelect = new System.Windows.Forms.ComboBox();
@@ -36,23 +37,27 @@
             this.chkAutoScreenshot = new System.Windows.Forms.CheckBox();
             this.lblBugReport = new System.Windows.Forms.LinkLabel();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btnLaguageApply = new System.Windows.Forms.Button();
-            this.cmbLanguageSelect = new System.Windows.Forms.ComboBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnHideShowPannel = new System.Windows.Forms.Button();
             this.btnFullScreen = new System.Windows.Forms.Button();
             this.btnForceRun = new System.Windows.Forms.Button();
             this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            this.panelSideMenu = new System.Windows.Forms.Panel();
+            this.btnWhereAmI = new System.Windows.Forms.Button();
+            this.btnSetting = new System.Windows.Forms.Button();
+            this.checkBoxHide = new System.Windows.Forms.CheckBox();
+            this.timerSliding = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
+            this.panelSideMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblSelectTheMap
             // 
             this.lblSelectTheMap.AutoSize = true;
             this.lblSelectTheMap.Font = new System.Drawing.Font("굴림", 18F);
-            this.lblSelectTheMap.Location = new System.Drawing.Point(89, 11);
+            this.lblSelectTheMap.Location = new System.Drawing.Point(101, 13);
             this.lblSelectTheMap.Name = "lblSelectTheMap";
             this.lblSelectTheMap.Size = new System.Drawing.Size(174, 24);
             this.lblSelectTheMap.TabIndex = 0;
@@ -63,15 +68,15 @@
             this.cmbMapSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMapSelect.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
             this.cmbMapSelect.FormattingEnabled = true;
-            this.cmbMapSelect.Location = new System.Drawing.Point(3, 50);
+            this.cmbMapSelect.Location = new System.Drawing.Point(3, 52);
             this.cmbMapSelect.Name = "cmbMapSelect";
-            this.cmbMapSelect.Size = new System.Drawing.Size(214, 29);
+            this.cmbMapSelect.Size = new System.Drawing.Size(230, 29);
             this.cmbMapSelect.TabIndex = 1;
             // 
             // btnMapApply
             // 
             this.btnMapApply.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnMapApply.Location = new System.Drawing.Point(223, 47);
+            this.btnMapApply.Location = new System.Drawing.Point(239, 50);
             this.btnMapApply.Name = "btnMapApply";
             this.btnMapApply.Size = new System.Drawing.Size(129, 35);
             this.btnMapApply.TabIndex = 2;
@@ -83,7 +88,7 @@
             // 
             this.lblHowToUse.AutoSize = true;
             this.lblHowToUse.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.lblHowToUse.Location = new System.Drawing.Point(61, 59);
+            this.lblHowToUse.Location = new System.Drawing.Point(72, 15);
             this.lblHowToUse.Name = "lblHowToUse";
             this.lblHowToUse.Size = new System.Drawing.Size(129, 22);
             this.lblHowToUse.TabIndex = 3;
@@ -96,7 +101,7 @@
             // 
             this.chkAutoScreenshot.AutoSize = true;
             this.chkAutoScreenshot.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.chkAutoScreenshot.Location = new System.Drawing.Point(24, 94);
+            this.chkAutoScreenshot.Location = new System.Drawing.Point(799, 14);
             this.chkAutoScreenshot.Name = "chkAutoScreenshot";
             this.chkAutoScreenshot.Size = new System.Drawing.Size(301, 26);
             this.chkAutoScreenshot.TabIndex = 4;
@@ -108,7 +113,7 @@
             // 
             this.lblBugReport.AutoSize = true;
             this.lblBugReport.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.lblBugReport.Location = new System.Drawing.Point(64, 95);
+            this.lblBugReport.Location = new System.Drawing.Point(83, 52);
             this.lblBugReport.Name = "lblBugReport";
             this.lblBugReport.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.lblBugReport.Size = new System.Drawing.Size(122, 22);
@@ -121,52 +126,28 @@
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Controls.Add(this.btnLaguageApply);
-            this.panel1.Controls.Add(this.cmbLanguageSelect);
             this.panel1.Controls.Add(this.lblHowToUse);
             this.panel1.Controls.Add(this.lblBugReport);
-            this.panel1.Location = new System.Drawing.Point(1113, 0);
+            this.panel1.Location = new System.Drawing.Point(1126, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(259, 129);
+            this.panel1.Size = new System.Drawing.Size(259, 89);
             this.panel1.TabIndex = 6;
-            // 
-            // btnLaguageApply
-            // 
-            this.btnLaguageApply.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnLaguageApply.Location = new System.Drawing.Point(158, 16);
-            this.btnLaguageApply.Name = "btnLaguageApply";
-            this.btnLaguageApply.Size = new System.Drawing.Size(101, 29);
-            this.btnLaguageApply.TabIndex = 7;
-            this.btnLaguageApply.Text = "Apply";
-            this.btnLaguageApply.UseVisualStyleBackColor = true;
-            this.btnLaguageApply.Click += new System.EventHandler(this.btnLaguageApply_Click);
-            // 
-            // cmbLanguageSelect
-            // 
-            this.cmbLanguageSelect.AllowDrop = true;
-            this.cmbLanguageSelect.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.cmbLanguageSelect.FormattingEnabled = true;
-            this.cmbLanguageSelect.Location = new System.Drawing.Point(3, 16);
-            this.cmbLanguageSelect.Name = "cmbLanguageSelect";
-            this.cmbLanguageSelect.Size = new System.Drawing.Size(149, 29);
-            this.cmbLanguageSelect.TabIndex = 6;
             // 
             // panel2
             // 
             this.panel2.Controls.Add(this.lblSelectTheMap);
             this.panel2.Controls.Add(this.btnMapApply);
-            this.panel2.Controls.Add(this.chkAutoScreenshot);
             this.panel2.Controls.Add(this.cmbMapSelect);
-            this.panel2.Location = new System.Drawing.Point(12, 0);
+            this.panel2.Location = new System.Drawing.Point(86, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(355, 129);
+            this.panel2.Size = new System.Drawing.Size(384, 89);
             this.panel2.TabIndex = 7;
             // 
             // btnHideShowPannel
             // 
             this.btnHideShowPannel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnHideShowPannel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnHideShowPannel.Location = new System.Drawing.Point(373, 3);
+            this.btnHideShowPannel.Location = new System.Drawing.Point(527, 5);
             this.btnHideShowPannel.Name = "btnHideShowPannel";
             this.btnHideShowPannel.Size = new System.Drawing.Size(223, 42);
             this.btnHideShowPannel.TabIndex = 8;
@@ -178,7 +159,7 @@
             // 
             this.btnFullScreen.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnFullScreen.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnFullScreen.Location = new System.Drawing.Point(373, 45);
+            this.btnFullScreen.Location = new System.Drawing.Point(527, 53);
             this.btnFullScreen.Name = "btnFullScreen";
             this.btnFullScreen.Size = new System.Drawing.Size(223, 42);
             this.btnFullScreen.TabIndex = 9;
@@ -190,7 +171,7 @@
             // 
             this.btnForceRun.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnForceRun.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnForceRun.Location = new System.Drawing.Point(373, 87);
+            this.btnForceRun.Location = new System.Drawing.Point(834, 50);
             this.btnForceRun.Name = "btnForceRun";
             this.btnForceRun.Size = new System.Drawing.Size(223, 42);
             this.btnForceRun.TabIndex = 10;
@@ -206,20 +187,92 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Location = new System.Drawing.Point(12, 135);
+            this.webView2.Location = new System.Drawing.Point(86, 94);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1360, 1014);
+            this.webView2.Size = new System.Drawing.Size(1304, 966);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 11;
             this.webView2.ZoomFactor = 1D;
+            // 
+            // panelSideMenu
+            // 
+            this.panelSideMenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.panelSideMenu.Controls.Add(this.btnWhereAmI);
+            this.panelSideMenu.Controls.Add(this.btnSetting);
+            this.panelSideMenu.Controls.Add(this.checkBoxHide);
+            this.panelSideMenu.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panelSideMenu.Location = new System.Drawing.Point(0, 0);
+            this.panelSideMenu.Name = "panelSideMenu";
+            this.panelSideMenu.Size = new System.Drawing.Size(75, 1061);
+            this.panelSideMenu.TabIndex = 12;
+            // 
+            // btnWhereAmI
+            // 
+            this.btnWhereAmI.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnWhereAmI.FlatAppearance.BorderSize = 0;
+            this.btnWhereAmI.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnWhereAmI.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
+            this.btnWhereAmI.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnWhereAmI.Font = new System.Drawing.Font("굴림", 15F, System.Drawing.FontStyle.Bold);
+            this.btnWhereAmI.ForeColor = System.Drawing.Color.White;
+            this.btnWhereAmI.Image = ((System.Drawing.Image)(resources.GetObject("btnWhereAmI.Image")));
+            this.btnWhereAmI.Location = new System.Drawing.Point(0, 75);
+            this.btnWhereAmI.Name = "btnWhereAmI";
+            this.btnWhereAmI.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btnWhereAmI.Size = new System.Drawing.Size(75, 75);
+            this.btnWhereAmI.TabIndex = 2;
+            this.btnWhereAmI.UseVisualStyleBackColor = true;
+            this.btnWhereAmI.Click += new System.EventHandler(this.btnWhereAmI_Click);
+            // 
+            // btnSetting
+            // 
+            this.btnSetting.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnSetting.FlatAppearance.BorderSize = 0;
+            this.btnSetting.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnSetting.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
+            this.btnSetting.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSetting.Font = new System.Drawing.Font("굴림", 15F, System.Drawing.FontStyle.Bold);
+            this.btnSetting.ForeColor = System.Drawing.Color.White;
+            this.btnSetting.Image = ((System.Drawing.Image)(resources.GetObject("btnSetting.Image")));
+            this.btnSetting.Location = new System.Drawing.Point(0, 0);
+            this.btnSetting.Name = "btnSetting";
+            this.btnSetting.Size = new System.Drawing.Size(75, 75);
+            this.btnSetting.TabIndex = 1;
+            this.btnSetting.UseVisualStyleBackColor = true;
+            this.btnSetting.Click += new System.EventHandler(this.btnSetting_Click);
+            // 
+            // checkBoxHide
+            // 
+            this.checkBoxHide.Appearance = System.Windows.Forms.Appearance.Button;
+            this.checkBoxHide.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.checkBoxHide.FlatAppearance.BorderSize = 0;
+            this.checkBoxHide.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.checkBoxHide.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
+            this.checkBoxHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkBoxHide.Font = new System.Drawing.Font("굴림", 15F, System.Drawing.FontStyle.Bold);
+            this.checkBoxHide.ForeColor = System.Drawing.Color.White;
+            this.checkBoxHide.Location = new System.Drawing.Point(0, 986);
+            this.checkBoxHide.Name = "checkBoxHide";
+            this.checkBoxHide.Size = new System.Drawing.Size(75, 75);
+            this.checkBoxHide.TabIndex = 0;
+            this.checkBoxHide.Text = ">";
+            this.checkBoxHide.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.checkBoxHide.UseVisualStyleBackColor = true;
+            // 
+            // timerSliding
+            // 
+            this.timerSliding.Interval = 10;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1384, 1161);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(1384, 1061);
+            this.Controls.Add(this.panelSideMenu);
             this.Controls.Add(this.webView2);
             this.Controls.Add(this.btnForceRun);
+            this.Controls.Add(this.chkAutoScreenshot);
             this.Controls.Add(this.btnFullScreen);
             this.Controls.Add(this.btnHideShowPannel);
             this.Controls.Add(this.panel2);
@@ -233,7 +286,9 @@
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
+            this.panelSideMenu.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -250,9 +305,12 @@
         private System.Windows.Forms.Button btnHideShowPannel;
         private System.Windows.Forms.Button btnFullScreen;
         private System.Windows.Forms.Button btnForceRun;
-        private System.Windows.Forms.Button btnLaguageApply;
-        private System.Windows.Forms.ComboBox cmbLanguageSelect;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
+        private System.Windows.Forms.Panel panelSideMenu;
+        private System.Windows.Forms.CheckBox checkBoxHide;
+        private System.Windows.Forms.Button btnSetting;
+        private System.Windows.Forms.Button btnWhereAmI;
+        private System.Windows.Forms.Timer timerSliding;
     }
 }
 
