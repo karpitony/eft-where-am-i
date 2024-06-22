@@ -27,9 +27,11 @@ namespace eft_where_am_i_chasrp
         public Form1()
         {
             InitializeComponent();
-            this.BackColor = ColorTranslator.FromHtml("#0F0F0F");
             LoadSettings();
         }
+
+        
+
 
         //슬라이딩 메뉴의 최대, 최소 폭 크기
         const int MAX_SLIDING_WIDTH = 200;

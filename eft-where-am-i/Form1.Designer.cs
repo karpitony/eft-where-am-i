@@ -36,8 +36,6 @@
             this.lblHowToUse = new System.Windows.Forms.LinkLabel();
             this.chkAutoScreenshot = new System.Windows.Forms.CheckBox();
             this.lblBugReport = new System.Windows.Forms.LinkLabel();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
             this.btnHideShowPannel = new System.Windows.Forms.Button();
             this.btnFullScreen = new System.Windows.Forms.Button();
             this.btnForceRun = new System.Windows.Forms.Button();
@@ -47,17 +45,23 @@
             this.btnSetting = new System.Windows.Forms.Button();
             this.checkBoxHide = new System.Windows.Forms.CheckBox();
             this.timerSliding = new System.Windows.Forms.Timer(this.components);
-            this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
             this.panelSideMenu.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblSelectTheMap
             // 
             this.lblSelectTheMap.AutoSize = true;
             this.lblSelectTheMap.Font = new System.Drawing.Font("굴림", 18F);
-            this.lblSelectTheMap.Location = new System.Drawing.Point(101, 13);
+            this.lblSelectTheMap.Location = new System.Drawing.Point(91, 18);
             this.lblSelectTheMap.Name = "lblSelectTheMap";
             this.lblSelectTheMap.Size = new System.Drawing.Size(174, 24);
             this.lblSelectTheMap.TabIndex = 0;
@@ -68,7 +72,7 @@
             this.cmbMapSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMapSelect.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
             this.cmbMapSelect.FormattingEnabled = true;
-            this.cmbMapSelect.Location = new System.Drawing.Point(3, 52);
+            this.cmbMapSelect.Location = new System.Drawing.Point(6, 64);
             this.cmbMapSelect.Name = "cmbMapSelect";
             this.cmbMapSelect.Size = new System.Drawing.Size(230, 29);
             this.cmbMapSelect.TabIndex = 1;
@@ -76,7 +80,7 @@
             // btnMapApply
             // 
             this.btnMapApply.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnMapApply.Location = new System.Drawing.Point(239, 50);
+            this.btnMapApply.Location = new System.Drawing.Point(243, 61);
             this.btnMapApply.Name = "btnMapApply";
             this.btnMapApply.Size = new System.Drawing.Size(129, 35);
             this.btnMapApply.TabIndex = 2;
@@ -88,7 +92,7 @@
             // 
             this.lblHowToUse.AutoSize = true;
             this.lblHowToUse.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.lblHowToUse.Location = new System.Drawing.Point(72, 15);
+            this.lblHowToUse.Location = new System.Drawing.Point(73, 19);
             this.lblHowToUse.Name = "lblHowToUse";
             this.lblHowToUse.Size = new System.Drawing.Size(129, 22);
             this.lblHowToUse.TabIndex = 3;
@@ -101,7 +105,7 @@
             // 
             this.chkAutoScreenshot.AutoSize = true;
             this.chkAutoScreenshot.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.chkAutoScreenshot.Location = new System.Drawing.Point(799, 14);
+            this.chkAutoScreenshot.Location = new System.Drawing.Point(17, 17);
             this.chkAutoScreenshot.Name = "chkAutoScreenshot";
             this.chkAutoScreenshot.Size = new System.Drawing.Size(301, 26);
             this.chkAutoScreenshot.TabIndex = 4;
@@ -113,7 +117,7 @@
             // 
             this.lblBugReport.AutoSize = true;
             this.lblBugReport.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.lblBugReport.Location = new System.Drawing.Point(83, 52);
+            this.lblBugReport.Location = new System.Drawing.Point(77, 67);
             this.lblBugReport.Name = "lblBugReport";
             this.lblBugReport.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.lblBugReport.Size = new System.Drawing.Size(122, 22);
@@ -123,31 +127,11 @@
             this.lblBugReport.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblBugReport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblBugReport_LinkClicked);
             // 
-            // panel1
-            // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Controls.Add(this.lblHowToUse);
-            this.panel1.Controls.Add(this.lblBugReport);
-            this.panel1.Location = new System.Drawing.Point(1126, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(259, 89);
-            this.panel1.TabIndex = 6;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.lblSelectTheMap);
-            this.panel2.Controls.Add(this.btnMapApply);
-            this.panel2.Controls.Add(this.cmbMapSelect);
-            this.panel2.Location = new System.Drawing.Point(86, 3);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(384, 89);
-            this.panel2.TabIndex = 7;
-            // 
             // btnHideShowPannel
             // 
             this.btnHideShowPannel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnHideShowPannel.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnHideShowPannel.Location = new System.Drawing.Point(527, 5);
+            this.btnHideShowPannel.Location = new System.Drawing.Point(41, 9);
             this.btnHideShowPannel.Name = "btnHideShowPannel";
             this.btnHideShowPannel.Size = new System.Drawing.Size(223, 42);
             this.btnHideShowPannel.TabIndex = 8;
@@ -159,7 +143,7 @@
             // 
             this.btnFullScreen.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnFullScreen.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnFullScreen.Location = new System.Drawing.Point(527, 53);
+            this.btnFullScreen.Location = new System.Drawing.Point(41, 57);
             this.btnFullScreen.Name = "btnFullScreen";
             this.btnFullScreen.Size = new System.Drawing.Size(223, 42);
             this.btnFullScreen.TabIndex = 9;
@@ -171,7 +155,7 @@
             // 
             this.btnForceRun.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnForceRun.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.btnForceRun.Location = new System.Drawing.Point(834, 50);
+            this.btnForceRun.Location = new System.Drawing.Point(48, 57);
             this.btnForceRun.Name = "btnForceRun";
             this.btnForceRun.Size = new System.Drawing.Size(223, 42);
             this.btnForceRun.TabIndex = 10;
@@ -187,9 +171,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Location = new System.Drawing.Point(86, 94);
+            this.webView2.Location = new System.Drawing.Point(84, 110);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1304, 966);
+            this.webView2.Size = new System.Drawing.Size(1288, 950);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 11;
             this.webView2.ZoomFactor = 1D;
@@ -263,32 +247,73 @@
             // 
             this.timerSliding.Interval = 10;
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.lblBugReport);
+            this.groupBox4.Controls.Add(this.lblHowToUse);
+            this.groupBox4.Location = new System.Drawing.Point(1106, 0);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(266, 104);
+            this.groupBox4.TabIndex = 13;
+            this.groupBox4.TabStop = false;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.lblSelectTheMap);
+            this.groupBox1.Controls.Add(this.btnMapApply);
+            this.groupBox1.Controls.Add(this.cmbMapSelect);
+            this.groupBox1.Location = new System.Drawing.Point(84, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(378, 104);
+            this.groupBox1.TabIndex = 14;
+            this.groupBox1.TabStop = false;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.btnHideShowPannel);
+            this.groupBox2.Controls.Add(this.btnFullScreen);
+            this.groupBox2.Location = new System.Drawing.Point(468, 0);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(302, 104);
+            this.groupBox2.TabIndex = 15;
+            this.groupBox2.TabStop = false;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.chkAutoScreenshot);
+            this.groupBox3.Controls.Add(this.btnForceRun);
+            this.groupBox3.Location = new System.Drawing.Point(776, 0);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(324, 104);
+            this.groupBox3.TabIndex = 16;
+            this.groupBox3.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(1384, 1061);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.panelSideMenu);
             this.Controls.Add(this.webView2);
-            this.Controls.Add(this.btnForceRun);
-            this.Controls.Add(this.chkAutoScreenshot);
-            this.Controls.Add(this.btnFullScreen);
-            this.Controls.Add(this.btnHideShowPannel);
-            this.Controls.Add(this.panel2);
-            this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "EFT Where am I? (v2.0)";
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
             this.panelSideMenu.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -300,8 +325,6 @@
         private System.Windows.Forms.LinkLabel lblHowToUse;
         private System.Windows.Forms.CheckBox chkAutoScreenshot;
         private System.Windows.Forms.LinkLabel lblBugReport;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button btnHideShowPannel;
         private System.Windows.Forms.Button btnFullScreen;
         private System.Windows.Forms.Button btnForceRun;
@@ -311,6 +334,10 @@
         private System.Windows.Forms.Button btnSetting;
         private System.Windows.Forms.Button btnWhereAmI;
         private System.Windows.Forms.Timer timerSliding;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox groupBox3;
     }
 }
 
