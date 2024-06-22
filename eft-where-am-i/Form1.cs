@@ -18,23 +18,27 @@ namespace eft_where_am_i_chasrp
         private string settingsFile = "settings.json";
         private Settings appSettings;
         private string screenshotPath;
+        private FileSystemWatcher watcher;
 
         public Form1()
         {
             InitializeComponent();
             LoadSettings();
         }
+
         private void Form1_Load(object sender, EventArgs e)
         {
             InitializeMapComboBox();
             siteUrl = "https://tarkov-market.com/maps/ground-zero";
             webView2.Source = new Uri(siteUrl);
         }
+
         private void InitializeMapComboBox()
         {
             cmbMapSelect.Items.AddRange(mapList);
             cmbMapSelect.SelectedItem = "ground-zero"; // 기본 입력값 설정
         }
+
         private void LoadSettings()
         {
             if (File.Exists(settingsFile))
@@ -96,7 +100,8 @@ namespace eft_where_am_i_chasrp
             string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
             File.WriteAllText(settingsFile, json);
         }
-        private string GetLatestFiles()
+
+        private string GetLatestFile()
         {
             if (!Directory.Exists(screenshotPath))
             {
@@ -114,23 +119,20 @@ namespace eft_where_am_i_chasrp
             var latestFile = files.First();
             return latestFile.Name; // 가장 최근에 수정된 파일 이름 반환
         }
-
-        
-
-        // Settings class to match the JSON structure
-        public class Settings
+        private async Task ExecuteJavaScriptAsync(string script)
         {
-            public bool auto_screenshot_detection { get; set; }
-            public string language { get; set; }
-            public List<string> screenshot_paths_list { get; set; }
-            public string screenshot_path { get; set; }
+            try
+            {
+                await webView2.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"JavaScript 실행 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-
-
-
         private async Task CheckLocationAsync()
         {
-            string screenshot = GetLatestFiles();
+            string screenshot = GetLatestFile();
             if (screenshot == null)
                 return;
 
@@ -145,7 +147,7 @@ namespace eft_where_am_i_chasrp
                     "} else {\n" +
                     "    console.log('Button not found');\n" +
                     "}";
-                await webView2.CoreWebView2.ExecuteScriptAsync(jsCodeClick);
+                await ExecuteJavaScriptAsync(jsCodeClick);
                 await Task.Delay(500);  // Wait for the button click action to complete
             }
 
@@ -158,17 +160,18 @@ namespace eft_where_am_i_chasrp
                 "} else {\n" +
                 "    console.log('Input not found');\n" +
                 "}";
-            await webView2.CoreWebView2.ExecuteScriptAsync(jsInputCode);
-            ChangeMarker();
+            await ExecuteJavaScriptAsync(jsInputCode);
+            await ChangeMarkerAsync();
         }
 
-        private async void ChangeMarker()
+
+        private async Task ChangeMarkerAsync()
         {
             string[] styleList = {
-                "background: #ff0000",
-                "height: 20px",
-                "width: 20px"
-            };
+        "background: #ff0000",
+        "height: 20px",
+        "width: 20px"
+    };
 
             foreach (var style in styleList)
             {
@@ -179,7 +182,7 @@ namespace eft_where_am_i_chasrp
                     "} else {\n" +
                     "    console.log('Marker not found');\n" +
                     "}";
-                await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
+                await ExecuteJavaScriptAsync(jsCode);
             }
         }
 
@@ -196,7 +199,43 @@ namespace eft_where_am_i_chasrp
 
         private void chkAutoScreenshot_CheckedChanged(object sender, EventArgs e)
         {
-            // Implement auto screenshot detection logic here
+            if (chkAutoScreenshot.Checked)
+            {
+                if (string.IsNullOrEmpty(screenshotPath))
+                {
+                    FindAndSetScreenshotPath();
+                }
+
+                if (!string.IsNullOrEmpty(screenshotPath))
+                {
+                    watcher = new FileSystemWatcher();
+                    watcher.Path = screenshotPath;
+                    watcher.Filter = "*.png"; // 감시할 파일 유형 설정
+                    watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
+
+                    watcher.Created += OnScreenshotCreated;
+                    watcher.EnableRaisingEvents = true; // 감시 시작
+                }
+            }
+            else
+            {
+                if (watcher != null)
+                {
+                    watcher.EnableRaisingEvents = false;
+                    watcher.Created -= OnScreenshotCreated;
+                    watcher.Dispose();
+                    watcher = null;
+                }
+            }
+        }
+
+        private async void OnScreenshotCreated(object sender, FileSystemEventArgs e)
+        {
+            // 파일 생성 후 사용 가능해질 때까지 잠시 대기
+            await Task.Delay(500);
+
+            // UI 스레드에서 CheckLocationAsync 호출
+            this.Invoke(new MethodInvoker(async () => await CheckLocationAsync()));
         }
 
         private async void btnHideShowPannel_Click(object sender, EventArgs e)
@@ -220,8 +259,8 @@ namespace eft_where_am_i_chasrp
                 "    button.click();\n" +
                 "    console.log('Fullscreen button clicked');\n" +
                 "} else {\n" +
-                "    console.log('Fullscreen button not found');\n" +
-                "}";
+                    "    console.log('Fullscreen button not found');\n" +
+                    "}";
             await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
         }
 
@@ -250,6 +289,13 @@ namespace eft_where_am_i_chasrp
             System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/issues");
         }
 
-
+        // Settings class to match the JSON structure
+        public class Settings
+        {
+            public bool auto_screenshot_detection { get; set; }
+            public string language { get; set; }
+            public List<string> screenshot_paths_list { get; set; }
+            public string screenshot_path { get; set; }
+        }
     }
 }

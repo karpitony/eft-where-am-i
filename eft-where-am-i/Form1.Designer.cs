@@ -33,7 +33,7 @@
             this.cmbMapSelect = new System.Windows.Forms.ComboBox();
             this.btnMapApply = new System.Windows.Forms.Button();
             this.lblHowToUse = new System.Windows.Forms.LinkLabel();
-            this.cktAutoScreenshot = new System.Windows.Forms.CheckBox();
+            this.chkAutoScreenshot = new System.Windows.Forms.CheckBox();
             this.lblBugReport = new System.Windows.Forms.LinkLabel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnLaguageApply = new System.Windows.Forms.Button();
@@ -92,17 +92,17 @@
             this.lblHowToUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblHowToUse.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblHowtouse_LinkClicked);
             // 
-            // cktAutoScreenshot
+            // chkAutoScreenshot
             // 
-            this.cktAutoScreenshot.AutoSize = true;
-            this.cktAutoScreenshot.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
-            this.cktAutoScreenshot.Location = new System.Drawing.Point(24, 94);
-            this.cktAutoScreenshot.Name = "cktAutoScreenshot";
-            this.cktAutoScreenshot.Size = new System.Drawing.Size(301, 26);
-            this.cktAutoScreenshot.TabIndex = 4;
-            this.cktAutoScreenshot.Text = "Auto Screenshot Detection";
-            this.cktAutoScreenshot.UseVisualStyleBackColor = true;
-            this.cktAutoScreenshot.CheckedChanged += new System.EventHandler(this.chkAutoScreenshot_CheckedChanged);
+            this.chkAutoScreenshot.AutoSize = true;
+            this.chkAutoScreenshot.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
+            this.chkAutoScreenshot.Location = new System.Drawing.Point(24, 94);
+            this.chkAutoScreenshot.Name = "chkAutoScreenshot";
+            this.chkAutoScreenshot.Size = new System.Drawing.Size(301, 26);
+            this.chkAutoScreenshot.TabIndex = 4;
+            this.chkAutoScreenshot.Text = "Auto Screenshot Detection";
+            this.chkAutoScreenshot.UseVisualStyleBackColor = true;
+            this.chkAutoScreenshot.CheckedChanged += new System.EventHandler(this.chkAutoScreenshot_CheckedChanged);
             // 
             // lblBugReport
             // 
@@ -155,7 +155,7 @@
             // 
             this.panel2.Controls.Add(this.lblSelectTheMap);
             this.panel2.Controls.Add(this.btnMapApply);
-            this.panel2.Controls.Add(this.cktAutoScreenshot);
+            this.panel2.Controls.Add(this.chkAutoScreenshot);
             this.panel2.Controls.Add(this.cmbMapSelect);
             this.panel2.Location = new System.Drawing.Point(12, 0);
             this.panel2.Name = "panel2";
@@ -243,7 +243,7 @@
         private System.Windows.Forms.ComboBox cmbMapSelect;
         private System.Windows.Forms.Button btnMapApply;
         private System.Windows.Forms.LinkLabel lblHowToUse;
-        private System.Windows.Forms.CheckBox cktAutoScreenshot;
+        private System.Windows.Forms.CheckBox chkAutoScreenshot;
         private System.Windows.Forms.LinkLabel lblBugReport;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
