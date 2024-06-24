@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 
 namespace eft_where_am_i
 {
-    public partial class Settings : UserControl
+    public partial class SettingPage : UserControl
     {
         private string settingsFile = @"assets\settings.json";
         private AppSettings appSettings = new AppSettings(); // Settings 객체 초기화
 
-        public Settings()
+        public SettingPage()
         {
             InitializeComponent();
             LoadSettings();
@@ -52,6 +52,7 @@ namespace eft_where_am_i
                 MessageBox.Show($"설정 파일을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private void btnLanguageSelect_Click(object sender, EventArgs e)
         {
 
@@ -67,7 +68,7 @@ namespace eft_where_am_i
                     string selectedPath = folderBrowserDialog.SelectedPath;
                     txtPath.Text = selectedPath;
                     appSettings.screenshot_path = selectedPath;
-                    SaveSettings();
+                    SaveSettings(); // 변경된 경로만 저장
                 }
             }
         }
@@ -82,8 +83,9 @@ namespace eft_where_am_i
                 if (Directory.Exists(fullPath))
                 {
                     appSettings.screenshot_path = fullPath;
-                    SaveSettings();
+                    SaveSettings(); // 변경된 경로만 저장
                     txtPath.Text = appSettings.screenshot_path;
+                    break; // 첫 번째 일치하는 경로만 사용
                 }
             }
         }
@@ -106,10 +108,11 @@ namespace eft_where_am_i
 
     public class AppSettings
     {
+        public bool isFirstRun { get; set; }
         public bool auto_screenshot_detection { get; set; }
         public string language { get; set; }
-        public List<string> screenshot_paths_list { get; set; }
         public string screenshot_path { get; set; }
+        public List<string> screenshot_paths_list { get; set; }
         public string latest_map { get; set; }
     }
 }
