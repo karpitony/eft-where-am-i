@@ -1,37 +1,24 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Microsoft.Web.WebView2.Core;
-using System.Windows.Forms;
-using System.Threading.Tasks;
-using System.Data;
 using System.Drawing;
+using System.Windows.Forms;
 using eft_where_am_i;
-
 
 namespace eft_where_am_i_chasrp
 {
     public partial class Form1 : Form
     {
-        
+        private string currentScreen = "WhereAmI";
+
         public Form1()
         {
             InitializeComponent();
             LoadUserControl();
         }
+
         private void LoadUserControl()
         {
-            // WhereAmI 컨트롤의 인스턴스 생성
-            WhereAmI whereAmIControl = new WhereAmI();
-
-            // 컨트롤의 크기를 패널에 맞게 조정
-            whereAmIControl.Dock = DockStyle.Fill;
-
-            // 패널에 사용자 정의 컨트롤 추가
-            panel1.Controls.Add(whereAmIControl);
+            // 처음 시작할 때 WhereAmI 컨트롤을 로드
+            SwitchUserControl(new WhereAmI());
         }
 
         // 슬라이딩 메뉴의 최대, 최소 폭 크기
@@ -90,22 +77,36 @@ namespace eft_where_am_i_chasrp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
             panelSideMenu.Width = _posSliding; // 초기 패널 크기 설정
             checkBoxHide.Checked = false; // 기본값으로 접혀있는 상태
         }
 
-
         private void btnSetting_Click(object sender, EventArgs e)
         {
-        
+            if (currentScreen != "Settings")
+            {
+                SwitchUserControl(new Settings());
+                currentScreen = "Settings";
+            }
         }
 
         private void btnWhereAmI_Click(object sender, EventArgs e)
         {
-
+            if (currentScreen != "WhereAmI")
+            {
+                SwitchUserControl(new WhereAmI());
+                currentScreen = "WhereAmI";
+            }
         }
 
-        
+        private void SwitchUserControl(UserControl newControl)
+        {
+            // 기존에 로드된 컨트롤 제거
+            panel1.Controls.Clear();
+
+            // 새로운 컨트롤 추가
+            newControl.Dock = DockStyle.Fill;
+            panel1.Controls.Add(newControl);
+        }
     }
 }
