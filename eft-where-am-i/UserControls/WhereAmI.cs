@@ -273,14 +273,22 @@ namespace eft_where_am_i
                     MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Environment.Exit(0);
                 }
-
-                if (string.IsNullOrEmpty(appSettings.screenshot_path) || !Directory.Exists(appSettings.screenshot_path))
+                
+                if (appSettings.isFirstRun == true)
                 {
-                    MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CheckAndSetScreenshotPath();
+                    screenshotPath = appSettings.screenshot_path;
                 }
                 else
                 {
-                    screenshotPath = appSettings.screenshot_path;
+                    if (string.IsNullOrEmpty(appSettings.screenshot_path) || !Directory.Exists(appSettings.screenshot_path))
+                    {
+                        MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        screenshotPath = appSettings.screenshot_path;
+                    }
                 }
             }
             catch (Exception ex)
@@ -293,6 +301,35 @@ namespace eft_where_am_i
         {
             string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
             File.WriteAllText(settingsFile, json);
+        }
+
+        // Form1.cs에 넣고 싶었는데 예상 못한 오류가 발생하여 여기에 넣음
+        private void CheckAndSetScreenshotPath()
+        {
+            if (appSettings.isFirstRun)
+            {
+                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                bool pathFound = false;
+
+                foreach (string relativePath in appSettings.screenshot_paths_list)
+                {
+                    string fullPath = Path.Combine(homeDirectory, relativePath);
+                    if (Directory.Exists(fullPath))
+                    {
+                        appSettings.screenshot_path = fullPath;
+                        pathFound = true;
+                        break;
+                    }
+                }
+
+                if (!pathFound)
+                {
+                    MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                appSettings.isFirstRun = false;
+                SaveSettings();
+            }
         }
     }
 }
