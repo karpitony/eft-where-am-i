@@ -194,14 +194,16 @@
             this.lblHowToUse.TabStop = true;
             this.lblHowToUse.Text = "How to Use";
             this.lblHowToUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblHowToUse.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblHowtouse_LinkClicked);
+            this.lblHowToUse.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblHowToUse_LinkClicked);
             // 
             // webView2
             // 
             this.webView2.AllowExternalDrop = true;
+            this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.webView2.Location = new System.Drawing.Point(0, 107);
             this.webView2.Name = "webView2";
             this.webView2.Size = new System.Drawing.Size(1309, 954);

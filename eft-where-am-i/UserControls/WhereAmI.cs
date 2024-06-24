@@ -70,6 +70,9 @@ namespace eft_where_am_i
                             appSettings.latest_map = "ground-zero"; // 기본 맵 설정
                             SaveSettings(); // 기본값 저장
                         }
+
+                        // autoscreenshot 체크박스 초기화
+                        chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
                     }
                     else
                     {
@@ -226,6 +229,8 @@ namespace eft_where_am_i
 
         private void chkAutoScreenshot_CheckedChanged(object sender, EventArgs e)
         {
+            appSettings.auto_screenshot_detection = chkAutoScreenshot.Checked;
+            SaveSettings();
             if (chkAutoScreenshot.Checked)
             {
                 if (string.IsNullOrEmpty(screenshotPath))
@@ -296,7 +301,7 @@ namespace eft_where_am_i
             await CheckLocationAsync();
         }
 
-        private void lblHowtouse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void lblHowToUse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/blob/main/README.md");
         }
