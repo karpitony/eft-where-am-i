@@ -8,7 +8,6 @@ using Microsoft.Web.WebView2.Core;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Data;
-using System.Drawing;
 
 namespace eft_where_am_i
 {
@@ -18,56 +17,85 @@ namespace eft_where_am_i
         private string siteUrl;
         private bool whereAmIClick = false;
         private string settingsFile = @"assets\settings.json";
-        private Settings appSettings;
+        private Settings appSettings = new Settings(); // Settings 객체 초기화
         private string screenshotPath;
         private FileSystemWatcher watcher;
 
         public WhereAmI()
         {
             InitializeComponent();
-            InitializeMapComboBox();
             LoadSettings();
-            siteUrl = "https://tarkov-market.com/maps/ground-zero";
+            InitializeMapComboBox();
+            siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
             webView2.Source = new Uri(siteUrl);
         }
 
         private void InitializeMapComboBox()
         {
             cmbMapSelect.Items.AddRange(mapList);
-            cmbMapSelect.SelectedItem = "ground-zero"; // 기본 입력값 설정
+            cmbMapSelect.SelectedItem = appSettings.latest_map; // 기본 입력값 설정
         }
 
+        // Settings class to match the JSON structure
+        public class Settings
+        {
+            public bool auto_screenshot_detection { get; set; }
+            public string language { get; set; }
+            public List<string> screenshot_paths_list { get; set; }
+            public string screenshot_path { get; set; }
+            public string latest_map { get; set; }
+        }
         private void LoadSettings()
         {
-            if (File.Exists(settingsFile))
+            try
             {
-                string json = File.ReadAllText(settingsFile);
-                appSettings = JsonConvert.DeserializeObject<Settings>(json);
-            }
-            else
-            {
-                appSettings = new Settings
+                if (File.Exists(settingsFile))
                 {
-                    auto_screenshot_detection = false,
-                    language = "en",
-                    screenshot_paths_list = new List<string>
-                    {
-                        "Documents\\Escape from Tarkov\\Screenshots\\",
-                        "문서\\Escape from Tarkov\\Screenshots\\",
-                        "OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
-                        "OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
-                    },
-                    screenshot_path = ""
-                };
-            }
+                    string json = File.ReadAllText(settingsFile);
 
-            if (string.IsNullOrEmpty(appSettings.screenshot_path))
-            {
-                FindAndSetScreenshotPath();
+                    // JSON 문자열이 유효한지 검사
+                    if (!string.IsNullOrEmpty(json))
+                    {
+                        appSettings = JsonConvert.DeserializeObject<Settings>(json);
+
+                        // appSettings가 null인지 확인
+                        if (appSettings == null)
+                        {
+                            appSettings = new Settings(); // 기본 객체 생성
+                        }
+
+                        // 설정 파일에서 latest_map 값을 로드하여 초기화
+                        if (string.IsNullOrEmpty(appSettings.latest_map) || !mapList.Contains(appSettings.latest_map))
+                        {
+                            appSettings.latest_map = "ground-zero"; // 기본 맵 설정
+                            SaveSettings(); // 기본값 저장
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("settings.json 파일이 비어 있습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Environment.Exit(0);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(0);
+                }
+
+                if (string.IsNullOrEmpty(appSettings.screenshot_path))
+                {
+                    FindAndSetScreenshotPath();
+                }
+                else
+                {
+                    screenshotPath = appSettings.screenshot_path;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                screenshotPath = appSettings.screenshot_path;
+                MessageBox.Show($"설정 파일을 로드하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
 
@@ -83,14 +111,11 @@ namespace eft_where_am_i
                     screenshotPath = fullPath;
                     appSettings.screenshot_path = fullPath;
                     SaveSettings();
-                    break;
+                    return;
                 }
             }
 
-            if (string.IsNullOrEmpty(screenshotPath))
-            {
-                MessageBox.Show("Screenshot directory not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            MessageBox.Show("Screenshot directory not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void SaveSettings()
@@ -117,6 +142,7 @@ namespace eft_where_am_i
             var latestFile = files.First();
             return latestFile.Name;
         }
+
         private async Task ExecuteJavaScriptAsync(string script)
         {
             try
@@ -128,6 +154,7 @@ namespace eft_where_am_i
                 MessageBox.Show($"JavaScript 실행 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private async Task CheckLocationAsync()
         {
             string screenshot = GetLatestFile();
@@ -162,14 +189,13 @@ namespace eft_where_am_i
             await ChangeMarkerAsync();
         }
 
-
         private async Task ChangeMarkerAsync()
         {
             string[] styleList = {
-        "background: #ff0000",
-        "height: 20px",
-        "width: 20px"
-    };
+                "background: #ff0000",
+                "height: 20px",
+                "width: 20px"
+            };
 
             foreach (var style in styleList)
             {
@@ -189,6 +215,9 @@ namespace eft_where_am_i
             string selectedMap = cmbMapSelect.SelectedItem.ToString();
             if (selectedMap != null)
             {
+                appSettings.latest_map = selectedMap;
+                SaveSettings(); // latest_map 업데이트 후 설정 저장
+
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
                 webView2.Source = new Uri(siteUrl);
                 whereAmIClick = false;
@@ -257,8 +286,8 @@ namespace eft_where_am_i
                 "    button.click();\n" +
                 "    console.log('Fullscreen button clicked');\n" +
                 "} else {\n" +
-                    "    console.log('Fullscreen button not found');\n" +
-                    "}";
+                "    console.log('Fullscreen button not found');\n" +
+                "}";
             await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
         }
 
@@ -275,15 +304,6 @@ namespace eft_where_am_i
         private void lblBugReport_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/issues");
-        }
-
-        // Settings class to match the JSON structure
-        public class Settings
-        {
-            public bool auto_screenshot_detection { get; set; }
-            public string language { get; set; }
-            public List<string> screenshot_paths_list { get; set; }
-            public string screenshot_path { get; set; }
         }
     }
 }

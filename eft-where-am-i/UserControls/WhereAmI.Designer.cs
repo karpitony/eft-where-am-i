@@ -53,7 +53,7 @@
             // 
             this.groupBox3.Controls.Add(this.chkAutoScreenshot);
             this.groupBox3.Controls.Add(this.btnForceRun);
-            this.groupBox3.Location = new System.Drawing.Point(693, 2);
+            this.groupBox3.Location = new System.Drawing.Point(702, 2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(324, 104);
             this.groupBox3.TabIndex = 21;
@@ -87,7 +87,7 @@
             // 
             this.groupBox2.Controls.Add(this.btnHideShowPannel);
             this.groupBox2.Controls.Add(this.btnFullScreen);
-            this.groupBox2.Location = new System.Drawing.Point(385, 2);
+            this.groupBox2.Location = new System.Drawing.Point(391, 2);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(302, 104);
             this.groupBox2.TabIndex = 20;
@@ -122,7 +122,7 @@
             this.groupBox1.Controls.Add(this.lblSelectTheMap);
             this.groupBox1.Controls.Add(this.btnMapApply);
             this.groupBox1.Controls.Add(this.cmbMapSelect);
-            this.groupBox1.Location = new System.Drawing.Point(1, 2);
+            this.groupBox1.Location = new System.Drawing.Point(3, 2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(378, 104);
             this.groupBox1.TabIndex = 19;
@@ -163,7 +163,7 @@
             // 
             this.groupBox4.Controls.Add(this.lblBugReport);
             this.groupBox4.Controls.Add(this.lblHowToUse);
-            this.groupBox4.Location = new System.Drawing.Point(1023, 2);
+            this.groupBox4.Location = new System.Drawing.Point(1036, 2);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(266, 104);
             this.groupBox4.TabIndex = 18;
@@ -204,7 +204,7 @@
             this.webView2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.webView2.Location = new System.Drawing.Point(0, 107);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1291, 950);
+            this.webView2.Size = new System.Drawing.Size(1309, 954);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 17;
             this.webView2.ZoomFactor = 1D;
@@ -219,7 +219,7 @@
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.webView2);
             this.Name = "WhereAmI";
-            this.Size = new System.Drawing.Size(1291, 1057);
+            this.Size = new System.Drawing.Size(1309, 1061);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
