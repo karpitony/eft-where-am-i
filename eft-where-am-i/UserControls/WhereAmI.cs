@@ -39,10 +39,11 @@ namespace eft_where_am_i
         // Settings class to match the JSON structure
         public class Settings
         {
+            public bool isFirstRun { get; set; }
             public bool auto_screenshot_detection { get; set; }
             public string language { get; set; }
-            public List<string> screenshot_paths_list { get; set; }
             public string screenshot_path { get; set; }
+            public List<string> screenshot_paths_list { get; set; }
             public string latest_map { get; set; }
         }
         private void LoadSettings()
@@ -86,9 +87,9 @@ namespace eft_where_am_i
                     Environment.Exit(0);
                 }
 
-                if (string.IsNullOrEmpty(appSettings.screenshot_path))
+                if (string.IsNullOrEmpty(appSettings.screenshot_path) || !Directory.Exists(appSettings.screenshot_path))
                 {
-                    FindAndSetScreenshotPath();
+                    MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
@@ -102,24 +103,24 @@ namespace eft_where_am_i
             }
         }
 
-        private void FindAndSetScreenshotPath()
-        {
-            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        // private void FindAndSetScreenshotPath()
+        // {
+        //     string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            foreach (string relativePath in appSettings.screenshot_paths_list)
-            {
-                string fullPath = Path.Combine(homeDirectory, relativePath);
-                if (Directory.Exists(fullPath))
-                {
-                    screenshotPath = fullPath;
-                    appSettings.screenshot_path = fullPath;
-                    SaveSettings();
-                    return;
-                }
-            }
+        //     foreach (string relativePath in appSettings.screenshot_paths_list)
+        //     {
+        //         string fullPath = Path.Combine(homeDirectory, relativePath);
+        //         if (Directory.Exists(fullPath))
+        //         {
+        //             screenshotPath = fullPath;
+        //             appSettings.screenshot_path = fullPath;
+        //             SaveSettings();
+        //             return;
+        //         }
+        //     }
 
-            MessageBox.Show("Screenshot directory not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
+        //     MessageBox.Show("Screenshot directory not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        // }
 
         private void SaveSettings()
         {
@@ -229,16 +230,18 @@ namespace eft_where_am_i
 
         private void chkAutoScreenshot_CheckedChanged(object sender, EventArgs e)
         {
-            appSettings.auto_screenshot_detection = chkAutoScreenshot.Checked;
-            SaveSettings();
             if (chkAutoScreenshot.Checked)
             {
-                if (string.IsNullOrEmpty(screenshotPath))
+                // 경로가 올바르지 않은 경우 경고 메시지 표시 및 체크박스를 해제
+                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
-                    FindAndSetScreenshotPath();
+                    MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    chkAutoScreenshot.Checked = false;
+                    appSettings.auto_screenshot_detection = false;
+                    SaveSettings();
+                    return; // 경로가 잘못된 경우 이후 코드를 실행하지 않음
                 }
-
-                if (!string.IsNullOrEmpty(screenshotPath))
+                else
                 {
                     watcher = new FileSystemWatcher();
                     watcher.Path = screenshotPath;
@@ -259,7 +262,12 @@ namespace eft_where_am_i
                     watcher = null;
                 }
             }
+
+            // 체크 상태를 저장
+            appSettings.auto_screenshot_detection = chkAutoScreenshot.Checked;
+            SaveSettings();
         }
+
 
         private async void OnScreenshotCreated(object sender, FileSystemEventArgs e)
         {

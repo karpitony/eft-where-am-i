@@ -1,41 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using eft_where_am_i;
+using Newtonsoft.Json;
 
 namespace eft_where_am_i_chasrp
 {
     public partial class Form1 : Form
     {
         private string currentScreen = "WhereAmI";
+        private Settings appSettings = new Settings(); // Settings 객체 초기화
+        private string settingsFile = @"assets\settings.json";
 
         public Form1()
         {
             InitializeComponent();
+            LoadSettings();
             LoadUserControl();
+            CheckAndSetScreenshotPath();
         }
 
         private void LoadUserControl()
         {
-            // 처음 시작할 때 WhereAmI 컨트롤을 로드
             SwitchUserControl(new WhereAmI());
         }
 
-        // 슬라이딩 메뉴의 최대, 최소 폭 크기
         const int MAX_SLIDING_WIDTH = 200;
         const int MIN_SLIDING_WIDTH = 75;
-        // 슬라이딩 메뉴가 보이는/접히는 속도 조절
         const int STEP_SLIDING = 10;
         // 최초 슬라이딩 메뉴 크기
         int _posSliding = 75;
 
         private void checkBoxHide_CheckedChanged(object sender, EventArgs e)
         {
-            // 기본은 슬라이딩 접혀있는 상태
             if (checkBoxHide.Checked == true)
             {
                 //슬라이딩 메뉴가 보였을 때, 메뉴 버튼의 표시
-                btnSetting.Text = "Settings";
+                btnSetting.Text = "Setting Page";
                 btnSetting.Image = null;
                 btnWhereAmI.Text = "Where Am I";
                 btnWhereAmI.Image = null;
@@ -51,7 +54,6 @@ namespace eft_where_am_i_chasrp
                 checkBoxHide.Text = ">";
             }
 
-            // 타이머 시작
             timerSliding.Start();
         }
 
@@ -77,16 +79,16 @@ namespace eft_where_am_i_chasrp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            panelSideMenu.Width = _posSliding; // 초기 패널 크기 설정
+            panelSideMenu.Width = _posSliding;
             checkBoxHide.Checked = false; // 기본값으로 접혀있는 상태
         }
 
         private void btnSetting_Click(object sender, EventArgs e)
         {
-            if (currentScreen != "Settings")
+            if (currentScreen != "SettingPage")
             {
-                SwitchUserControl(new Settings());
-                currentScreen = "Settings";
+                SwitchUserControl(new SettingPage());
+                currentScreen = "SettingPage";
             }
         }
 
@@ -107,6 +109,96 @@ namespace eft_where_am_i_chasrp
             // 새로운 컨트롤 추가
             newControl.Dock = DockStyle.Fill;
             panel1.Controls.Add(newControl);
+        }
+
+        private void LoadSettings()
+        {
+            try
+            {
+                if (File.Exists(settingsFile))
+                {
+                    string json = File.ReadAllText(settingsFile);
+
+                    if (!string.IsNullOrEmpty(json))
+                    {
+                        appSettings = JsonConvert.DeserializeObject<Settings>(json);
+
+                        if (appSettings == null)
+                        {
+                            appSettings = new Settings();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("settings.json 파일이 비어 있습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"설정 파일을 로드하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SaveSettings()
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
+                File.WriteAllText(settingsFile, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"설정 파일을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CheckAndSetScreenshotPath()
+        {
+            if (appSettings.isFirstRun)
+            {
+                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                bool pathFound = false;
+
+                foreach (string relativePath in appSettings.screenshot_paths_list)
+                {
+                    string fullPath = Path.Combine(homeDirectory, relativePath);
+                    if (Directory.Exists(fullPath))
+                    {
+                        appSettings.screenshot_path = fullPath;
+                        pathFound = true;
+                        break;
+                    }
+                }
+
+                if (!pathFound)
+                {
+                    MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                appSettings.isFirstRun = false;
+                SaveSettings();
+            }
+        }
+
+        public class Settings
+        {
+            public bool isFirstRun { get; set; }
+            public bool auto_screenshot_detection { get; set; }
+            public string language { get; set; }
+            public string screenshot_path { get; set; }
+            public List<string> screenshot_paths_list { get; set; }
+            public string latest_map { get; set; }
+
+            public Settings()
+            {
+                isFirstRun = true;
+                screenshot_paths_list = new List<string>();
+            }
         }
     }
 }
