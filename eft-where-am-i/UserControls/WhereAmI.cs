@@ -17,7 +17,7 @@ namespace eft_where_am_i
         private string siteUrl;
         private bool whereAmIClick = false;
         private string settingsFile = @"assets\settings.json";
-        private Settings appSettings = new Settings(); // Settings 객체 초기화
+        private Settings appSettings = new Settings();
         private string screenshotPath;
         private FileSystemWatcher watcher;
 
@@ -34,98 +34,6 @@ namespace eft_where_am_i
         {
             cmbMapSelect.Items.AddRange(mapList);
             cmbMapSelect.SelectedItem = appSettings.latest_map; // 기본 입력값 설정
-        }
-
-        // Settings class to match the JSON structure
-        public class Settings
-        {
-            public bool isFirstRun { get; set; }
-            public bool auto_screenshot_detection { get; set; }
-            public string language { get; set; }
-            public string screenshot_path { get; set; }
-            public List<string> screenshot_paths_list { get; set; }
-            public string latest_map { get; set; }
-        }
-        private void LoadSettings()
-        {
-            try
-            {
-                if (File.Exists(settingsFile))
-                {
-                    string json = File.ReadAllText(settingsFile);
-
-                    // JSON 문자열이 유효한지 검사
-                    if (!string.IsNullOrEmpty(json))
-                    {
-                        appSettings = JsonConvert.DeserializeObject<Settings>(json);
-
-                        // appSettings가 null인지 확인
-                        if (appSettings == null)
-                        {
-                            appSettings = new Settings(); // 기본 객체 생성
-                        }
-
-                        // 설정 파일에서 latest_map 값을 로드하여 초기화
-                        if (string.IsNullOrEmpty(appSettings.latest_map) || !mapList.Contains(appSettings.latest_map))
-                        {
-                            appSettings.latest_map = "ground-zero"; // 기본 맵 설정
-                            SaveSettings(); // 기본값 저장
-                        }
-
-                        // autoscreenshot 체크박스 초기화
-                        chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
-                    }
-                    else
-                    {
-                        MessageBox.Show("settings.json 파일이 비어 있습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Environment.Exit(0);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Environment.Exit(0);
-                }
-
-                if (string.IsNullOrEmpty(appSettings.screenshot_path) || !Directory.Exists(appSettings.screenshot_path))
-                {
-                    MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                else
-                {
-                    screenshotPath = appSettings.screenshot_path;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"설정 파일을 로드하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
-            }
-        }
-
-        // private void FindAndSetScreenshotPath()
-        // {
-        //     string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-        //     foreach (string relativePath in appSettings.screenshot_paths_list)
-        //     {
-        //         string fullPath = Path.Combine(homeDirectory, relativePath);
-        //         if (Directory.Exists(fullPath))
-        //         {
-        //             screenshotPath = fullPath;
-        //             appSettings.screenshot_path = fullPath;
-        //             SaveSettings();
-        //             return;
-        //         }
-        //     }
-
-        //     MessageBox.Show("Screenshot directory not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        // }
-
-        private void SaveSettings()
-        {
-            string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
-            File.WriteAllText(settingsFile, json);
         }
 
         private string GetLatestFile()
@@ -317,6 +225,74 @@ namespace eft_where_am_i
         private void lblBugReport_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/issues");
+        }
+
+        // Settings class to match the JSON structure
+        public class Settings
+        {
+            public bool isFirstRun { get; set; }
+            public bool auto_screenshot_detection { get; set; }
+            public string language { get; set; }
+            public string screenshot_path { get; set; }
+            public List<string> screenshot_paths_list { get; set; }
+            public string latest_map { get; set; }
+        }
+        private void LoadSettings()
+        {
+            try
+            {
+                if (File.Exists(settingsFile))
+                {
+                    string json = File.ReadAllText(settingsFile);
+
+                    if (!string.IsNullOrEmpty(json))
+                    {
+                        appSettings = JsonConvert.DeserializeObject<Settings>(json);
+
+                        if (appSettings == null)
+                        {
+                            appSettings = new Settings();
+                        }
+
+                        if (string.IsNullOrEmpty(appSettings.latest_map) || !mapList.Contains(appSettings.latest_map))
+                        {
+                            appSettings.latest_map = "ground-zero";
+                            SaveSettings();
+                        }
+
+                        chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
+                    }
+                    else
+                    {
+                        MessageBox.Show("settings.json 파일이 비어 있습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Environment.Exit(0);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(0);
+                }
+
+                if (string.IsNullOrEmpty(appSettings.screenshot_path) || !Directory.Exists(appSettings.screenshot_path))
+                {
+                    MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    screenshotPath = appSettings.screenshot_path;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"설정 파일을 로드하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
+        }
+        private void SaveSettings()
+        {
+            string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
+            File.WriteAllText(settingsFile, json);
         }
     }
 }
