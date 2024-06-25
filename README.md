@@ -8,9 +8,7 @@
 [한국어](README_ko_kr.md)
 
 - This is a program that let you directly interact with [Tarkov-Market](https://tarkov-market.com/)—Instantly find where you are, where you should go to get quests and many!
-- It is based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
-- This program is licensed under the `MIT License`.
-- Use at your risk.
+- This program is licensed under the `MIT License`. Use at your risk.
 - [Map icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/map)
 <br />
 
