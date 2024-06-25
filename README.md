@@ -47,5 +47,3 @@ A red dot indicating your location will appear on the map.
 - Click the `Change` button to change the path to the desired folder.
 - If you think you've made a mistake and the path looks weird, you can click the `Auto Find` button to automatically find it.
 - Multi-language and automatic screenshot deletion are not supported yet... Stay tuned for future versions!
-
-Translated with DeepL.com (free version)
