@@ -7,7 +7,7 @@
 
 [한국어](README_ko_kr.md)
 
-- This is a C# Winform program that helps you easily use the Maps feature of `Tarkov-Market`.
+- This is a program that let you directly interact with [Tarkov-Market](https://tarkov-market.com/)—Instantly find where you are, where you should go to get quests and many!
 - It is based on [Rok's post and source code](https://gall.dcinside.com/m/eft/2143712).
 - This program is licensed under the `MIT License`.
 - Use at your risk.
@@ -20,30 +20,29 @@
 
 <img src="assets/screenshot01.png" alt="screenshot01" width="800">
 
-After selecting a map, make sure to click the `Apply` button!
+Make sure to click the `Apply` button!
 <br />
 
 **2. Take a screenshot during EFT raids.**
 
 - The default screenshot key is `PrtSc`.
-- If you check the `Auto Screenshot Detection` checkbox, your location will be automatically updated each time you take a screenshot.
-- If you check the `Auto Screenshot Detection` checkbox, you can skip step 3.
+- If `Auto Screenshot Detection` has been turned on, your location will be automatically updated each time you take a screenshot.
   <br />
 
 **3. Click the `Force Run` button.**
+If you have activated `Auto Screenshot Detection`, you can skip this step.
 
 <img src="assets/screenshot01.png" alt="screenshot01" width="800">
 
 A red dot indicating your location will appear on the map.
 
 - To update your location, repeat steps 2 and 3.
-- You can use the `Hide/Show Panels` or `Full Screen` buttons to view the map more clearly.
+- You can use the `Hide/Show Panels` or `Full Screen` buttons to view the map wider.
 <br />
 
-**4. For more settings, click the gear icon on the left.** **5.
-
+**4. For more settings, click the gear icon on the left side.**
 <img src="assets/screenshot02.png" alt="screenshot02" width="800">
 
-- Click the `Change` button to change the path to the desired folder.
-- If you think you've made a mistake and the path looks weird, you can click the `Auto Find` button to automatically find it.
-- Multi-language and automatic screenshot deletion are not supported yet... Stay tuned for future versions!
+- Click the `Change` button to save the path to the desired folder.
+- If you think you've made a mistake and the path looks weird, you can use the `Auto Find` button. It will automatically find EFT screenshot folder.
+- Localization and automatic screenshot deletion are not implemented yet. Stay tuned for future updates!
