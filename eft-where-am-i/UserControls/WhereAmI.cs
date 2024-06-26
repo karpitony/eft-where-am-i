@@ -28,8 +28,23 @@ namespace eft_where_am_i
             InitializeMapComboBox();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
             webView2.Source = new Uri(siteUrl);
+            WmiFullScreen();
         }
 
+        private async void WmiFullScreen()
+        {
+            await Task.Delay(3000);
+
+            string jsCode =
+                "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');\n" +
+                "if (button) {\n" +
+                "    button.click();\n" +
+                "    console.log('Fullscreen button clicked');\n" +
+                "} else {\n" +
+                "    console.log('Fullscreen button not found');\n" +
+                "}";
+            await ExecuteJavaScriptAsync(jsCode);
+        }
         private void InitializeMapComboBox()
         {
             cmbMapSelect.Items.AddRange(mapList);
