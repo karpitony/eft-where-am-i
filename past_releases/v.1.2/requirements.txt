@@ -1,4 +1,0 @@
-cx-Freeze==7.1.0
-pyinstaller==5.13.2
-PyQt5==5.15.4
-PyQtWebEngine==5.15.4
