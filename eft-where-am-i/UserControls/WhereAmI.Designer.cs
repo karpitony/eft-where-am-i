@@ -229,15 +229,15 @@
             // checkBoxHide
             // 
             this.checkBoxHide.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBoxHide.AutoSize = true;
             this.checkBoxHide.FlatAppearance.BorderSize = 0;
             this.checkBoxHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkBoxHide.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold);
             this.checkBoxHide.Location = new System.Drawing.Point(0, 110);
             this.checkBoxHide.Name = "checkBoxHide";
-            this.checkBoxHide.Size = new System.Drawing.Size(143, 26);
+            this.checkBoxHide.Size = new System.Drawing.Size(170, 30);
             this.checkBoxHide.TabIndex = 23;
             this.checkBoxHide.Text = "∧ Click to Fold";
+            this.checkBoxHide.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkBoxHide.UseVisualStyleBackColor = true;
             this.checkBoxHide.CheckedChanged += new System.EventHandler(this.checkBoxHide_CheckedChanged);
             // 
@@ -265,7 +265,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
