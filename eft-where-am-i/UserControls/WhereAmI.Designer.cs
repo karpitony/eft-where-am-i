@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.chkAutoScreenshot = new System.Windows.Forms.CheckBox();
             this.btnForceRun = new System.Windows.Forms.Button();
@@ -42,18 +43,22 @@
             this.lblBugReport = new System.Windows.Forms.LinkLabel();
             this.lblHowToUse = new System.Windows.Forms.LinkLabel();
             this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.checkBoxHide = new System.Windows.Forms.CheckBox();
+            this.timerSliding = new System.Windows.Forms.Timer(this.components);
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.chkAutoScreenshot);
             this.groupBox3.Controls.Add(this.btnForceRun);
-            this.groupBox3.Location = new System.Drawing.Point(702, 2);
+            this.groupBox3.Location = new System.Drawing.Point(704, 0);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(324, 104);
             this.groupBox3.TabIndex = 21;
@@ -87,7 +92,7 @@
             // 
             this.groupBox2.Controls.Add(this.btnHideShowPannel);
             this.groupBox2.Controls.Add(this.btnFullScreen);
-            this.groupBox2.Location = new System.Drawing.Point(391, 2);
+            this.groupBox2.Location = new System.Drawing.Point(392, 0);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(302, 104);
             this.groupBox2.TabIndex = 20;
@@ -122,7 +127,7 @@
             this.groupBox1.Controls.Add(this.lblSelectTheMap);
             this.groupBox1.Controls.Add(this.btnMapApply);
             this.groupBox1.Controls.Add(this.cmbMapSelect);
-            this.groupBox1.Location = new System.Drawing.Point(3, 2);
+            this.groupBox1.Location = new System.Drawing.Point(4, 0);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(378, 104);
             this.groupBox1.TabIndex = 19;
@@ -163,7 +168,7 @@
             // 
             this.groupBox4.Controls.Add(this.lblBugReport);
             this.groupBox4.Controls.Add(this.lblHowToUse);
-            this.groupBox4.Location = new System.Drawing.Point(1036, 2);
+            this.groupBox4.Location = new System.Drawing.Point(1038, 0);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(266, 104);
             this.groupBox4.TabIndex = 18;
@@ -199,27 +204,55 @@
             // webView2
             // 
             this.webView2.AllowExternalDrop = true;
-            this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Location = new System.Drawing.Point(0, 107);
+            this.webView2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webView2.Location = new System.Drawing.Point(0, 110);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1309, 954);
+            this.webView2.Size = new System.Drawing.Size(1309, 951);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 17;
             this.webView2.ZoomFactor = 1D;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.groupBox3);
+            this.panel1.Controls.Add(this.groupBox4);
+            this.panel1.Controls.Add(this.groupBox1);
+            this.panel1.Controls.Add(this.groupBox2);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1309, 110);
+            this.panel1.TabIndex = 22;
+            // 
+            // checkBoxHide
+            // 
+            this.checkBoxHide.Appearance = System.Windows.Forms.Appearance.Button;
+            this.checkBoxHide.AutoSize = true;
+            this.checkBoxHide.FlatAppearance.BorderSize = 0;
+            this.checkBoxHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkBoxHide.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold);
+            this.checkBoxHide.Location = new System.Drawing.Point(0, 110);
+            this.checkBoxHide.Name = "checkBoxHide";
+            this.checkBoxHide.Size = new System.Drawing.Size(143, 26);
+            this.checkBoxHide.TabIndex = 23;
+            this.checkBoxHide.Text = "∧ Click to Fold";
+            this.checkBoxHide.UseVisualStyleBackColor = true;
+            this.checkBoxHide.CheckedChanged += new System.EventHandler(this.checkBoxHide_CheckedChanged);
+            // 
+            // timerSliding
+            // 
+            this.timerSliding.Interval = 10;
+            this.timerSliding.Tick += new System.EventHandler(this.timerSliding_Tick);
             // 
             // WhereAmI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.groupBox4);
+            this.Controls.Add(this.checkBoxHide);
             this.Controls.Add(this.webView2);
+            this.Controls.Add(this.panel1);
             this.Name = "WhereAmI";
             this.Size = new System.Drawing.Size(1309, 1061);
             this.groupBox3.ResumeLayout(false);
@@ -230,7 +263,9 @@
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -250,5 +285,8 @@
         private System.Windows.Forms.LinkLabel lblBugReport;
         private System.Windows.Forms.LinkLabel lblHowToUse;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.CheckBox checkBoxHide;
+        private System.Windows.Forms.Timer timerSliding;
     }
 }
