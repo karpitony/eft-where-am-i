@@ -207,9 +207,9 @@
             this.webView2.CreationProperties = null;
             this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
             this.webView2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webView2.Location = new System.Drawing.Point(0, 0);
+            this.webView2.Location = new System.Drawing.Point(0, 110);
             this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1309, 1061);
+            this.webView2.Size = new System.Drawing.Size(1309, 951);
             this.webView2.Source = new System.Uri("https://tarkov-market.com/maps/ground-zero", System.UriKind.Absolute);
             this.webView2.TabIndex = 17;
             this.webView2.ZoomFactor = 1D;
@@ -228,10 +228,14 @@
             // 
             // checkBoxHide
             // 
+            this.checkBoxHide.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBoxHide.AutoSize = true;
-            this.checkBoxHide.Location = new System.Drawing.Point(4, 115);
+            this.checkBoxHide.FlatAppearance.BorderSize = 0;
+            this.checkBoxHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkBoxHide.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold);
+            this.checkBoxHide.Location = new System.Drawing.Point(0, 110);
             this.checkBoxHide.Name = "checkBoxHide";
-            this.checkBoxHide.Size = new System.Drawing.Size(110, 16);
+            this.checkBoxHide.Size = new System.Drawing.Size(143, 26);
             this.checkBoxHide.TabIndex = 23;
             this.checkBoxHide.Text = "∧ Click to Fold";
             this.checkBoxHide.UseVisualStyleBackColor = true;
@@ -247,8 +251,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.checkBoxHide);
-            this.Controls.Add(this.panel1);
             this.Controls.Add(this.webView2);
+            this.Controls.Add(this.panel1);
             this.Name = "WhereAmI";
             this.Size = new System.Drawing.Size(1309, 1061);
             this.groupBox3.ResumeLayout(false);

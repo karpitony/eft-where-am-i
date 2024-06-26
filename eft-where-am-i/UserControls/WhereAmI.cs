@@ -356,12 +356,14 @@ namespace eft_where_am_i
             if (checkBoxHide.Checked == true)
             {
                 _posSliding -= STEP_SLIDING;
+                checkBoxHide.Top = _posSliding;
                 if (_posSliding <= MIN_SLIDING_HEIGHT)
                     timerSliding.Stop();
             }
             else
             {
                 _posSliding += STEP_SLIDING;
+                checkBoxHide.Top = _posSliding;
                 if (_posSliding >= MAX_SLIDING_HEIGHT)
                     timerSliding.Stop();
                 
