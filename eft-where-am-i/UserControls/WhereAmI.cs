@@ -331,5 +331,43 @@ namespace eft_where_am_i
                 SaveSettings();
             }
         }
+
+        const int MAX_SLIDING_HEIGHT = 110;
+        const int MIN_SLIDING_HEIGHT = 0;
+        const int STEP_SLIDING = 10;
+        int _posSliding = 110;
+
+        private void checkBoxHide_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxHide.Checked == true)
+            {
+                checkBoxHide.Text = "∨ Click to Unfold";
+            }
+            else
+            {
+                checkBoxHide.Text = "∧ Click to Fold";
+            }
+
+            timerSliding.Start();
+        }
+
+        private void timerSliding_Tick(object sender, EventArgs e)
+        {
+            if (checkBoxHide.Checked == true)
+            {
+                _posSliding -= STEP_SLIDING;
+                if (_posSliding <= MIN_SLIDING_HEIGHT)
+                    timerSliding.Stop();
+            }
+            else
+            {
+                _posSliding += STEP_SLIDING;
+                if (_posSliding >= MAX_SLIDING_HEIGHT)
+                    timerSliding.Stop();
+                
+            }
+
+            panel1.Height = _posSliding;
+        }
     }
 }
