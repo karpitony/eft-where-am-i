@@ -156,6 +156,7 @@ namespace eft_where_am_i
             if (chkAutoScreenshot.Checked)
             {
                 // 경로가 올바르지 않은 경우 경고 메시지 표시 및 체크박스를 해제
+                screenshotPath = appSettings.screenshot_path;
                 if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
                     MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
