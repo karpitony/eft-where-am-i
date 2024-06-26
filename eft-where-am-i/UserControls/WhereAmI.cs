@@ -148,6 +148,7 @@ namespace eft_where_am_i
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
                 webView2.Source = new Uri(siteUrl);
                 whereAmIClick = false;
+                WmiFullScreen();
             }
         }
 
