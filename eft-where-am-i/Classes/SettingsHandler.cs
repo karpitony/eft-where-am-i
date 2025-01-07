@@ -93,7 +93,6 @@ namespace eft_where_am_i.Classes
 
     public class AppSettings
     {
-        public bool isFirstRun { get; set; } = true;
         public bool auto_screenshot_detection { get; set; } = false;
         public string language { get; set; } = "en";
         public string screenshot_path { get; set; } = string.Empty;

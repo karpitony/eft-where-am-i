@@ -24,7 +24,6 @@ namespace eft_where_am_i
             settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
             jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             LoadSettings();
-            CheckAndSetScreenshotPath();
             InitializeMapComboBox();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
             webView2.Source = new Uri(siteUrl);
@@ -32,16 +31,21 @@ namespace eft_where_am_i
         }
 
         private void LoadSettings()
-
-
         {
             try
             {
                 appSettings = settingsHandler.GetSettings(); // SettingsHandler에서 설정 로드
                 screenshotPath = appSettings.screenshot_path; // 스크린샷 경로 설정
-                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
+                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))  
                 {
-                    MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    try
+                    {
+                        CheckAndSetScreenshotPath();
+                    }
+                    catch
+                    {
+                        MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
 
                 chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
@@ -145,6 +149,7 @@ namespace eft_where_am_i
                 WmiFullScreen();
             }
         }
+
         private void chkAutoScreenshot_CheckedChanged(object sender, EventArgs e)
         {
             if (chkAutoScreenshot.Checked)
@@ -235,51 +240,48 @@ namespace eft_where_am_i
         }
 
         // Form1.cs에 넣고 싶었는데 예상 못한 오류가 발생하여 여기에 넣음
+        // settings.json에 screenshot_path가 비어있을 때 경로 자동 탐색하는 로직(추후 교체 예정)
         private void CheckAndSetScreenshotPath()
         {
-            if (appSettings.isFirstRun)
+            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (string.IsNullOrEmpty(homeDirectory))
             {
-                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                if (string.IsNullOrEmpty(homeDirectory))
-                {
-                    MessageBox.Show("사용자 홈 디렉터리를 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                MessageBox.Show("사용자 홈 디렉터리를 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-                if (appSettings.screenshot_paths_list == null || !appSettings.screenshot_paths_list.Any())
-                {
-                    MessageBox.Show("스크린샷 경로 리스트가 비어 있습니다. 설정을 확인해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+            if (appSettings.screenshot_paths_list == null || !appSettings.screenshot_paths_list.Any())
+            {
+                MessageBox.Show("스크린샷 경로 리스트가 비어 있습니다. 설정을 확인해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-                bool pathFound = false;
+            bool pathFound = false;
 
-                foreach (string relativePath in appSettings.screenshot_paths_list)
+            foreach (string relativePath in appSettings.screenshot_paths_list)
+            {
+                string fullPath = Path.Combine(homeDirectory, relativePath);
+                if (Directory.Exists(fullPath))
                 {
-                    string fullPath = Path.Combine(homeDirectory, relativePath);
-                    if (Directory.Exists(fullPath))
-                    {
-                        appSettings.screenshot_path = fullPath;
-                        pathFound = true;
-                        break;
-                    }
+                    appSettings.screenshot_path = fullPath;
+                    pathFound = true;
+                    screenshotPath = fullPath;
+                    break;
                 }
+            }
 
-                if (!pathFound)
-                {
-                    MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+            if (!pathFound)
+            {
+                MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
 
-                appSettings.isFirstRun = false;
-
-                try
-                {
-                    SaveSettings(); // 설정 저장
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"설정을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+            try
+            {
+                SaveSettings(); // 설정 저장
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"설정을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
