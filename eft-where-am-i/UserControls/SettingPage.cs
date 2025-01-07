@@ -1,19 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using Newtonsoft.Json;
+using eft_where_am_i.Classes;
 
 namespace eft_where_am_i
 {
     public partial class SettingPage : UserControl
     {
-        private string settingsFile = @"assets\settings.json";
-        private AppSettings appSettings = new AppSettings(); // Settings 객체 초기화
+        private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
+        private AppSettings appSettings; // AppSettings 참조
 
         public SettingPage()
         {
             InitializeComponent();
+            settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
             LoadSettings();
         }
 
@@ -21,18 +21,8 @@ namespace eft_where_am_i
         {
             try
             {
-                if (File.Exists(settingsFile))
-                {
-                    string json = File.ReadAllText(settingsFile);
-                    appSettings = JsonConvert.DeserializeObject<AppSettings>(json);
-
-                    // 텍스트박스에 현재 경로 표시
-                    txtPath.Text = appSettings.screenshot_path;
-                }
-                else
-                {
-                    MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                appSettings = settingsHandler.GetSettings(); // SettingsHandler에서 설정 로드
+                txtPath.Text = appSettings.screenshot_path; // 텍스트박스에 현재 경로 표시
             }
             catch (Exception ex)
             {
@@ -44,8 +34,7 @@ namespace eft_where_am_i
         {
             try
             {
-                string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
-                File.WriteAllText(settingsFile, json);
+                settingsHandler.UpdateSettings(appSettings); // SettingsHandler를 통해 설정 저장
             }
             catch (Exception ex)
             {
@@ -67,8 +56,8 @@ namespace eft_where_am_i
                 {
                     string selectedPath = folderBrowserDialog.SelectedPath;
                     txtPath.Text = selectedPath;
-                    appSettings.screenshot_path = selectedPath;
-                    SaveSettings(); // 변경된 경로만 저장
+                    appSettings.screenshot_path = selectedPath; // AppSettings 업데이트
+                    SaveSettings(); // 변경 사항 저장
                 }
             }
         }
@@ -82,8 +71,8 @@ namespace eft_where_am_i
                 string fullPath = Path.Combine(homeDirectory, relativePath);
                 if (Directory.Exists(fullPath))
                 {
-                    appSettings.screenshot_path = fullPath;
-                    SaveSettings(); // 변경된 경로만 저장
+                    appSettings.screenshot_path = fullPath; // AppSettings 업데이트
+                    SaveSettings(); // 변경 사항 저장
                     txtPath.Text = appSettings.screenshot_path;
                     break; // 첫 번째 일치하는 경로만 사용
                 }
@@ -104,15 +93,5 @@ namespace eft_where_am_i
         {
             System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/issues");
         }
-    }
-
-    public class AppSettings
-    {
-        public bool isFirstRun { get; set; }
-        public bool auto_screenshot_detection { get; set; }
-        public string language { get; set; }
-        public string screenshot_path { get; set; }
-        public List<string> screenshot_paths_list { get; set; }
-        public string latest_map { get; set; }
     }
 }
