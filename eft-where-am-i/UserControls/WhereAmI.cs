@@ -11,6 +11,7 @@ namespace eft_where_am_i
     {
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
         private AppSettings appSettings; // AppSettings 참조
+        private readonly JavaScriptExecutor jsExecutor;
         private string[] mapList = { "ground-zero", "factory", "customs", "interchange", "woods", "shoreline", "lighthouse", "reserve", "streets", "lab" };
         private string siteUrl;
         private bool whereAmIClick = false;
@@ -21,6 +22,7 @@ namespace eft_where_am_i
         {
             InitializeComponent();
             settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
+            jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             LoadSettings();
             CheckAndSetScreenshotPath();
             InitializeMapComboBox();
@@ -30,6 +32,8 @@ namespace eft_where_am_i
         }
 
         private void LoadSettings()
+
+
         {
             try
             {
@@ -59,20 +63,6 @@ namespace eft_where_am_i
             }
         }
 
-        private async void WmiFullScreen()
-        {
-            await Task.Delay(3000);
-
-            string jsCode =
-                "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');\n" +
-                "if (button) {\n" +
-                "    button.click();\n" +
-                "    console.log('Fullscreen button clicked');\n" +
-                "} else {\n" +
-                "    console.log('Fullscreen button not found');\n" +
-                "}";
-            await ExecuteJavaScriptAsync(jsCode);
-        }
         private void InitializeMapComboBox()
         {
             cmbMapSelect.Items.AddRange(mapList);
@@ -97,49 +87,25 @@ namespace eft_where_am_i
             return files.FirstOrDefault()?.Name;
         }
 
-        private async Task ExecuteJavaScriptAsync(string script)
+        private async void WmiFullScreen()
         {
-            try
-            {
-                await webView2.CoreWebView2.ExecuteScriptAsync(script);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"JavaScript 실행 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            await Task.Delay(3000);
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button");
         }
 
         private async Task CheckLocationAsync()
         {
             string screenshot = GetLatestFile();
-            if (screenshot == null)
-                return;
+            if (screenshot == null) return;
 
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                string jsCodeClick =
-                    "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');\n" +
-                    "if (button) {\n" +
-                    "    button.click();\n" +
-                    "    console.log('Button clicked');\n" +
-                    "} else {\n" +
-                    "    console.log('Button not found');\n" +
-                    "}";
-                await ExecuteJavaScriptAsync(jsCodeClick);
+                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button");
                 await Task.Delay(500);
             }
 
-            string jsInputCode =
-                "var input = document.querySelector('input[type=\"text\"]');\n" +
-                "if (input) {\n" +
-                "    input.value = '" + screenshot.Replace(".png", "") + "';\n" +
-                "    input.dispatchEvent(new Event('input'));\n" +
-                "    console.log('Input value set');\n" +
-                "} else {\n" +
-                "    console.log('Input not found');\n" +
-                "}";
-            await ExecuteJavaScriptAsync(jsInputCode);
+            await jsExecutor.SetInputValueAsync("input[type=\"text\"]", screenshot.Replace(".png", ""));
             await ChangeMarkerAsync();
         }
 
@@ -153,14 +119,15 @@ namespace eft_where_am_i
 
             foreach (var style in styleList)
             {
-                string jsCode =
-                    "var marker = document.getElementsByClassName('marker')[0];\n" +
-                    "if (marker) {\n" +
-                    "    marker.style.setProperty('" + style.Split(':')[0].Trim() + "', '" + style.Split(':')[1].Trim() + "', 'important');\n" +
-                    "} else {\n" +
-                    "    console.log('Marker not found');\n" +
-                    "}";
-                await ExecuteJavaScriptAsync(jsCode);
+                string[] styleParts = style.Split(':');
+                string jsCode = $@"
+                    var marker = document.getElementsByClassName('marker')[0];
+                    if (marker) {{
+                        marker.style.setProperty('{styleParts[0].Trim()}', '{styleParts[1].Trim()}', 'important');
+                    }} else {{
+                        console.log('Marker not found');
+                    }}";
+                await jsExecutor.ExecuteScriptAsync(jsCode);
             }
         }
 
