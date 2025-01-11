@@ -12,6 +12,10 @@
 - [Map icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/map)
 <br />
 
+## Download
+
+You can download the latest version of the `.zip` file from [Releases](https://github.com/karpitony/eft-where-am-i/releases). After downloading, extract the file and run `eft-where-am-i.exe`. A security warning may appear. There is no virus, so click `More Info` and then `Run`. [VirusTotal](https://www.virustotal.com/gui/file/4aa4768640a4c29ddc42ad1bc736d70c98630149985477e153bdae93aa91f010/detection)
+
 ## How to Use
 
 **1. Select a map.**
@@ -24,11 +28,11 @@ Make sure to click the `Apply` button!
 **2. Take a screenshot during EFT raids.**
 
 - The default screenshot key is `PrtSc`.
-- If `Auto Screenshot Detection` has been turned on, your location will be automatically updated each time you take a screenshot.
+- If `Auto Screenshot Detection` is enabled, your location will be automatically updated each time you take a screenshot.
   <br />
 
 **3. Click the `Force Run` button.**
-If you have activated `Auto Screenshot Detection`, you can skip this step.
+If you have enabled `Auto Screenshot Detection`, you can skip this step.
 
 <img src="assets/screenshot01.png" alt="screenshot01" width="800">
 
