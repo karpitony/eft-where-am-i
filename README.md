@@ -18,9 +18,9 @@
 ## 다운로드
 
 [Releases](https://github.com/karpitony/eft-where-am-i/releases)에서
-최신 버전의 `.zip` 파일을 다운로드 받으실 수 있습니다. 다운받은 원하는 위치에서
+최신 버전의 `.zip` 파일을 다운로드 받으실 수 있습니다. 다운받은 후 원하는 위치에서
 압축을 풀고 `eft-where-am-i.exe`를 실행하시면 됩니다. 보안 경고가 표시될 수
-있습니다. 바이러스는 없으니 `추가 정보`를 눌러 `실행`을 눌러주세요. [VirusTotal](https://www.virustotal.com/gui/file/4aa4768640a4c29ddc42ad1bc736d70c98630149985477e153bdae93aa91f010/detection)
+있으나, 바이러스는 없으니 `추가 정보`를 눌러 `실행`을 눌러주세요. [VirusTotal](https://www.virustotal.com/gui/file/4aa4768640a4c29ddc42ad1bc736d70c98630149985477e153bdae93aa91f010/detection)
 
 ![exe](assets/eft-wmi-exe.png)
 
