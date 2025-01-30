@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 using eft_where_am_i;
 
@@ -9,7 +8,6 @@ namespace eft_where_am_i_chasrp
     public partial class Form1 : Form
     {
         private string currentScreen = "WhereAmI";
-        private string settingsFile = @"assets\settings.json";
 
         public Form1()
         {
