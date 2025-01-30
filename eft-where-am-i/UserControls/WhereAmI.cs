@@ -2,28 +2,27 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Microsoft.Web.WebView2.Core;
 using System.Windows.Forms;
 using System.Threading.Tasks;
-using System.Data;
-
+using eft_where_am_i.Classes;
 namespace eft_where_am_i
 {
     public partial class WhereAmI : UserControl
     {
+        private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
+        private AppSettings appSettings; // AppSettings 참조
+        private readonly JavaScriptExecutor jsExecutor;
         private string[] mapList = { "ground-zero", "factory", "customs", "interchange", "woods", "shoreline", "lighthouse", "reserve", "streets", "lab" };
         private string siteUrl;
         private bool whereAmIClick = false;
-        private string settingsFile = @"assets\settings.json";
-        private Settings appSettings = new Settings();
         private string screenshotPath;
         private FileSystemWatcher watcher;
 
         public WhereAmI()
         {
             InitializeComponent();
+            settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
+            jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             LoadSettings();
             InitializeMapComboBox();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
@@ -31,20 +30,43 @@ namespace eft_where_am_i
             WmiFullScreen();
         }
 
-        private async void WmiFullScreen()
+        private void LoadSettings()
         {
-            await Task.Delay(3000);
+            try
+            {
+                appSettings = settingsHandler.GetSettings(); // SettingsHandler에서 설정 로드
+                screenshotPath = appSettings.screenshot_path; // 스크린샷 경로 설정
+                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))  
+                {
+                    try
+                    {
+                        CheckAndSetScreenshotPath();
+                    }
+                    catch
+                    {
+                        MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
 
-            string jsCode =
-                "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');\n" +
-                "if (button) {\n" +
-                "    button.click();\n" +
-                "    console.log('Fullscreen button clicked');\n" +
-                "} else {\n" +
-                "    console.log('Fullscreen button not found');\n" +
-                "}";
-            await ExecuteJavaScriptAsync(jsCode);
+                chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"설정을 로드하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+        private void SaveSettings()
+        {
+            try
+            {
+                settingsHandler.UpdateSettings(appSettings); // SettingsHandler를 통해 설정 저장
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"설정을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void InitializeMapComboBox()
         {
             cmbMapSelect.Items.AddRange(mapList);
@@ -66,53 +88,28 @@ namespace eft_where_am_i
                 return null; // 파일이 없으면 null 반환
             }
 
-            var latestFile = files.First();
-            return latestFile.Name;
+            return files.FirstOrDefault()?.Name;
         }
 
-        private async Task ExecuteJavaScriptAsync(string script)
+        private async void WmiFullScreen()
         {
-            try
-            {
-                await webView2.CoreWebView2.ExecuteScriptAsync(script);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"JavaScript 실행 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            await Task.Delay(3000);
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
         }
 
         private async Task CheckLocationAsync()
         {
             string screenshot = GetLatestFile();
-            if (screenshot == null)
-                return;
+            if (screenshot == null) return;
 
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                string jsCodeClick =
-                    "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button');\n" +
-                    "if (button) {\n" +
-                    "    button.click();\n" +
-                    "    console.log('Button clicked');\n" +
-                    "} else {\n" +
-                    "    console.log('Button not found');\n" +
-                    "}";
-                await ExecuteJavaScriptAsync(jsCodeClick);
+                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button");
                 await Task.Delay(500);
             }
 
-            string jsInputCode =
-                "var input = document.querySelector('input[type=\"text\"]');\n" +
-                "if (input) {\n" +
-                "    input.value = '" + screenshot.Replace(".png", "") + "';\n" +
-                "    input.dispatchEvent(new Event('input'));\n" +
-                "    console.log('Input value set');\n" +
-                "} else {\n" +
-                "    console.log('Input not found');\n" +
-                "}";
-            await ExecuteJavaScriptAsync(jsInputCode);
+            await jsExecutor.SetInputValueAsync("input[type=\"text\"]", screenshot.Replace(".png", ""));
             await ChangeMarkerAsync();
         }
 
@@ -126,14 +123,15 @@ namespace eft_where_am_i
 
             foreach (var style in styleList)
             {
-                string jsCode =
-                    "var marker = document.getElementsByClassName('marker')[0];\n" +
-                    "if (marker) {\n" +
-                    "    marker.style.setProperty('" + style.Split(':')[0].Trim() + "', '" + style.Split(':')[1].Trim() + "', 'important');\n" +
-                    "} else {\n" +
-                    "    console.log('Marker not found');\n" +
-                    "}";
-                await ExecuteJavaScriptAsync(jsCode);
+                string[] styleParts = style.Split(':');
+                string jsCode = $@"
+                    var marker = document.getElementsByClassName('marker')[0];
+                    if (marker) {{
+                        marker.style.setProperty('{styleParts[0].Trim()}', '{styleParts[1].Trim()}', 'important');
+                    }} else {{
+                        console.log('Marker not found');
+                    }}";
+                await jsExecutor.ExecuteScriptAsync(jsCode);
             }
         }
 
@@ -156,26 +154,24 @@ namespace eft_where_am_i
         {
             if (chkAutoScreenshot.Checked)
             {
-                // 경로가 올바르지 않은 경우 경고 메시지 표시 및 체크박스를 해제
-                screenshotPath = appSettings.screenshot_path;
                 if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
                     MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     chkAutoScreenshot.Checked = false;
                     appSettings.auto_screenshot_detection = false;
                     SaveSettings();
-                    return; // 경로가 잘못된 경우 이후 코드를 실행하지 않음
+                    return;
                 }
-                else
-                {
-                    watcher = new FileSystemWatcher();
-                    watcher.Path = screenshotPath;
-                    watcher.Filter = "*.png";
-                    watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
 
-                    watcher.Created += OnScreenshotCreated;
-                    watcher.EnableRaisingEvents = true;
-                }
+                watcher = new FileSystemWatcher
+                {
+                    Path = screenshotPath,
+                    Filter = "*.png",
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite
+                };
+
+                watcher.Created += OnScreenshotCreated;
+                watcher.EnableRaisingEvents = true;
             }
             else
             {
@@ -188,7 +184,6 @@ namespace eft_where_am_i
                 }
             }
 
-            // 체크 상태를 저장
             appSettings.auto_screenshot_detection = chkAutoScreenshot.Checked;
             SaveSettings();
         }
@@ -244,108 +239,49 @@ namespace eft_where_am_i
             System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/issues");
         }
 
-        // Settings class to match the JSON structure
-        public class Settings
+        // Form1.cs에 넣고 싶었는데 예상 못한 오류가 발생하여 여기에 넣음
+        // settings.json에 screenshot_path가 비어있을 때 경로 자동 탐색하는 로직(추후 교체 예정)
+        private void CheckAndSetScreenshotPath()
         {
-            public bool isFirstRun { get; set; }
-            public bool auto_screenshot_detection { get; set; }
-            public string language { get; set; }
-            public string screenshot_path { get; set; }
-            public List<string> screenshot_paths_list { get; set; }
-            public string latest_map { get; set; }
-        }
-        private void LoadSettings()
-        {
+            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (string.IsNullOrEmpty(homeDirectory))
+            {
+                MessageBox.Show("사용자 홈 디렉터리를 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (appSettings.screenshot_paths_list == null || !appSettings.screenshot_paths_list.Any())
+            {
+                MessageBox.Show("스크린샷 경로 리스트가 비어 있습니다. 설정을 확인해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            bool pathFound = false;
+
+            foreach (string relativePath in appSettings.screenshot_paths_list)
+            {
+                string fullPath = Path.Combine(homeDirectory, relativePath);
+                if (Directory.Exists(fullPath))
+                {
+                    appSettings.screenshot_path = fullPath;
+                    pathFound = true;
+                    screenshotPath = fullPath;
+                    break;
+                }
+            }
+
+            if (!pathFound)
+            {
+                MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
             try
             {
-                if (File.Exists(settingsFile))
-                {
-                    string json = File.ReadAllText(settingsFile);
-
-                    if (!string.IsNullOrEmpty(json))
-                    {
-                        appSettings = JsonConvert.DeserializeObject<Settings>(json);
-
-                        if (appSettings == null)
-                        {
-                            appSettings = new Settings();
-                        }
-
-                        if (string.IsNullOrEmpty(appSettings.latest_map) || !mapList.Contains(appSettings.latest_map))
-                        {
-                            appSettings.latest_map = "ground-zero";
-                            SaveSettings();
-                        }
-
-                        chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
-                    }
-                    else
-                    {
-                        MessageBox.Show("settings.json 파일이 비어 있습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Environment.Exit(0);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("settings.json 파일을 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Environment.Exit(0);
-                }
-                
-                if (appSettings.isFirstRun == true)
-                {
-                    CheckAndSetScreenshotPath();
-                    screenshotPath = appSettings.screenshot_path;
-                }
-                else
-                {
-                    if (string.IsNullOrEmpty(appSettings.screenshot_path) || !Directory.Exists(appSettings.screenshot_path))
-                    {
-                        MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        screenshotPath = appSettings.screenshot_path;
-                    }
-                }
+                SaveSettings(); // 설정 저장
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"설정 파일을 로드하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
-            }
-        }
-        private void SaveSettings()
-        {
-            string json = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
-            File.WriteAllText(settingsFile, json);
-        }
-
-        // Form1.cs에 넣고 싶었는데 예상 못한 오류가 발생하여 여기에 넣음
-        private void CheckAndSetScreenshotPath()
-        {
-            if (appSettings.isFirstRun)
-            {
-                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                bool pathFound = false;
-
-                foreach (string relativePath in appSettings.screenshot_paths_list)
-                {
-                    string fullPath = Path.Combine(homeDirectory, relativePath);
-                    if (Directory.Exists(fullPath))
-                    {
-                        appSettings.screenshot_path = fullPath;
-                        pathFound = true;
-                        break;
-                    }
-                }
-
-                if (!pathFound)
-                {
-                    MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-
-                appSettings.isFirstRun = false;
-                SaveSettings();
+                MessageBox.Show($"설정을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
