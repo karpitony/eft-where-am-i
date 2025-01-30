@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Where Am I Panel</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-50">
+  <div class="grid grid-cols-4 grid-rows-2 gap-x-6 gap-y-2 px-4 py-4 rounded-md bg-gray-200 shadow-md w-full">
+
+    <!-- Cell 1: Map Selection -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
+      <label class="text-lg lg:text-xl xl:text-2xl font-semibold">Select The Map</label>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
+      <div class="flex gap-1 lg:gap-2 xl:gap-4 items-center">
+        <select class="border rounded px-4 lg:px-6 xl:px-8 py-2 text-base lg:text-lg xl:text-xl font-medium bg-white">
+          <option value="ground-zero">ground-zero</option>
+          <option value="another-map">another-map</option>
+        </select>
+        <button class="bg-white text-gray-800 py-2 px-4 lg:px-5 xl:px-6 rounded hover:bg-gray-100 text-base lg:text-lg xl:text-xl font-medium border">
+          Apply
+        </button>
+      </div>
+    </div>
+
+    <!-- Cell 2: Hide/Show and Full Screen -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
+      <button class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full">
+        Hide/Show Panels
+      </button>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
+      <button class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full">
+        Full Screen
+      </button>
+    </div>
+
+    <!-- Cell 3: Screenshot Detection -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
+      <div class="flex items-center">
+        <input type="checkbox" id="auto-detect" class="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 mr-2">
+        <label for="auto-detect" class="text-base lg:text-lg xl:text-xl font-medium">Auto Screenshot Detection</label>
+      </div>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
+      <button class="bg-white border rounded py-2 px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full">
+        Force Run
+      </button>
+    </div>
+
+    <!-- Cell 4: Links -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 1;">
+      <a 
+        href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md"
+        class="text-blue-600 hover:underline text-base lg:text-lg xl:text-xl font-semibold"
+      >
+        How To Use
+      </a>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 2;">
+      <a 
+        href="https://github.com/karpitony/eft-where-am-i/issues"
+        class="text-blue-600 hover:underline text-base lg:text-lg xl:text-xl font-semibold"
+      >
+        Bug Report
+      </a>
+    </div>
+  </div>
+</body>
+</html>
