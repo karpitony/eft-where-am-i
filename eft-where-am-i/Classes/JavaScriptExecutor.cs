@@ -15,6 +15,17 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
+        /// WebView2 초기화 완료 대기
+        /// </summary>
+        private async Task EnsureWebViewInitializedAsync()
+        {
+            if (webView.CoreWebView2 == null)
+            {
+                await webView.EnsureCoreWebView2Async(null);
+            }
+        }
+
+        /// <summary>
         /// JavaScript 코드를 실행합니다.
         /// </summary>
         /// <param name="script">실행할 JavaScript 코드</param>
@@ -22,7 +33,12 @@ namespace eft_where_am_i.Classes
         {
             try
             {
-                await webView.CoreWebView2.ExecuteScriptAsync(script);
+                await EnsureWebViewInitializedAsync(); // 초기화 대기
+
+                if (webView.CoreWebView2 != null)
+                {
+                    await webView.CoreWebView2.ExecuteScriptAsync(script);
+                }
             }
             catch (Exception ex)
             {
