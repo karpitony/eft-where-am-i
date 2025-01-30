@@ -94,7 +94,7 @@ namespace eft_where_am_i
         private async void WmiFullScreen()
         {
             await Task.Delay(3000);
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button");
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
         }
 
         private async Task CheckLocationAsync()
