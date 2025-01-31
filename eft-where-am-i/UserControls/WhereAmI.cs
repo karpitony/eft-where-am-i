@@ -53,16 +53,28 @@ namespace eft_where_am_i
                 webView2_panel_ui.Source = new Uri(htmlPath);
             }
 
-            // WebView2와 메시지 통신
             webView2_panel_ui.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
 
-            // 맵 목록 전송
-            string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(mapList);
-            await webView2.ExecuteScriptAsync($"populateMapList('{mapListJson}')");
+            // HTML이 완전히 로드된 후 명령 전달
+            webView2_panel_ui.NavigationCompleted += async (sender, args) =>
+            {
+                if (args.IsSuccess)
+                {
+                    try
+                    {
+                        // 콤보박스에 맵 목록 전송
+                        string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(mapList);
+                        await webView2_panel_ui.ExecuteScriptAsync($"populateMapList('{mapListJson}', '{appSettings.latest_map}')");
 
-            // 체크박스 상태 전송
-            await webView2.ExecuteScriptAsync($"setCheckboxState({appSettings.auto_screenshot_detection.ToString().ToLower()})");
-
+                        // 체크박스 상태 전송
+                        await webView2_panel_ui.ExecuteScriptAsync($"setCheckboxState({appSettings.auto_screenshot_detection.ToString().ToLower()})");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"JavaScript 명령 전송 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
         }
 
         // 메시지 수신 핸들러

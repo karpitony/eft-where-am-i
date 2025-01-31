@@ -14,14 +14,13 @@
       <label class="text-lg lg:text-xl xl:text-2xl font-semibold">Select The Map</label>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
-      <div class="flex gap-1 lg:gap-2 xl:gap-4 items-center">
-        <select id="mapSelect" class="border rounded px-4 lg:px-6 xl:px-8 py-2 text-base lg:text-lg xl:text-xl font-medium bg-white">
-          <!-- C#에서 맵 목록 추가 -->
-        </select>
-        <button class="bg-white text-gray-800 py-2 px-4 lg:px-5 xl:px-6 rounded hover:bg-gray-100 text-base lg:text-lg xl:text-xl font-medium border" onclick="applyMapSelected()">
-          Apply
-        </button>
-      </div>
+      <select 
+        id="mapSelect"
+        onchange="mapSelected()"
+        class="border rounded mx-8 px-4 py-2 text-base lg:text-lg xl:text-xl font-medium bg-white w-full"
+      >
+        <!-- C#에서 맵 목록 추가 -->
+      </select>
     </div>
 
     <!-- Cell 2: Hide/Show and Full Screen -->
@@ -72,34 +71,48 @@
 
   <script>
     // C#에서 호출하는 함수: 맵 목록 채우기
-    function populateMapList(mapsJson) {
-      const maps = JSON.parse(mapsJson);
-      const select = document.getElementById('mapSelect');
+    function populateMapList(mapsJson, selectedMap) {
+      try {
+        const maps = JSON.parse(mapsJson);
+        const select = document.getElementById('mapSelect');
+        select.innerHTML = '';
 
-      // 기존 옵션 제거 후 맵 추가
-      select.innerHTML = '';
-      maps.forEach(map => {
-        const option = document.createElement('option');
-        option.value = map;
-        option.textContent = map;
-        select.appendChild(option);
-      });
+        maps.forEach(map => {
+            const option = document.createElement('option');
+            option.value = map;
+            option.textContent = map;
+            select.appendChild(option);
+        });
+
+        select.value = selectedMap;
+        console.log("기본 선택된 맵:", selectedMap); // 디버그용 출력
+      } catch (error) {
+          console.error("populateMapList 오류: ", error);
+      }
     }
 
     // C#에서 호출하는 함수: 초기 체크박스 상태 설정
     function setCheckboxState(isChecked) {
-      document.getElementById('autoDetect').checked = isChecked;
+      try {
+          const checkbox = document.getElementById('autoDetect');
+          checkbox.checked = isChecked;
+          console.log("Checkbox state set to:", isChecked);  // 디버그용 출력
+      } catch (error) {
+          console.error("setCheckboxState 오류 발생: ", error);
+      }
     }
 
     // 맵 선택 시 C#으로 상태 전달
-    function applyMapSelection() {
+    function mapSelected() {
       const selectedMap = document.getElementById('mapSelect').value;
+      console.log("Selected map:", selectedMap);  // 디버그용 콘솔 출력
       window.chrome.webview.postMessage(JSON.stringify({ action: 'map-selected', map: selectedMap }));
     }
 
     // 체크박스 상태 변경 시 C#으로 상태 전달
     function checkboxChanged() {
       const isChecked = document.getElementById('autoDetect').checked;
+      console.log("Checkbox state changed to:", isChecked);  // 디버그용 콘솔 출력
       window.chrome.webview.postMessage(JSON.stringify({ action: 'checkbox-updated', isChecked: isChecked }));
     }
 
