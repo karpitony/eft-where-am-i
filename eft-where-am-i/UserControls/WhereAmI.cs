@@ -94,7 +94,7 @@ namespace eft_where_am_i
         private async void WmiFullScreen()
         {
             await Task.Delay(3000);
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
         }
 
         private async Task CheckLocationAsync()
@@ -105,7 +105,7 @@ namespace eft_where_am_i
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button");
+                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
                 await Task.Delay(500);
             }
 
@@ -200,28 +200,12 @@ namespace eft_where_am_i
 
         private async void btnHideShowPannel_Click(object sender, EventArgs e)
         {
-            string jsCode =
-                "var button = document.evaluate('//*[@id=\"__nuxt\"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;\n" +
-                "if (button) {\n" +
-                "    button.click();\n" +
-                "    console.log('Panel control button clicked');\n" +
-                "} else {\n" +
-                "    console.log('Panel control button not found');\n" +
-                "}";
-            await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.mr-15 > button");
         }
 
         private async void btnFullScreen_Click(object sender, EventArgs e)
         {
-            string jsCode =
-                "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');\n" +
-                "if (button) {\n" +
-                "    button.click();\n" +
-                "    console.log('Fullscreen button clicked');\n" +
-                "} else {\n" +
-                "    console.log('Fullscreen button not found');\n" +
-                "}";
-            await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
         }
 
         private async void btnForceRun_Click(object sender, EventArgs e)
