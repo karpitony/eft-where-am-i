@@ -81,9 +81,7 @@
     <Compile Include="UserControls\SettingPage.Designer.cs">
       <DependentUpon>SettingPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\WhereAmI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="UserControls\WhereAmI.cs" />
     <Compile Include="UserControls\WhereAmI.Designer.cs">
       <DependentUpon>WhereAmI.cs</DependentUpon>
     </Compile>
@@ -119,19 +117,33 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="translations\en.json" />
-    <None Include="translations\ko.json" />
+    <None Include="translations\en.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="translations\ko.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\images\eft-where-am-i_icon_resize.png" />
-    <Content Include="assets\images\settings_icon2_resize.png" />
-    <Content Include="assets\js\i18next.min.js" />
-    <Content Include="assets\js\i18nextHttpBackend.min.js" />
+    <Content Include="assets\images\eft-where-am-i_icon_resize.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\images\settings_icon2_resize.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\js\i18next.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\js\i18nextHttpBackend.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="eft-where-am-i.ico" />
-    <Content Include="pages\panel.html" />
+    <Content Include="pages\panel.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\css\" />
