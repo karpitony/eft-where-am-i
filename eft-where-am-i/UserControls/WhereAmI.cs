@@ -94,7 +94,8 @@ namespace eft_where_am_i
         private async void WmiFullScreen()
         {
             await Task.Delay(3000);
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
+            // Updated : Jan 31 2025
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > .page-content > div > div > .panel_top > div > button");
         }
 
         private async Task CheckLocationAsync()
@@ -105,7 +106,8 @@ namespace eft_where_am_i
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button");
+                // Updated : Jan 31 2025
+                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > .page-content > div > div > .panel_top.d-flex > .d-flex.ml-15.fs-0 > button");
                 await Task.Delay(500);
             }
 
