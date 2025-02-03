@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Where Am I Panel</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="flex items-center justify-center bg-gray-50">
+  <div class="grid grid-cols-4 grid-rows-2 gap-x-6 gap-y-2 px-4 pt-1 rounded-md bg-gray-200 shadow-md w-full">
+
+    <!-- Cell 1: Map Selection -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
+      <label class="text-lg lg:text-xl xl:text-2xl font-semibold">Select The Map</label>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
+      <select 
+        id="mapSelect"
+        onchange="mapSelected()"
+        class="border rounded mx-8 px-4 py-2 text-base lg:text-lg xl:text-xl font-medium bg-white w-full"
+      >
+        <!-- C#에서 맵 목록 추가 -->
+      </select>
+    </div>
+
+    <!-- Cell 2: Hide/Show and Full Screen -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
+      <button class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full" onclick="hideShowPanel()">
+        Hide/Show Panels
+      </button>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
+      <button class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full" onclick="fullScreen()">
+        Full Screen
+      </button>
+    </div>
+
+    <!-- Cell 3: Screenshot Detection -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
+      <div class="flex items-center">
+        <input type="checkbox" id="autoDetect" class="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 mr-2" onchange="checkboxChanged()">
+        <label for="autoDetect" class="text-base lg:text-lg xl:text-xl font-medium">Auto Screenshot Detection</label>
+      </div>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
+      <button class="bg-white border rounded py-2 px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full" onclick="forceRun()">
+        Force Run
+      </button>
+    </div>
+
+    <!-- Cell 4: Links -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 1;">
+      <a 
+        id="howToUseLink"
+        href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md"
+        class="text-blue-600 hover:underline text-base lg:text-lg xl:text-xl font-semibold"
+      >
+        How To Use
+      </a>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 2;">
+      <a 
+        id="bugLink"
+        href="https://github.com/karpitony/eft-where-am-i/issues"
+        class="text-blue-600 hover:underline text-base lg:text-lg xl:text-xl font-semibold"
+      >
+        Bug Report
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // C#에서 호출하는 함수: 맵 목록 채우기
+    function populateMapList(mapsJson, selectedMap) {
+      try {
+        const maps = JSON.parse(mapsJson);
+        const select = document.getElementById('mapSelect');
+        select.innerHTML = '';
+
+        maps.forEach(map => {
+            const option = document.createElement('option');
+            option.value = map;
+            option.textContent = map;
+            select.appendChild(option);
+        });
+
+        select.value = selectedMap;
+        console.log("기본 선택된 맵:", selectedMap); // 디버그용 출력
+      } catch (error) {
+          console.error("populateMapList 오류: ", error);
+      }
+    }
+
+    // C#에서 호출하는 함수: 초기 체크박스 상태 설정
+    function setCheckboxState(isChecked) {
+      try {
+          const checkbox = document.getElementById('autoDetect');
+          checkbox.checked = isChecked;
+          console.log("Checkbox state set to:", isChecked);  // 디버그용 출력
+      } catch (error) {
+          console.error("setCheckboxState 오류 발생: ", error);
+      }
+    }
+
+    // 맵 선택 시 C#으로 상태 전달
+    function mapSelected() {
+      const selectedMap = document.getElementById('mapSelect').value;
+      console.log("Selected map:", selectedMap);  // 디버그용 콘솔 출력
+      window.chrome.webview.postMessage(JSON.stringify({ action: 'map-selected', map: selectedMap }));
+    }
+
+    // 체크박스 상태 변경 시 C#으로 상태 전달
+    function checkboxChanged() {
+      const isChecked = document.getElementById('autoDetect').checked;
+      console.log("Checkbox state changed to:", isChecked);  // 디버그용 콘솔 출력
+      window.chrome.webview.postMessage(JSON.stringify({ action: 'checkbox-updated', isChecked: isChecked }));
+    }
+
+    // Hide/Show Panel 버튼 클릭 시
+    function hideShowPanel() {
+      window.chrome.webview.postMessage(JSON.stringify({
+          action: 'hide-show-panel'
+      }));
+    }
+
+    // Full Screen 버튼 클릭 시
+    function fullScreen() {
+      window.chrome.webview.postMessage(JSON.stringify({
+          action: 'full-screen'
+      }));
+    }
+
+    // Force Run 버튼 클릭 시
+    function forceRun() {
+      window.chrome.webview.postMessage(JSON.stringify({
+          action: 'force-run'
+      }));
+    }
+
+    // How To Use 링크
+    document.querySelector('#howToUseLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'link-clicked',
+        url: this.href
+      }));
+    });
+
+    // Bug Report 링크
+    document.querySelector('#bugLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'link-clicked',
+        url: this.href
+      }));
+    });
+  </script>
+</body>
+</html>

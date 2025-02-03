@@ -38,9 +38,9 @@ namespace eft_where_am_i_chasrp
             else
             {
                 btnSetting.Text = "";
-                btnSetting.Image = Image.FromFile(@"assets\settings_icon2_resize.png");
+                btnSetting.Image = Image.FromFile(@"assets\images\settings_icon2_resize.png");
                 btnWhereAmI.Text = "";
-                btnWhereAmI.Image = Image.FromFile(@"assets\eft-where-am-i_icon_resize.png");
+                btnWhereAmI.Image = Image.FromFile(@"assets\images\eft-where-am-i_icon_resize.png");
                 checkBoxHide.Text = ">";
             }
 

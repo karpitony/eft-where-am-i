@@ -4,9 +4,19 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Threading.Tasks;
+using Microsoft.Web.WebView2.Core;
+using Newtonsoft.Json.Linq;
 using eft_where_am_i.Classes;
 namespace eft_where_am_i
 {
+    public class WebViewMessage
+    {
+        public string Action { get; set; } = string.Empty;
+        public string Map { get; set; } = string.Empty;
+        public bool IsChecked { get; set; } = false;
+        public string Url { get; set; } = string.Empty;
+    }
+
     public partial class WhereAmI : UserControl
     {
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
@@ -18,16 +28,127 @@ namespace eft_where_am_i
         private string screenshotPath;
         private FileSystemWatcher watcher;
 
+        private bool chkAutoScreenshot;
+
         public WhereAmI()
         {
             InitializeComponent();
             settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
             jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             LoadSettings();
-            InitializeMapComboBox();
+            InitializeWebView();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
             webView2.Source = new Uri(siteUrl);
             WmiFullScreen();
+        }
+
+        private async void InitializeWebView()
+        {
+            await webView2_panel_ui.EnsureCoreWebView2Async(null);
+
+            // HTML 파일 로드
+            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/panel.html");
+            if (File.Exists(htmlPath))
+            {
+                webView2_panel_ui.Source = new Uri(htmlPath);
+            }
+
+            webView2_panel_ui.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+
+            // HTML이 완전히 로드된 후 명령 전달
+            webView2_panel_ui.NavigationCompleted += async (sender, args) =>
+            {
+                if (args.IsSuccess)
+                {
+                    try
+                    {
+                        // 콤보박스에 맵 목록 전송
+                        string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(mapList);
+                        await webView2_panel_ui.ExecuteScriptAsync($"populateMapList('{mapListJson}', '{appSettings.latest_map}')");
+
+                        // 체크박스 상태 전송
+                        await webView2_panel_ui.ExecuteScriptAsync($"setCheckboxState({appSettings.auto_screenshot_detection.ToString().ToLower()})");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"JavaScript 명령 전송 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
+        }
+
+        // 메시지 수신 핸들러
+        private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                string rawMessage = e.WebMessageAsJson.Trim('"').Replace("\\\"", "\"");
+
+                JObject message = JObject.Parse(rawMessage);
+
+                // 안전하게 속성 접근
+                string action = message["action"]?.ToString() ?? "";
+                string map = message["map"]?.ToString() ?? "";
+                bool isChecked = message["isChecked"] != null && bool.Parse(message["isChecked"].ToString());
+                string url = message["url"]?.ToString() ?? "";
+
+                // 메시지 처리
+                switch (action.ToLower())
+                {
+                    case "map-selected":
+                        if (!string.IsNullOrEmpty(map))
+                        {
+                            HandleMapSelection(map);
+                        }
+                        break;
+
+                    case "checkbox-updated":
+                        chkAutoScreenshot = isChecked;
+                        appSettings.auto_screenshot_detection = chkAutoScreenshot;
+                        SaveSettings();  // 설정 변경 저장
+                        break;
+
+                    case "hide-show-panel":
+                        btnHideShowPannel_Click(null, null);
+                        break;
+
+                    case "full-screen":
+                        btnFullScreen_Click(null, null);
+                        break;
+
+                    case "force-run":
+                        btnForceRun_Click(null, null);
+                        break;
+
+                    case "link-clicked":
+                        if (!string.IsNullOrEmpty(url))
+                        {
+                            System.Diagnostics.Process.Start(url);
+                        }
+                        break;
+
+                    default:
+                        MessageBox.Show($"알 수 없는 action: {action}", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"메시지 처리 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void HandleMapSelection(string selectedMap)
+        {
+            if (!string.IsNullOrEmpty(selectedMap))
+            {
+                appSettings.latest_map = selectedMap;
+                SaveSettings();  // 설정 저장
+                siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
+                webView2.Source = new Uri(siteUrl);
+                whereAmIClick = false;
+                WmiFullScreen();  // 전체 화면 버튼 자동 클릭
+            }
         }
 
         private void LoadSettings()
@@ -36,7 +157,7 @@ namespace eft_where_am_i
             {
                 appSettings = settingsHandler.GetSettings(); // SettingsHandler에서 설정 로드
                 screenshotPath = appSettings.screenshot_path; // 스크린샷 경로 설정
-                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))  
+                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
                     try
                     {
@@ -48,7 +169,7 @@ namespace eft_where_am_i
                     }
                 }
 
-                chkAutoScreenshot.Checked = appSettings.auto_screenshot_detection;
+                chkAutoScreenshot = appSettings.auto_screenshot_detection;
             }
             catch (Exception ex)
             {
@@ -65,12 +186,6 @@ namespace eft_where_am_i
             {
                 MessageBox.Show($"설정을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void InitializeMapComboBox()
-        {
-            cmbMapSelect.Items.AddRange(mapList);
-            cmbMapSelect.SelectedItem = appSettings.latest_map; // 기본 입력값 설정
         }
 
         private string GetLatestFile()
@@ -94,7 +209,7 @@ namespace eft_where_am_i
         private async void WmiFullScreen()
         {
             await Task.Delay(3000);
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
         }
 
         private async Task CheckLocationAsync()
@@ -105,7 +220,7 @@ namespace eft_where_am_i
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > div.d-flex.ml-15.fs-0 > button");
+                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
                 await Task.Delay(500);
             }
 
@@ -135,29 +250,14 @@ namespace eft_where_am_i
             }
         }
 
-        private void btnMapApply_Click(object sender, EventArgs e)
-        {
-            string selectedMap = cmbMapSelect.SelectedItem.ToString();
-            if (selectedMap != null)
-            {
-                appSettings.latest_map = selectedMap;
-                SaveSettings(); // latest_map 업데이트 후 설정 저장
-
-                siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
-                webView2.Source = new Uri(siteUrl);
-                whereAmIClick = false;
-                WmiFullScreen();
-            }
-        }
-
         private void chkAutoScreenshot_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkAutoScreenshot.Checked)
+            if (chkAutoScreenshot)
             {
                 if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
                     MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    chkAutoScreenshot.Checked = false;
+                    chkAutoScreenshot = false;
                     appSettings.auto_screenshot_detection = false;
                     SaveSettings();
                     return;
@@ -184,7 +284,7 @@ namespace eft_where_am_i
                 }
             }
 
-            appSettings.auto_screenshot_detection = chkAutoScreenshot.Checked;
+            appSettings.auto_screenshot_detection = chkAutoScreenshot;
             SaveSettings();
         }
 
@@ -200,28 +300,12 @@ namespace eft_where_am_i
 
         private async void btnHideShowPannel_Click(object sender, EventArgs e)
         {
-            string jsCode =
-                "var button = document.evaluate('//*[@id=\"__nuxt\"]/div/div/div[2]/div/div/div[1]/div[1]/button', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;\n" +
-                "if (button) {\n" +
-                "    button.click();\n" +
-                "    console.log('Panel control button clicked');\n" +
-                "} else {\n" +
-                "    console.log('Panel control button not found');\n" +
-                "}";
-            await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.mr-15 > button");
         }
 
         private async void btnFullScreen_Click(object sender, EventArgs e)
         {
-            string jsCode =
-                "var button = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top.d-flex > button');\n" +
-                "if (button) {\n" +
-                "    button.click();\n" +
-                "    console.log('Fullscreen button clicked');\n" +
-                "} else {\n" +
-                "    console.log('Fullscreen button not found');\n" +
-                "}";
-            await webView2.CoreWebView2.ExecuteScriptAsync(jsCode);
+            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
         }
 
         private async void btnForceRun_Click(object sender, EventArgs e)
@@ -319,7 +403,7 @@ namespace eft_where_am_i
                 checkBoxHide.Top = _posSliding;
                 if (_posSliding >= MAX_SLIDING_HEIGHT)
                     timerSliding.Stop();
-                
+
             }
 
             panel1.Height = _posSliding;
