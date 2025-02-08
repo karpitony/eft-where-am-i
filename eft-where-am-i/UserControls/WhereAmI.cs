@@ -34,15 +34,15 @@ namespace eft_where_am_i
         {
             InitializeComponent();
             settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
-            jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             LoadSettings();
-            InitializeWebView();
+            InitializeWebViewUI();
+            jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
             webView2.Source = new Uri(siteUrl);
             WmiFullScreen();
         }
 
-        private async void InitializeWebView()
+        private async void InitializeWebViewUI()
         {
             await webView2_panel_ui.EnsureCoreWebView2Async(null);
 
