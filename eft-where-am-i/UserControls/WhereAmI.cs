@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json.Linq;
 using eft_where_am_i.Classes;
+
 namespace eft_where_am_i
 {
     public class WebViewMessage
@@ -209,7 +210,7 @@ namespace eft_where_am_i
         private async void WmiFullScreen()
         {
             await Task.Delay(3000);
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
+            await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
         }
 
         private async Task CheckLocationAsync()
@@ -220,7 +221,7 @@ namespace eft_where_am_i
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
+                await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
                 await Task.Delay(500);
             }
 
@@ -300,12 +301,12 @@ namespace eft_where_am_i
 
         private async void btnHideShowPannel_Click(object sender, EventArgs e)
         {
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.mr-15 > button");
+            await jsExecutor.ClickButtonAsync(Constants.HideShowPannelButtonSelector);
         }
 
         private async void btnFullScreen_Click(object sender, EventArgs e)
         {
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
+            await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
         }
 
         private async void btnForceRun_Click(object sender, EventArgs e)
