@@ -10,14 +10,6 @@ using eft_where_am_i.Classes;
 
 namespace eft_where_am_i
 {
-    public class WebViewMessage
-    {
-        public string Action { get; set; } = string.Empty;
-        public string Map { get; set; } = string.Empty;
-        public bool IsChecked { get; set; } = false;
-        public string Url { get; set; } = string.Empty;
-    }
-
     public partial class WhereAmI : UserControl
     {
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스

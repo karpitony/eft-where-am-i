@@ -82,7 +82,9 @@
     <Compile Include="UserControls\SettingPage.Designer.cs">
       <DependentUpon>SettingPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\WhereAmI.cs" />
+    <Compile Include="UserControls\WhereAmI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="UserControls\WhereAmI.Designer.cs">
       <DependentUpon>WhereAmI.cs</DependentUpon>
     </Compile>
