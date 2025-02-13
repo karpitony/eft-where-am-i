@@ -5,6 +5,7 @@ using Microsoft.Web.WebView2.Core;
 using eft_where_am_i.Classes;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace eft_where_am_i
 {
@@ -160,14 +161,16 @@ namespace eft_where_am_i
 
         public void SelectScreenshotFolder()
         {
-            using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
+            string selectedPath = "";
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             {
-                folderBrowserDialog.Description = "스크린샷 폴더를 선택하세요. Select the screenshot folder.";
+                dialog.Title = "스크린샷 폴더를 선택하세요. Select the screenshot folder.";
+                dialog.IsFolderPicker = true;
 
-                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    string selectedPath = folderBrowserDialog.SelectedPath;
-
+                    selectedPath = dialog.FileName;
+                
                     // 설정 업데이트 및 저장
                     appSettings.screenshot_path = selectedPath;
                     SaveSettings();
