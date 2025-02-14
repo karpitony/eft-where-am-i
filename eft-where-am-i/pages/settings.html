@@ -118,24 +118,18 @@
   
 
   <script>
-    // 페이지가 로드될 때, 로컬 스토리지에서 저장된 언어 값을 가져옵니다.
-    const savedLanguage = localStorage.getItem('language') || 'en';
-
-    // i18next 초기화 (로컬 스토리지에서 가져온 savedLanguage 사용)
     i18next
       .use(i18nextHttpBackend)
       .init({
-        lng: savedLanguage,
+        lng: "en",
         fallbackLng: "en",
         debug: false,
         backend: {
-          loadPath: "../translations/{{lng}}.json"
+          loadPath: "https://appassets/{{lng}}.json"
         }
       })
       .then(() => {
         updateContent();
-        // 언어 선택 드롭다운에 초기 값 설정
-        document.getElementById('languageSelect').value = savedLanguage;
       })
       .catch(err => console.error("i18next 초기화 오류:", err));
 
@@ -157,22 +151,41 @@
     function applyLanguage() {
       const language = document.getElementById('languageSelect').value;
       console.log("Selected Language:", language);
-      
-      // 로컬 스토리지에 저장
-      localStorage.setItem('language', language);
 
       // i18next를 통해 언어 변경 및 화면 갱신
       i18next.changeLanguage(language)
         .then(() => {
           updateContent();
         })
+        .then(() => {
+          window.chrome.webview.postMessage(JSON.stringify({
+            action: 'language-updated',
+            language: language
+          }));
+        })
         .catch(err => console.error("언어 변경 오류:", err));
+    }
 
-      // C#으로 언어 변경 메시지 전달 (필요한 경우)
-      window.chrome?.webview?.postMessage(JSON.stringify({
-        action: 'language-updated',
-        language: language
-      }));
+    function setLanguage(language) {
+      try {
+        // 언어 선택 <select> 요소의 값을 변경
+        const select = document.getElementById('languageSelect');
+        if(select) {
+          select.value = language;
+        }
+        // i18next를 통해 언어 변경 (비동기 처리는 필요시 then()으로 체이닝 가능)
+        i18next.changeLanguage(language)
+          .then(() => {
+            updateContent(); // DOM 텍스트 업데이트
+          })
+          .catch(error => {
+            console.error("i18next changeLanguage 오류 발생:", error);
+          });
+          
+        console.log("Language set to:", language); // 디버그용 출력
+      } catch (error) {
+        console.error("setLanguage 오류 발생: ", error);
+      }
     }
 
     // C#에서 호출하는 함수: 스크린샷 경로 설정
