@@ -32,7 +32,7 @@ namespace eft_where_am_i
             jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
             webView2.Source = new Uri(siteUrl);
-            WmiFullScreen();
+            WmiInitialize();
         }
 
         private async void InitializeWebViewUI()
@@ -140,7 +140,7 @@ namespace eft_where_am_i
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
                 webView2.Source = new Uri(siteUrl);
                 whereAmIClick = false;
-                WmiFullScreen();  // 전체 화면 버튼 자동 클릭
+                WmiInitialize();
             }
         }
 
@@ -199,10 +199,16 @@ namespace eft_where_am_i
             return files.FirstOrDefault()?.Name;
         }
 
-        private async void WmiFullScreen()
+        private async void WmiInitialize()
         {
             await Task.Delay(3000);
             await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
+            if(!whereAmIClick)
+            {
+                whereAmIClick = true;
+                await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
+                await Task.Delay(500);
+            }
         }
 
         private async Task CheckLocationAsync()
