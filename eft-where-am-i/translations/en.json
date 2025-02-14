@@ -1,11 +1,12 @@
 {
-    "Select The Map": "Select The Map",
-    "Apply": "Apply",
-    "Auto Screenshot Detection": "Auto Screenshot Detection",
-    "Hide/Show Pannels": "Hide/Show Panels",
-    "Full Screen": "Full Screen",
-    "Force Run": "Force Run",
-    "How to use": "How to use",
-    "Bug Report": "Bug Report",
-    "Apply Language": "Apply Language"
+    "settingPageTitle": "Setting Page",
+    "chooseLanguageText": "Choose language and click 'Apply' button.",
+    "applyButton": "Apply",
+    "resetScreenshotPathText": "Reset Screenshot Path",
+    "changePathButton": "Change Path",
+    "autoDetectButton": "Auto Detect",
+    "openFolderButton": "Open Screenshot Folder",
+    "howToUseLink": "How To Use",
+    "bugLink": "Bug Report",
+    "footerText": "This program is not related to Tarkov-market."
 }

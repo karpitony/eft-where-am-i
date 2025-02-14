@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <script src="../assets/js/i18next.min.js"></script>
+  <script src="../assets/js/i18nextHttpBackend.min.js"></script>
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
 
@@ -15,17 +17,31 @@
 </head>
 <body class="bg-gray-50 p-6 flex flex-col min-h-screen">
   <main class="flex-grow">
-  <h1 class="text-3xl font-semibold mb-8">Setting Page</h1>
+  <h1 
+    id="settingPageTitle"
+    class="text-3xl font-semibold mb-8"
+  >
+    Setting Page
+  </h1>
 
   <!-- Language Selection -->
   <section class="mb-6">
-    <p class="mb-2 text-xl">Choose language and click 'Apply' button.</p>
+    <p
+      id="chooseLanguageText"
+      class="mb-2 text-xl"
+    >
+      Choose language and click 'Apply' button.
+    </p>
     <div class="flex items-center space-x-4">
       <select id="languageSelect" class="border rounded px-4 py-1.5 text-base bg-white w-64">
         <option value="en">English</option>
         <option value="ko">한국어</option>
       </select>
-      <button onclick="applyLanguage()" class="bg-white border rounded py-1.5 px-4 text-base font-medium hover:bg-gray-100">
+      <button 
+        id="applyButton"
+        onclick="applyLanguage()"
+        class="bg-white border rounded py-1.5 px-4 text-base font-medium hover:bg-gray-100"
+      >
         Apply
       </button>
     </div>
@@ -33,7 +49,9 @@
 
   <!-- Screenshot Path Settings -->
   <section class="mb-6">
-    <p class="mb-2 text-xl">Reset Screenshot Path</p>
+    <p id="resetScreenshotPathText" class="mb-2 text-xl">
+      Reset Screenshot Path
+    </p>
     <div class="flex flex-col items-start space-y-4">
       <input 
         type="text"
@@ -43,13 +61,25 @@
         readonly
       />
       <div class="flex space-x-4">
-      <button onclick="changePath()" class="bg-blue-500 text-white rounded py-1.5 px-4 text-base hover:bg-blue-600">
+      <button 
+        id="changePathButton"
+        onclick="changePath()"
+        class="bg-blue-500 text-white rounded py-1.5 px-4 text-base hover:bg-blue-600"
+      >
         Change Path
       </button>
-      <button onclick="autoDetect()" class="bg-gray-300 text-gray-800 rounded py-1.5 px-4 text-base hover:bg-gray-400">
+      <button 
+        id="autoDetectButton"
+        onclick="autoDetect()"
+        class="bg-gray-300 text-gray-800 rounded py-1.5 px-4 text-base hover:bg-gray-400"
+      >
         Auto Detect
       </button>
-      <button onclick="openFolder()" class="bg-gray-300 text-gray-800 rounded py-1.5 px-4 text-base hover:bg-gray-400">
+      <button 
+        id="openFolderButton"
+        onclick="openFolder()"
+        class="bg-gray-300 text-gray-800 rounded py-1.5 px-4 text-base hover:bg-gray-400"
+      >
         Open Screenshot Folder
       </button>
       </div>
@@ -81,30 +111,65 @@
         </div>
       </div>
     </section>
-    <p class="text-center text-gray-500 text-sm mt-4">
+    <p id="footerText" class="text-center text-gray-500 text-sm mt-4">
       This program is not related to Tarkov-market.
     </p>
   </footer>
   
 
   <script>
-    // C#에서 호출하는 함수: 언어 설정 업데이트
-    function setLanguage(language) {
-      try {
-        const select = document.getElementById('languageSelect');
-        select.value = language;
-        console.log("Language set to:", language); // 디버그용 출력
-      } catch (error) {
-        console.error("setLanguage 오류 발생: ", error);
-      }
+    // 페이지가 로드될 때, 로컬 스토리지에서 저장된 언어 값을 가져옵니다.
+    const savedLanguage = localStorage.getItem('language') || 'en';
+
+    // i18next 초기화 (로컬 스토리지에서 가져온 savedLanguage 사용)
+    i18next
+      .use(i18nextHttpBackend)
+      .init({
+        lng: savedLanguage,
+        fallbackLng: "en",
+        debug: false,
+        backend: {
+          loadPath: "../translations/{{lng}}.json"
+        }
+      })
+      .then(() => {
+        updateContent();
+        // 언어 선택 드롭다운에 초기 값 설정
+        document.getElementById('languageSelect').value = savedLanguage;
+      })
+      .catch(err => console.error("i18next 초기화 오류:", err));
+
+    // DOM에 번역 적용 함수
+    function updateContent() {
+      document.getElementById('settingPageTitle').textContent = i18next.t('settingPageTitle');
+      document.getElementById('chooseLanguageText').textContent = i18next.t('chooseLanguageText');
+      document.getElementById('applyButton').textContent = i18next.t('applyButton');
+      document.getElementById('resetScreenshotPathText').textContent = i18next.t('resetScreenshotPathText');
+      document.getElementById('changePathButton').textContent = i18next.t('changePathButton');
+      document.getElementById('autoDetectButton').textContent = i18next.t('autoDetectButton');
+      document.getElementById('openFolderButton').textContent = i18next.t('openFolderButton');
+      document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
+      document.getElementById('bugLink').textContent = i18next.t('bugLink');
+      document.getElementById('footerText').textContent = i18next.t('footerText');
     }
 
-    // 언어 선택 시 C#으로 전달
+    // 언어 선택 시 호출되는 함수
     function applyLanguage() {
       const language = document.getElementById('languageSelect').value;
       console.log("Selected Language:", language);
       
-      window.chrome.webview.postMessage(JSON.stringify({
+      // 로컬 스토리지에 저장
+      localStorage.setItem('language', language);
+
+      // i18next를 통해 언어 변경 및 화면 갱신
+      i18next.changeLanguage(language)
+        .then(() => {
+          updateContent();
+        })
+        .catch(err => console.error("언어 변경 오류:", err));
+
+      // C#으로 언어 변경 메시지 전달 (필요한 경우)
+      window.chrome?.webview?.postMessage(JSON.stringify({
         action: 'language-updated',
         language: language
       }));
