@@ -7,16 +7,10 @@ using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json.Linq;
 using eft_where_am_i.Classes;
+using System.Runtime.InteropServices;
+
 namespace eft_where_am_i
 {
-    public class WebViewMessage
-    {
-        public string Action { get; set; } = string.Empty;
-        public string Map { get; set; } = string.Empty;
-        public bool IsChecked { get; set; } = false;
-        public string Url { get; set; } = string.Empty;
-    }
-
     public partial class WhereAmI : UserControl
     {
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
@@ -34,17 +28,68 @@ namespace eft_where_am_i
         {
             InitializeComponent();
             settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
-            jsExecutor = new JavaScriptExecutor(webView2); // WebView2 전달
             LoadSettings();
-            InitializeWebView();
+            InitializeWebViewUI();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
-            webView2.Source = new Uri(siteUrl);
-            WmiFullScreen();
+            InitializeWebViewContent();
+            jsExecutor = new JavaScriptExecutor(webView2);
+            WmiInitialize();
         }
 
-        private async void InitializeWebView()
+        private async void InitializeWebViewContent()
         {
-            await webView2_panel_ui.EnsureCoreWebView2Async(null);
+            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
+            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2_Content", Guid.NewGuid().ToString());
+            CoreWebView2Environment env = null;
+            try
+            {
+                // 사용자 데이터 폴더를 지정하여 새로운 WebView2 환경 생성
+                env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                await webView2.EnsureCoreWebView2Async(env);
+            }
+            catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
+            {
+                MessageBox.Show($"웹 콘텐츠용 WebView2 초기화 오류: {comEx.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"웹 콘텐츠용 WebView2 초기화 예외: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 외부 URL 로드 (예외 처리 포함)
+            try
+            {
+                webView2.Source = new Uri(siteUrl);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"웹 콘텐츠 URL 설정 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void InitializeWebViewUI()
+        {
+            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
+            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2", Guid.NewGuid().ToString());
+            CoreWebView2Environment env = null;
+            try
+            {
+                // 사용자 데이터 폴더를 지정하여 새로운 WebView2 환경 생성
+                env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                await webView2_panel_ui.EnsureCoreWebView2Async(env);
+            }
+            catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
+            {
+                MessageBox.Show($"WebView2 초기화 중 오류 발생: {comEx.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"WebView2 초기화 중 예외 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             // HTML 파일 로드
             string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/panel.html");
@@ -147,7 +192,7 @@ namespace eft_where_am_i
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
                 webView2.Source = new Uri(siteUrl);
                 whereAmIClick = false;
-                WmiFullScreen();  // 전체 화면 버튼 자동 클릭
+                WmiInitialize();
             }
         }
 
@@ -206,10 +251,16 @@ namespace eft_where_am_i
             return files.FirstOrDefault()?.Name;
         }
 
-        private async void WmiFullScreen()
+        private async void WmiInitialize()
         {
-            await Task.Delay(3000);
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
+            await Task.Delay(5000);
+            await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
+            if(!whereAmIClick)
+            {
+                whereAmIClick = true;
+                await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
+                await Task.Delay(500);
+            }
         }
 
         private async Task CheckLocationAsync()
@@ -220,7 +271,7 @@ namespace eft_where_am_i
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button");
+                await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
                 await Task.Delay(500);
             }
 
@@ -300,12 +351,12 @@ namespace eft_where_am_i
 
         private async void btnHideShowPannel_Click(object sender, EventArgs e)
         {
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.mr-15 > button");
+            await jsExecutor.ClickButtonAsync(Constants.HideShowPannelButtonSelector);
         }
 
         private async void btnFullScreen_Click(object sender, EventArgs e)
         {
-            await jsExecutor.ClickButtonAsync("#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button");
+            await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
         }
 
         private async void btnForceRun_Click(object sender, EventArgs e)

@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Where Am I Panel</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
+
+    body {
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    }
+  </style>
 </head>
 <body class="flex items-center justify-center bg-gray-50">
   <div class="grid grid-cols-4 grid-rows-2 gap-x-6 gap-y-2 px-4 pt-1 rounded-md bg-gray-200 shadow-md w-full">
@@ -17,7 +24,7 @@
       <select 
         id="mapSelect"
         onchange="mapSelected()"
-        class="border rounded mx-8 px-4 py-2 text-base lg:text-lg xl:text-xl font-medium bg-white w-full"
+        class="border rounded mx-8 px-4 py-1 text-base lg:text-lg xl:text-xl font-medium bg-white w-full"
       >
         <!-- C#에서 맵 목록 추가 -->
       </select>
@@ -25,12 +32,18 @@
 
     <!-- Cell 2: Hide/Show and Full Screen -->
     <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
-      <button class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full" onclick="hideShowPanel()">
+      <button 
+        onclick="hideShowPanel()"
+        class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
+      >
         Hide/Show Panels
       </button>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
-      <button class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full" onclick="fullScreen()">
+      <button 
+        onclick="fullScreen()"
+        class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
+      >
         Full Screen
       </button>
     </div>
@@ -43,7 +56,10 @@
       </div>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
-      <button class="bg-white border rounded py-2 px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full" onclick="forceRun()">
+      <button 
+        onclick="forceRun()"
+        class="bg-white border rounded py-2 px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
+      >
         Force Run
       </button>
     </div>
