@@ -2,10 +2,12 @@
 using System.IO;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
+using System.Threading.Tasks;
 using eft_where_am_i.Classes;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Runtime.InteropServices;
 
 namespace eft_where_am_i
 {
@@ -24,7 +26,25 @@ namespace eft_where_am_i
 
         private async void InitializeWebViewUI()
         {
-            await webView2_Settings.EnsureCoreWebView2Async(null);
+            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
+            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2_Settings", Guid.NewGuid().ToString());
+            CoreWebView2Environment env = null;
+            try
+            {
+                // 사용자 데이터 폴더를 지정하여 새로운 WebView2 환경 생성
+                env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                await webView2_Settings.EnsureCoreWebView2Async(env);
+            }
+            catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
+            {
+                MessageBox.Show($"WebView2 초기화 중 오류 발생: {comEx.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"WebView2 초기화 중 예외 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/settings.html");
             if (File.Exists(htmlPath))
@@ -159,7 +179,7 @@ namespace eft_where_am_i
             }
         }
 
-        public void SelectScreenshotFolder()
+        public async void SelectScreenshotFolder()
         {
             string selectedPath = "";
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
@@ -175,8 +195,9 @@ namespace eft_where_am_i
                     appSettings.screenshot_path = selectedPath;
                     SaveSettings();
 
-                    // JavaScript에 업데이트된 경로 전송
-                    webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{selectedPath.Replace("\\", "\\\\")}')");
+                    // JavaScript에 업데이트된 경로 전송 (백슬래시 이스케이프)
+                    string escapedPath = selectedPath.Replace("\\", "\\\\");
+                    await webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{escapedPath}')");
                 }
             }
         }
