@@ -79,6 +79,15 @@ namespace eft_where_am_i
                 // 사용자 데이터 폴더를 지정하여 새로운 WebView2 환경 생성
                 env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
                 await webView2_panel_ui.EnsureCoreWebView2Async(env);
+
+
+                // 가상 호스트 매핑 코드: 예를 들어, 번역 파일들이 저장된 폴더를 매핑
+                string translationFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "translations");
+                webView2_panel_ui.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "appassets",
+                    translationFolder,
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
             }
             catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
             {
@@ -107,6 +116,10 @@ namespace eft_where_am_i
                 {
                     try
                     {
+                        // 언어 설정 전송
+                        string language = appSettings.language;
+                        await webView2_panel_ui.ExecuteScriptAsync($"setLanguage('{language}')");
+
                         // 콤보박스에 맵 목록 전송
                         string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(mapList);
                         await webView2_panel_ui.ExecuteScriptAsync($"populateMapList('{mapListJson}', '{appSettings.latest_map}')");

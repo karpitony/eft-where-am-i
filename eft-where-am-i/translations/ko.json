@@ -1,5 +1,11 @@
 {
-    "settingPageTitle": "설정 페이지지",
+    "mapSelectionLabel": "맵을 선택해주세요.",
+    "hideShowPanelsButton": "패널 숨기기/보이기",
+    "fullScreenButton": "전체 화면",
+    "autoScreenshotDetectionLabel": "스크린샷 자동 감지",
+    "forceRunButton": "강제 실행",
+
+    "settingPageTitle": "설정 페이지",
     "chooseLanguageText": "언어를 선택하고 '적용' 버튼을 클릭하십시오.",
     "applyButton": "적용",
     "resetScreenshotPathText": "스크린샷 경로 초기화",

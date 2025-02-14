@@ -1,4 +1,10 @@
 {
+    "mapSelectionLabel": "Select The Map",
+    "hideShowPanelsButton": "Hide/Show Panels",
+    "fullScreenButton": "Full Screen",
+    "autoScreenshotDetectionLabel": "Auto Screenshot Detection",
+    "forceRunButton": "Force Run",
+
     "settingPageTitle": "Setting Page",
     "chooseLanguageText": "Choose language and click 'Apply' button.",
     "applyButton": "Apply",
