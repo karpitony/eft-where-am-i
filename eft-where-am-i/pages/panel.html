@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Where Am I Panel</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <script src="../assets/js/i18next.min.js"></script>
+  <script src="../assets/js/i18nextHttpBackend.min.js"></script>
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
 
@@ -18,7 +20,12 @@
 
     <!-- Cell 1: Map Selection -->
     <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
-      <label class="text-lg lg:text-xl xl:text-2xl font-semibold">Select The Map</label>
+      <label
+        id="mapSelectionLabel"
+        class="text-lg lg:text-xl xl:text-2xl font-semibold"
+      >
+        Select The Map
+      </label>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
       <select 
@@ -33,6 +40,7 @@
     <!-- Cell 2: Hide/Show and Full Screen -->
     <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
       <button 
+        id="hideShowPanelsButton"
         onclick="hideShowPanel()"
         class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
       >
@@ -41,6 +49,7 @@
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
       <button 
+        id="fullScreenButton"
         onclick="fullScreen()"
         class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
       >
@@ -52,11 +61,18 @@
     <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
       <div class="flex items-center">
         <input type="checkbox" id="autoDetect" class="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 mr-2" onchange="checkboxChanged()">
-        <label for="autoDetect" class="text-base lg:text-lg xl:text-xl font-medium">Auto Screenshot Detection</label>
+        <label 
+          id="autoScreenshotDetectionLabel"
+          for="autoDetect"
+          class="text-base lg:text-lg xl:text-xl font-medium"
+        >
+          Auto Screenshot Detection
+        </label>
       </div>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
       <button 
+        id="forceRunButton"
         onclick="forceRun()"
         class="bg-white border rounded py-2 px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
       >
@@ -86,6 +102,55 @@
   </div>
 
   <script>
+    i18next
+      .use(i18nextHttpBackend)
+      .init({
+        lng: "en",
+        fallbackLng: "en",
+        debug: false,
+        backend: {
+          loadPath: "https://appassets/{{lng}}.json"
+        }
+      })
+      .then(() => {
+        updateContent();
+      })
+      .catch(err => console.error("i18next 초기화 오류:", err));
+
+    // DOM에 번역 적용 함수
+    function updateContent() {
+      document.getElementById('mapSelectionLabel').textContent = i18next.t('mapSelectionLabel');
+      document.getElementById('autoScreenshotDetectionLabel').textContent = i18next.t('autoScreenshotDetectionLabel');
+      document.getElementById('hideShowPanelsButton').textContent = i18next.t('hideShowPanelsButton');
+      document.getElementById('fullScreenButton').textContent = i18next.t('fullScreenButton');
+      document.getElementById('forceRunButton').textContent = i18next.t('forceRunButton');
+      document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
+      document.getElementById('bugLink').textContent = i18next.t('bugLink');
+    }
+
+    // C#에서 호출하는 함수: 언어 설정
+    function setLanguage(language) {
+      try {
+        // 언어 선택 <select> 요소의 값을 변경
+        const select = document.getElementById('languageSelect');
+        if(select) {
+          select.value = language;
+        }
+        // i18next를 통해 언어 변경 (비동기 처리는 필요시 then()으로 체이닝 가능)
+        i18next.changeLanguage(language)
+          .then(() => {
+            updateContent(); // DOM 텍스트 업데이트
+          })
+          .catch(error => {
+            console.error("i18next changeLanguage 오류 발생:", error);
+          });
+          
+        console.log("Language set to:", language); // 디버그용 출력
+      } catch (error) {
+        console.error("setLanguage 오류 발생: ", error);
+      }
+    }
+
     // C#에서 호출하는 함수: 맵 목록 채우기
     function populateMapList(mapsJson, selectedMap) {
       try {

@@ -34,6 +34,14 @@ namespace eft_where_am_i
                 // 사용자 데이터 폴더를 지정하여 새로운 WebView2 환경 생성
                 env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
                 await webView2_Settings.EnsureCoreWebView2Async(env);
+
+                // 가상 호스트 매핑 코드: 예를 들어, 번역 파일들이 저장된 폴더를 매핑
+                string translationFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "translations");
+                webView2_Settings.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "appassets",
+                    translationFolder,
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
             }
             catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
             {
