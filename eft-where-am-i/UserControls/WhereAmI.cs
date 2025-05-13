@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Linq; 
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Threading.Tasks;
@@ -281,7 +281,7 @@ namespace eft_where_am_i
             string screenshot = GetLatestFile();
             if (screenshot == null) return;
 
-            if (!whereAmIClick)
+            if (!await jsExecutor.CheckInputAble())
             {
                 whereAmIClick = true;
                 await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
