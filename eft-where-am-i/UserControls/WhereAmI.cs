@@ -174,9 +174,9 @@ namespace eft_where_am_i
                         break;
 
                     case "checkbox-updated":
-                        chkAutoScreenshot = isChecked;
-                        appSettings.auto_screenshot_detection = chkAutoScreenshot;
+                        appSettings.auto_screenshot_detection = isChecked;
                         SaveSettings();  // 설정 변경 저장
+                        UpdateWatcherState(isChecked);
                         break;
 
                     case "hide-show-panel":
@@ -226,8 +226,8 @@ namespace eft_where_am_i
         {
             try
             {
-                appSettings = settingsHandler.GetSettings(); // SettingsHandler에서 설정 로드
-                screenshotPath = appSettings.screenshot_path; // 스크린샷 경로 설정
+                appSettings = settingsHandler.GetSettings();        // SettingsHandler에서 설정 로드
+                screenshotPath = appSettings.screenshot_path;       // 스크린샷 경로 설정
                 if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
                     try
@@ -241,6 +241,8 @@ namespace eft_where_am_i
                 }
 
                 chkAutoScreenshot = appSettings.auto_screenshot_detection;
+                // 설정값을 기준으로 FileSystemWatcher를 초기화합니다.
+                UpdateWatcherState(chkAutoScreenshot);
             }
             catch (Exception ex)
             {
@@ -303,42 +305,55 @@ namespace eft_where_am_i
             }
 
             await jsExecutor.SetInputValueAsync("input[type=\"text\"]", screenshot.Replace(".png", ""));
-            await ChangeMarkerAsync();
+            // await ChangeMarkerAsync();
         }
 
-        private async Task ChangeMarkerAsync()
-        {
-            string[] styleList = {
-                "background: #ff0000",
-                "height: 20px",
-                "width: 20px"
-            };
+        //private async Task ChangeMarkerAsync()
+        //{
+        //    string[] styleList = {
+        //        "background: #ff0000",
+        //        "height: 20px",
+        //        "width: 20px"
+        //    };
 
-            foreach (var style in styleList)
-            {
-                string[] styleParts = style.Split(':');
-                string jsCode = $@"
-                    var marker = document.getElementsByClassName('marker')[0];
-                    if (marker) {{
-                        marker.style.setProperty('{styleParts[0].Trim()}', '{styleParts[1].Trim()}', 'important');
-                    }} else {{
-                        console.log('Marker not found');
-                    }}";
-                await jsExecutor.ExecuteScriptAsync(jsCode);
-            }
-        }
+        //    foreach (var style in styleList)
+        //    {
+        //        string[] styleParts = style.Split(':');
+        //        string jsCode = $@"
+        //            var marker = document.getElementsByClassName('marker')[0];
+        //            if (marker) {{
+        //                marker.style.setProperty('{styleParts[0].Trim()}', '{styleParts[1].Trim()}', 'important');
+        //            }} else {{
+        //                console.log('Marker not found');
+        //            }}";
+        //        await jsExecutor.ExecuteScriptAsync(jsCode);
+        //    }
+        //}
 
-        private void chkAutoScreenshot_CheckedChanged(object sender, EventArgs e)
+        private void UpdateWatcherState(bool isEnabled)
         {
-            if (chkAutoScreenshot)
+            // bool 필드 값을 새 상태로 업데이트
+            chkAutoScreenshot = isEnabled;
+
+            if (isEnabled)
             {
                 if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
                 {
                     MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    chkAutoScreenshot = false;
+                    chkAutoScreenshot = false; // 상태를 다시 false로
                     appSettings.auto_screenshot_detection = false;
                     SaveSettings();
+
+                    // (중요) UI에도 반영
+                    _ = webView2_panel_ui.ExecuteScriptAsync($"setCheckboxState(false)");
                     return;
+                }
+
+                // 와처가 이미 실행 중이면 중복 생성 방지
+                if (watcher != null)
+                {
+                    watcher.EnableRaisingEvents = false;
+                    watcher.Dispose();
                 }
 
                 watcher = new FileSystemWatcher
@@ -362,10 +377,10 @@ namespace eft_where_am_i
                 }
             }
 
-            appSettings.auto_screenshot_detection = chkAutoScreenshot;
-            SaveSettings();
+            // (선택사항) 이 메서드에서 직접 설정을 저장하도록 변경
+            // appSettings.auto_screenshot_detection = isEnabled;
+            // SaveSettings();
         }
-
 
         private async void OnScreenshotCreated(object sender, FileSystemEventArgs e)
         {
@@ -389,16 +404,6 @@ namespace eft_where_am_i
         private async void btnForceRun_Click(object sender, EventArgs e)
         {
             await CheckLocationAsync();
-        }
-
-        private void lblHowToUse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/blob/main/README.md");
-        }
-
-        private void lblBugReport_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://github.com/karpitony/eft-where-am-i/issues");
         }
 
         // Form1.cs에 넣고 싶었는데 예상 못한 오류가 발생하여 여기에 넣음
