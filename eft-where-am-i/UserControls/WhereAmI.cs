@@ -114,7 +114,7 @@ namespace eft_where_am_i
             }
 
             // HTML 파일 로드
-            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/panel.html");
+            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "html/panel.html");
             if (File.Exists(htmlPath))
             {
                 webView2_panel_ui.Source = new Uri(htmlPath);

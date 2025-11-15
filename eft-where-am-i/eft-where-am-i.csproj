@@ -176,11 +176,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="eft-where-am-i.ico" />
-    <Content Include="pages\panel.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="html\panel.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="pages\settings.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="html\settings.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -194,4 +194,17 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.2957.106\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.2957.106\build\Microsoft.Web.WebView2.targets'))" />
   </Target>
+  <Target Name="InstallNpmDependencies" BeforeTargets="BuildTailwindCss" Condition="!Exists('$(ProjectDir)node_modules')">
+    <Message Text="Running 'npm install'..." Importance="high" />
+    <Exec Command="npm install" WorkingDirectory="$(ProjectDir)" />
+  </Target>
+  <Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" DependsOnTargets="InstallNpmDependencies">
+    <Message Text="Building Tailwind CSS..." Importance="high" />
+    <Exec Command="npm run build:css" WorkingDirectory="$(ProjectDir)" />
+  </Target>
+  <ItemGroup>
+    <Content Include="assets\css\tailwind.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

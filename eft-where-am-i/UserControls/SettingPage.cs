@@ -66,7 +66,7 @@ namespace eft_where_am_i
                 return;
             }
 
-            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/settings.html");
+            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "html/settings.html");
             if (File.Exists(htmlPath))
             {
                 webView2_Settings.Source = new Uri(htmlPath);
