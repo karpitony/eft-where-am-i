@@ -7,16 +7,31 @@ namespace eft_where_am_i.Classes
 {
     internal class SettingsHandler
     {
-        private static readonly string DefaultFilePath = Path.Combine("assets", "settings.json");
-        private readonly string _filePath;
-        private AppSettings _settings;
+        // 싱글톤 인스턴스
+        private static SettingsHandler _instance;
+        public static SettingsHandler Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new SettingsHandler();  // 처음 접근 시 생성
+                return _instance;
+            }
+        }
 
-        public SettingsHandler()
+        private SettingsHandler()
         {
             _filePath = DefaultFilePath;
             EnsureDirectoryExists();
             Load();
         }
+
+
+        private static readonly string DefaultFilePath = Path.Combine("assets", "settings.json");
+        private readonly string _filePath;
+        private AppSettings _settings;
+        public event Action<AppSettings> SettingsChanged;
+
 
         /// 디렉터리 존재 여부 확인 후 없으면 생성
         private void EnsureDirectoryExists()
@@ -75,6 +90,7 @@ namespace eft_where_am_i.Classes
         {
             updater(_settings);
             Save();
+            SettingsChanged?.Invoke(_settings);
         }
 
         /// 전체 AppSettings 객체를 반환
@@ -88,6 +104,7 @@ namespace eft_where_am_i.Classes
         {
             _settings = newSettings;
             Save();
+            SettingsChanged?.Invoke(_settings);
         }
     }
 

@@ -4,19 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings</title>
-  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   <script src="../assets/js/i18next.min.js"></script>
   <script src="../assets/js/i18nextHttpBackend.min.js"></script>
-  <style>
-    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
-
-    body {
-      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../assets/css/tailwind.css">
 </head>
-<body class="bg-gray-50 p-6 flex flex-col min-h-screen">
-  <main class="flex-grow">
+<body class="bg-gray-200 p-6 flex flex-col min-h-screen">
+  <main class="grow">
   <h1 
     id="settingPageTitle"
     class="text-3xl font-semibold mb-8"
@@ -91,7 +85,7 @@
   <footer class="mt-auto">
     <section class="flex justify-center items-center w-full">
       <div class="flex items-center w-3xl">
-        <div class="flex justify-center items-center w-full"">
+        <div class="flex justify-center items-center w-full">
           <a 
             id="howToUseLink"
             href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md"
@@ -100,7 +94,7 @@
             How To Use
           </a>
         </div>
-        <div class="flex justify-center items-center w-full"">
+        <div class="flex justify-center items-center w-full">
           <a 
             id="bugLink"
             href="https://github.com/karpitony/eft-where-am-i/issues"

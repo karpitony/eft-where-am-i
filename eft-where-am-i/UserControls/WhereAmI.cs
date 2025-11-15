@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Linq; 
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Threading.Tasks;
@@ -27,7 +27,8 @@ namespace eft_where_am_i
         public WhereAmI()
         {
             InitializeComponent();
-            settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
+            settingsHandler = SettingsHandler.Instance;             // 싱글톤 인스턴스 사용
+            settingsHandler.SettingsChanged += OnSettingsChanged;   // 세팅 변경될 때마다 호출됨
             LoadSettings();
             InitializeWebViewUI();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
@@ -35,6 +36,18 @@ namespace eft_where_am_i
             jsExecutor = new JavaScriptExecutor(webView2);
             WmiInitialize();
         }
+
+        private async void OnSettingsChanged(AppSettings updatedSettings)
+        {
+            // 새로운 설정 반영
+            appSettings = updatedSettings;
+
+            // 화면 갱신 (언어/경로 등 UI 업데이트)
+            LoadSettings();
+            string language = appSettings.language;
+            await webView2_panel_ui.ExecuteScriptAsync($"setLanguage('{language}')");
+        }
+
 
         private async void InitializeWebViewContent()
         {
@@ -101,7 +114,7 @@ namespace eft_where_am_i
             }
 
             // HTML 파일 로드
-            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/panel.html");
+            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "html/panel.html");
             if (File.Exists(htmlPath))
             {
                 webView2_panel_ui.Source = new Uri(htmlPath);
@@ -282,7 +295,7 @@ namespace eft_where_am_i
             string screenshot = GetLatestFile();
             if (screenshot == null) return;
 
-            if (!whereAmIClick)
+            if (!await jsExecutor.CheckInputAble())
             {
                 whereAmIClick = true;
                 await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);

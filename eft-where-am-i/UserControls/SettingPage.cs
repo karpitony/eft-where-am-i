@@ -19,9 +19,21 @@ namespace eft_where_am_i
         public SettingPage()
         {
             InitializeComponent();
-            settingsHandler = new SettingsHandler(); // SettingsHandler 초기화
+            settingsHandler = SettingsHandler.Instance;     // 싱글톤 인스턴스 사용
+            settingsHandler.SettingsChanged += OnSettingsChanged;
+
             LoadSettings();
             InitializeWebViewUI();
+        }
+
+        private void OnSettingsChanged(AppSettings updatedSettings)
+        {
+            appSettings = updatedSettings; // 로컬 참조 업데이트
+                                           // WebView나 UI 갱신 필요 시 호출
+            _ = webView2_Settings.ExecuteScriptAsync($"setCheckboxState({appSettings.auto_screenshot_detection.ToString().ToLower()})");
+            _ = webView2_Settings.ExecuteScriptAsync($"setLanguage('{appSettings.language}')");
+            string escapedPath = appSettings.screenshot_path.Replace("\\", "\\\\");
+            _ = webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{escapedPath}')");
         }
 
         private async void InitializeWebViewUI()
@@ -54,7 +66,7 @@ namespace eft_where_am_i
                 return;
             }
 
-            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pages/settings.html");
+            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "html/settings.html");
             if (File.Exists(htmlPath))
             {
                 webView2_Settings.Source = new Uri(htmlPath);
