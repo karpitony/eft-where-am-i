@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
@@ -61,6 +62,40 @@ namespace eft_where_am_i.Classes
                     console.log('Button not found');
                 }}";
             await ExecuteScriptAsync(script);
+        }
+
+        public async Task<bool> CheckInputAble()
+        {
+            string script = $@"
+            (function() {{
+                const buttons = document.querySelectorAll('button');
+                for (const btn of buttons) {{
+                    if (btn.textContent.trim() === 'Where am i?') {{
+                        const parent = btn.parentElement;
+                        if (!parent) return false;
+
+                        const input = parent.querySelector('input');
+                        if (!input) return false;
+
+                        const isVisible = input.offsetParent !== null;
+                        const isEnabled = !input.disabled && !input.readOnly;
+
+                        return isVisible && isEnabled;
+                    }}
+                }}
+                return false;
+            }})()
+            ";
+            try
+            {
+                string result = await webView.ExecuteScriptAsync(script);
+                return result.Trim().ToLower() == "true";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"JS 실행 실패: {ex.Message}");
+                return false;
+            }
         }
 
         /// <summary>

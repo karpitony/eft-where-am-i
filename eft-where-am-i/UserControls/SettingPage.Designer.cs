@@ -30,14 +30,8 @@
         {
             this.lblBugReport = new System.Windows.Forms.LinkLabel();
             this.lblHowToUse = new System.Windows.Forms.LinkLabel();
-            this.txtPath = new System.Windows.Forms.TextBox();
-            this.btnPathChange = new System.Windows.Forms.Button();
-            this.chkAutoScreenshotCleaner = new System.Windows.Forms.CheckBox();
-            this.cmbLanguageSelect = new System.Windows.Forms.ComboBox();
-            this.btnLanguageSelect = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.btnPathAutoFind = new System.Windows.Forms.Button();
+            this.webView2_Settings = new Microsoft.Web.WebView2.WinForms.WebView2();
+            ((System.ComponentModel.ISupportInitialize)(this.webView2_Settings)).BeginInit();
             this.SuspendLayout();
             // 
             // lblBugReport
@@ -67,106 +61,30 @@
             this.lblHowToUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblHowToUse.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblHowToUse_LinkClicked);
             // 
-            // txtPath
+            // webView2_Settings
             // 
-            this.txtPath.Font = new System.Drawing.Font("굴림", 15F);
-            this.txtPath.Location = new System.Drawing.Point(45, 194);
-            this.txtPath.Name = "txtPath";
-            this.txtPath.ReadOnly = true;
-            this.txtPath.Size = new System.Drawing.Size(707, 30);
-            this.txtPath.TabIndex = 8;
+            this.webView2_Settings.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
+            this.webView2_Settings.AllowExternalDrop = true;
+            this.webView2_Settings.CreationProperties = null;
+            this.webView2_Settings.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.webView2_Settings.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webView2_Settings.Location = new System.Drawing.Point(0, 0);
+            this.webView2_Settings.Name = "webView2_Settings";
+            this.webView2_Settings.Size = new System.Drawing.Size(1309, 1061);
+            this.webView2_Settings.TabIndex = 8;
+            this.webView2_Settings.ZoomFactor = 1D;
+            this.webView2_Settings.Click += new System.EventHandler(this.webView21_Click);
             // 
-            // btnPathChange
-            // 
-            this.btnPathChange.Font = new System.Drawing.Font("굴림", 15F);
-            this.btnPathChange.Location = new System.Drawing.Point(45, 230);
-            this.btnPathChange.Name = "btnPathChange";
-            this.btnPathChange.Size = new System.Drawing.Size(108, 30);
-            this.btnPathChange.TabIndex = 9;
-            this.btnPathChange.Text = "Change";
-            this.btnPathChange.UseVisualStyleBackColor = true;
-            this.btnPathChange.Click += new System.EventHandler(this.btnPathChange_Click);
-            // 
-            // chkAutoScreenshotCleaner
-            // 
-            this.chkAutoScreenshotCleaner.AutoSize = true;
-            this.chkAutoScreenshotCleaner.Font = new System.Drawing.Font("굴림", 15F);
-            this.chkAutoScreenshotCleaner.Location = new System.Drawing.Point(45, 309);
-            this.chkAutoScreenshotCleaner.Name = "chkAutoScreenshotCleaner";
-            this.chkAutoScreenshotCleaner.Size = new System.Drawing.Size(297, 24);
-            this.chkAutoScreenshotCleaner.TabIndex = 10;
-            this.chkAutoScreenshotCleaner.Text = "Clean Screenshot Automatically";
-            this.chkAutoScreenshotCleaner.UseVisualStyleBackColor = true;
-            this.chkAutoScreenshotCleaner.CheckedChanged += new System.EventHandler(this.chkAutoScreenshotCleaner_CheckedChanged);
-            // 
-            // cmbLanguageSelect
-            // 
-            this.cmbLanguageSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbLanguageSelect.Font = new System.Drawing.Font("굴림", 15F);
-            this.cmbLanguageSelect.FormattingEnabled = true;
-            this.cmbLanguageSelect.Location = new System.Drawing.Point(45, 103);
-            this.cmbLanguageSelect.Name = "cmbLanguageSelect";
-            this.cmbLanguageSelect.Size = new System.Drawing.Size(163, 28);
-            this.cmbLanguageSelect.TabIndex = 11;
-            // 
-            // btnLanguageSelect
-            // 
-            this.btnLanguageSelect.Font = new System.Drawing.Font("굴림", 15F);
-            this.btnLanguageSelect.Location = new System.Drawing.Point(223, 103);
-            this.btnLanguageSelect.Name = "btnLanguageSelect";
-            this.btnLanguageSelect.Size = new System.Drawing.Size(85, 28);
-            this.btnLanguageSelect.TabIndex = 12;
-            this.btnLanguageSelect.Text = "Apply";
-            this.btnLanguageSelect.UseVisualStyleBackColor = true;
-            this.btnLanguageSelect.Click += new System.EventHandler(this.btnLanguageSelect_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("굴림", 15F);
-            this.label1.Location = new System.Drawing.Point(42, 74);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(372, 20);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "Choose language and click \'Apply\' button.";
-            // 
-            // lblTitle
-            // 
-            this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("굴림", 20F, System.Drawing.FontStyle.Bold);
-            this.lblTitle.Location = new System.Drawing.Point(4, 4);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(183, 27);
-            this.lblTitle.TabIndex = 14;
-            this.lblTitle.Text = "Setting Page";
-            // 
-            // btnPathAutoFind
-            // 
-            this.btnPathAutoFind.Font = new System.Drawing.Font("굴림", 15F);
-            this.btnPathAutoFind.Location = new System.Drawing.Point(159, 230);
-            this.btnPathAutoFind.Name = "btnPathAutoFind";
-            this.btnPathAutoFind.Size = new System.Drawing.Size(137, 30);
-            this.btnPathAutoFind.TabIndex = 15;
-            this.btnPathAutoFind.Text = "Auto Find";
-            this.btnPathAutoFind.UseVisualStyleBackColor = true;
-            this.btnPathAutoFind.Click += new System.EventHandler(this.btnPathAutoFind_Click);
-            // 
-            // Settings
+            // SettingPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.btnPathAutoFind);
-            this.Controls.Add(this.lblTitle);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.btnLanguageSelect);
-            this.Controls.Add(this.cmbLanguageSelect);
-            this.Controls.Add(this.chkAutoScreenshotCleaner);
-            this.Controls.Add(this.btnPathChange);
-            this.Controls.Add(this.txtPath);
+            this.Controls.Add(this.webView2_Settings);
             this.Controls.Add(this.lblBugReport);
             this.Controls.Add(this.lblHowToUse);
-            this.Name = "Settings";
+            this.Name = "SettingPage";
             this.Size = new System.Drawing.Size(1309, 1061);
+            ((System.ComponentModel.ISupportInitialize)(this.webView2_Settings)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -175,13 +93,6 @@
         #endregion
         private System.Windows.Forms.LinkLabel lblBugReport;
         private System.Windows.Forms.LinkLabel lblHowToUse;
-        private System.Windows.Forms.TextBox txtPath;
-        private System.Windows.Forms.Button btnPathChange;
-        private System.Windows.Forms.CheckBox chkAutoScreenshotCleaner;
-        private System.Windows.Forms.ComboBox cmbLanguageSelect;
-        private System.Windows.Forms.Button btnLanguageSelect;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblTitle;
-        private System.Windows.Forms.Button btnPathAutoFind;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView2_Settings;
     }
 }
