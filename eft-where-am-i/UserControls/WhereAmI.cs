@@ -267,13 +267,14 @@ namespace eft_where_am_i
         private async void WmiInitialize()
         {
             await Task.Delay(5000);
-            await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
+            await jsExecutor.ClickButtonAsync(Constants.FULL_SCREEN_BUTTON_SELECTOR);
             if(!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
+                await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
                 await Task.Delay(500);
             }
+            await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
         }
 
         private async Task CheckLocationAsync()
@@ -284,7 +285,7 @@ namespace eft_where_am_i
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync(Constants.WhereAmIButtonSelector);
+                await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
                 await Task.Delay(500);
             }
 
@@ -364,12 +365,12 @@ namespace eft_where_am_i
 
         private async void btnHideShowPannel_Click(object sender, EventArgs e)
         {
-            await jsExecutor.ClickButtonAsync(Constants.HideShowPannelButtonSelector);
+            await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
         }
 
         private async void btnFullScreen_Click(object sender, EventArgs e)
         {
-            await jsExecutor.ClickButtonAsync(Constants.FullScreenButtonSelector);
+            await jsExecutor.ClickButtonAsync(Constants.FULL_SCREEN_BUTTON_SELECTOR);
         }
 
         private async void btnForceRun_Click(object sender, EventArgs e)
