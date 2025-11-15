@@ -45,7 +45,25 @@ namespace eft_where_am_i
             // 화면 갱신 (언어/경로 등 UI 업데이트)
             LoadSettings();
             string language = appSettings.language;
-            await webView2_panel_ui.ExecuteScriptAsync($"setLanguage('{language}')");
+
+            // webView2_panel_ui.CoreWebView2가 null이 아닌지 확인하여
+            // 컨트롤이 초기화되었을 때만 스크립트를 실행합니다.
+            if (webView2_panel_ui.CoreWebView2 != null)
+            {
+                try
+                {
+                    await webView2_panel_ui.ExecuteScriptAsync($"setLanguage('{language}')");
+                }
+                catch (Exception ex)
+                {
+                    // 초기화 직후 드물게 발생하는 예외를 대비한 방어 코드
+                    MessageBox.Show($"설정 변경 중 스크립트 실행 오류: {ex.Message}", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            // 만약 null이라면 (아직 초기화 전),
+            // 어차피 InitializeWebViewUI()의 NavigationCompleted 이벤트 핸들러가
+            // 나중에 최신 appSettings 값을 읽어 언어를 설정할 것이므로
+            // 여기서 별도로 처리할 필요가 없습니다.
         }
 
 
@@ -226,19 +244,8 @@ namespace eft_where_am_i
         {
             try
             {
-                appSettings = settingsHandler.GetSettings();        // SettingsHandler에서 설정 로드
-                screenshotPath = appSettings.screenshot_path;       // 스크린샷 경로 설정
-                if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath))
-                {
-                    try
-                    {
-                        CheckAndSetScreenshotPath();
-                    }
-                    catch
-                    {
-                        MessageBox.Show("올바르지 않은 경로입니다. 설정 페이지에서 경로를 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
+                appSettings = settingsHandler.GetSettings();                // SettingsHandler에서 설정 로드
+                screenshotPath = settingsHandler.GetOrFindScreenshotPath(); // 스크린샷 경로 설정
 
                 chkAutoScreenshot = appSettings.auto_screenshot_detection;
                 // 설정값을 기준으로 FileSystemWatcher를 초기화합니다.
@@ -404,52 +411,6 @@ namespace eft_where_am_i
         private async void btnForceRun_Click(object sender, EventArgs e)
         {
             await CheckLocationAsync();
-        }
-
-        // Form1.cs에 넣고 싶었는데 예상 못한 오류가 발생하여 여기에 넣음
-        // settings.json에 screenshot_path가 비어있을 때 경로 자동 탐색하는 로직(추후 교체 예정)
-        private void CheckAndSetScreenshotPath()
-        {
-            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            if (string.IsNullOrEmpty(homeDirectory))
-            {
-                MessageBox.Show("사용자 홈 디렉터리를 찾을 수 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (appSettings.screenshot_paths_list == null || !appSettings.screenshot_paths_list.Any())
-            {
-                MessageBox.Show("스크린샷 경로 리스트가 비어 있습니다. 설정을 확인해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            bool pathFound = false;
-
-            foreach (string relativePath in appSettings.screenshot_paths_list)
-            {
-                string fullPath = Path.Combine(homeDirectory, relativePath);
-                if (Directory.Exists(fullPath))
-                {
-                    appSettings.screenshot_path = fullPath;
-                    pathFound = true;
-                    screenshotPath = fullPath;
-                    break;
-                }
-            }
-
-            if (!pathFound)
-            {
-                MessageBox.Show("자동으로 경로를 찾는데 실패하였습니다. 설정 페이지에서 수동으로 경로를 지정해주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-
-            try
-            {
-                SaveSettings(); // 설정 저장
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"설정을 저장하는 동안 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         const int MAX_SLIDING_HEIGHT = 110;

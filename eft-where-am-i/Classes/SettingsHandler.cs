@@ -106,6 +106,108 @@ namespace eft_where_am_i.Classes
             Save();
             SettingsChanged?.Invoke(_settings);
         }
+
+        /// <summary>
+        /// 캐시된 스크린샷 경로를 가져오거나, 없으면 탐색하여 캐시하고 반환합니다.
+        /// (탐색, 캐싱, 반환 함수)
+        /// </summary>
+        /// <returns>성공 시 폴더 경로</returns>
+        /// <exception cref="DirectoryNotFoundException">탐색에 성공했으나 폴더가 존재하지 않는 경우</exception>
+        /// <exception cref="Exception">탐색 과정 중 권한 등의 오류로 실패한 경우</exception>
+        public string GetOrFindScreenshotPath()
+        {
+            // 1. (캐시 확인) 이미 경로가 설정되어 있고 "실제로 존재하는지" 확인
+            if (!string.IsNullOrEmpty(_settings.screenshot_path))
+            {
+                if (Directory.Exists(_settings.screenshot_path))
+                {
+                    return _settings.screenshot_path; // 캐시 유효, 즉시 반환
+                }
+                // 캐시된 경로는 있으나 실제 폴더가 사라진 경우: 탐색 재시도
+            }
+
+            // 2. (탐색) 캐시가 없거나 무효하므로 실제 탐색 수행
+            // PerformPathSearch는 이제 성공 시 경로 반환, 실패 시 예외를 throw합니다.
+            return ScreenshotPathSearch(); // 여기서 예외가 발생할 수 있음
+        }
+
+        /// <summary>
+        /// 실제 스크린샷 폴더 탐색 로직을 수행합니다.
+        /// </summary>
+        /// <returns>성공 시 폴더 경로</returns>
+        /// <exception cref="DirectoryNotFoundException">모든 전략으로 탐색했으나 폴더를 찾지 못한 경우</exception>
+        /// <exception cref="Exception">탐색 중 파일 시스템 접근 오류 등이 발생한 경우</exception>
+        public string ScreenshotPathSearch()
+        {
+            // 탐색 중 발생한 내부 오류를 저장하기 위한 변수
+            Exception lastKnownError = null;
+
+            // --- [전략 1] "내 문서"를 이용한 동적 탐지 (최우선 순위) ---
+            try
+            {
+                string standardPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "Escape From Tarkov",
+                    "Screenshots"
+                );
+
+                if (Directory.Exists(standardPath))
+                {
+                    SetValue<string>(settings =>
+                    {
+                        settings.screenshot_path = standardPath;
+                    });
+                    return standardPath; // 탐지 성공!
+                }
+            }
+            catch (Exception ex)
+            {
+                // MyDocuments 접근 권한이 없는 등 심각한 오류일 수 있음
+                Console.WriteLine($"[Error] Standard path detection failed: {ex.Message}");
+                lastKnownError = ex; // 첫 번째 오류 기록
+            }
+
+            // --- [전략 2] "UserProfile" + JSON 목록 기반 탐지 (폴백) ---
+            // (전략 1이 예외를 발생시켰더라도, 폴백 전략은 시도해봐야 함)
+            try
+            {
+                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+                if (!string.IsNullOrEmpty(homeDirectory) && _settings.screenshot_paths_list != null)
+                {
+                    foreach (string relativePath in _settings.screenshot_paths_list)
+                    {
+                        string fullPath = Path.Combine(homeDirectory, relativePath);
+
+                        if (Directory.Exists(fullPath))
+                        {
+                            SetValue<string>(settings =>
+                            {
+                                settings.screenshot_path = fullPath;
+                            });
+                            return fullPath; // 탐지 성공!
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // UserProfile 접근 권한이 없는 등 심각한 오류일 수 있음
+                Console.WriteLine($"[Error] UserProfile list detection failed: {ex.Message}");
+                lastKnownError = ex; // 두 번째 오류 기록 (덮어쓰기)
+            }
+
+            // --- [최종] 탐지 실패 ---
+
+            // 만약 탐색 '중'에 오류(예: 권한)가 있었다면, 그것이 주된 실패 원인이므로 해당 예외를 throw
+            if (lastKnownError != null)
+            {
+                throw new Exception($"스크린샷 폴더 탐색 중 오류 발생: {lastKnownError.Message}", lastKnownError);
+            }
+
+            // 탐색 중 오류는 없었으나, 단순히 폴더를 '못 찾은' 경우
+            throw new DirectoryNotFoundException("모든 경로에서 'Escape From Tarkov/Screenshots' 폴더를 자동으로 탐지하지 못했습니다. 설정에서 수동으로 지정해주세요.");
+        }
     }
 
     public class AppSettings

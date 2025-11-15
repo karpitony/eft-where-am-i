@@ -131,17 +131,16 @@ namespace eft_where_am_i
                         break;
 
                     case "auto-detect-path":
-                        string detectedPath = btnPathAutoFind_Click();
-                        if (!string.IsNullOrEmpty(detectedPath))
+                        try
                         {
-                            appSettings.screenshot_path = detectedPath;
-                            SaveSettings();
-                            webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{detectedPath.Replace("\\", "\\\\")}')");
-                            MessageBox.Show("Screenshot path auto-detected!", "Auto Detect", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            string detectedPath = settingsHandler.ScreenshotPathSearch();
+                            MessageBox.Show($"경로를 찾았습니다:\n{detectedPath}", "자동 탐지 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            MessageBox.Show("Failed to detect screenshot path.", "Auto Detect Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            // 3. 실패 시 예외 메시지 표시
+                            // GetOrFindScreenshotPath가 throw한 예외 메시지를 그대로 보여줍니다.
+                            MessageBox.Show(ex.Message, "자동 탐지 실패", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         break;
 
@@ -220,25 +219,6 @@ namespace eft_where_am_i
                     await webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{escapedPath}')");
                 }
             }
-        }
-
-
-        private string btnPathAutoFind_Click()
-        {
-            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-            foreach (string relativePath in appSettings.screenshot_paths_list)
-            {
-                string fullPath = Path.Combine(homeDirectory, relativePath);
-                if (Directory.Exists(fullPath))
-                {
-                    appSettings.screenshot_path = fullPath; // AppSettings 업데이트
-                    SaveSettings(); // 변경 사항 저장
-                    return fullPath; // 첫번째 일치하는 경로만 사용
-                }
-            }
-
-            return "자동 탐지중 오류가 발생했습니다. An error occurred during automatic detection.";
         }
 
         private void lblHowToUse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
