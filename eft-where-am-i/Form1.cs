@@ -9,15 +9,39 @@ namespace eft_where_am_i_chasrp
     {
         private string currentScreen = "WhereAmI";
 
+        // UserControl을 캐싱해서 상태 유지
+        private WhereAmI whereAmIControl;
+        private SettingPage settingPageControl;
+
         public Form1()
         {
             InitializeComponent();
-            LoadUserControl();
+
+            // 깜빡임 방지 옵션
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint |
+                          ControlStyles.UserPaint |
+                          ControlStyles.OptimizedDoubleBuffer, true);
+
+            InitializeScreens();
         }
 
-        private void LoadUserControl()
+        private void InitializeScreens()
         {
-            SwitchUserControl(new WhereAmI());
+            // 화면 2개 생성 (딱 1번만)
+            whereAmIControl = new WhereAmI();
+            settingPageControl = new SettingPage();
+
+            // Panel에 미리 추가
+            panel1.Controls.Add(whereAmIControl);
+            panel1.Controls.Add(settingPageControl);
+
+            whereAmIControl.Dock = DockStyle.Fill;
+            settingPageControl.Dock = DockStyle.Fill;
+
+            // 시작 화면 설정
+            whereAmIControl.Visible = true;
+            settingPageControl.Visible = false;
         }
 
         const int MAX_SLIDING_WIDTH = 200;
@@ -75,7 +99,7 @@ namespace eft_where_am_i_chasrp
         {
             if (currentScreen != "SettingPage")
             {
-                SwitchUserControl(new SettingPage());
+                SwitchUserControl(settingPageControl);
                 currentScreen = "SettingPage";
             }
         }
@@ -84,16 +108,19 @@ namespace eft_where_am_i_chasrp
         {
             if (currentScreen != "WhereAmI")
             {
-                SwitchUserControl(new WhereAmI());
+                SwitchUserControl(whereAmIControl);
                 currentScreen = "WhereAmI";
             }
         }
 
-        private void SwitchUserControl(UserControl newControl)
+        private void SwitchUserControl(UserControl control)
         {
-            panel1.Controls.Clear();
-            newControl.Dock = DockStyle.Fill;
-            panel1.Controls.Add(newControl);
+            // 모든 화면 숨기기
+            whereAmIControl.Visible = false;
+            settingPageControl.Visible = false;
+
+            // 새 화면만 보이기
+            control.Visible = true;
         }
     }
 
