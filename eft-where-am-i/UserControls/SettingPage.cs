@@ -5,6 +5,7 @@ using Microsoft.Web.WebView2.Core;
 using eft_where_am_i.Classes;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Runtime.InteropServices;
 
@@ -22,7 +23,22 @@ namespace eft_where_am_i
             settingsHandler.SettingsChanged += OnSettingsChanged;
 
             LoadSettings();
-            InitializeWebViewUI();
+            // Load 이벤트 핸들러 등록
+            this.Load += SettingPage_Load;
+        }
+
+        private async void SettingPage_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                // 컨트롤이 로드된 후 비동기 초기화 시작
+                await InitializeWebViewUI();
+            }
+            catch (Exception ex)
+            {
+                // InitializeWebViewUI에서 throw한 예외를 여기서 최종 처리
+                MessageBox.Show($"설정 페이지 WebView 초기화 중 심각한 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void OnSettingsChanged(AppSettings updatedSettings)
@@ -35,7 +51,7 @@ namespace eft_where_am_i
             _ = webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{escapedPath}')");
         }
 
-        private async void InitializeWebViewUI()
+        private async Task InitializeWebViewUI()
         {
             // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
             string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2_Settings", Guid.NewGuid().ToString());
@@ -57,12 +73,12 @@ namespace eft_where_am_i
             catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
             {
                 MessageBox.Show($"WebView2 초기화 중 오류 발생: {comEx.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"WebView2 초기화 중 예외 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
 
             string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "html/settings.html");
@@ -94,6 +110,7 @@ namespace eft_where_am_i
                     catch (Exception ex)
                     {
                         MessageBox.Show($"JavaScript 명령 전송 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw;
                     }
                 }
             };

@@ -15,7 +15,7 @@ namespace eft_where_am_i
     {
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
         private AppSettings appSettings; // AppSettings 참조
-        private readonly JavaScriptExecutor jsExecutor;
+        private JavaScriptExecutor jsExecutor;
         private string[] mapList = { 
             "ground-zero", 
             "factory", 
@@ -42,12 +42,34 @@ namespace eft_where_am_i
             InitializeComponent();
             settingsHandler = SettingsHandler.Instance;             // 싱글톤 인스턴스 사용
             settingsHandler.SettingsChanged += OnSettingsChanged;   // 세팅 변경될 때마다 호출됨
-            LoadSettings();
-            InitializeWebViewUI();
+            LoadSettings();                                         // 동기작업
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
-            InitializeWebViewContent();
-            jsExecutor = new JavaScriptExecutor(webView2);
-            WmiInitialize();
+            
+            // Load 이벤트 핸들러 등록
+            this.Load += WhereAmI_Load;
+        }
+
+        private async void WhereAmI_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                // 1. UI용 WebView2 초기화
+                await InitializeWebViewUI();
+
+                // 2. 콘텐츠용 WebView2 초기화
+                await InitializeWebViewContent();
+
+                // 3. 모든 WebView가 초기화된 후에 jsExecutor 생성
+                jsExecutor = new JavaScriptExecutor(webView2);
+
+                // 4. 모든 준비가 끝난 후 WmiInitialize 호출
+                WmiInitialize();
+            }
+            catch (Exception ex)
+            {
+                // Initialize... 메서드에서 throw한 예외를 여기서 최종 처리
+                MessageBox.Show($"WebView 초기화 중 심각한 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void OnSettingsChanged(AppSettings updatedSettings)
@@ -80,7 +102,7 @@ namespace eft_where_am_i
         }
 
 
-        private async void InitializeWebViewContent()
+        private async Task InitializeWebViewContent()
         {
             // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
             string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2_Content", Guid.NewGuid().ToString());
@@ -94,12 +116,12 @@ namespace eft_where_am_i
             catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
             {
                 MessageBox.Show($"웹 콘텐츠용 WebView2 초기화 오류: {comEx.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"웹 콘텐츠용 WebView2 초기화 예외: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
 
             // 외부 URL 로드 (예외 처리 포함)
@@ -110,10 +132,11 @@ namespace eft_where_am_i
             catch (Exception ex)
             {
                 MessageBox.Show($"웹 콘텐츠 URL 설정 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
             }
         }
 
-        private async void InitializeWebViewUI()
+        private async Task InitializeWebViewUI()
         {
             // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
             string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2", Guid.NewGuid().ToString());
@@ -136,12 +159,12 @@ namespace eft_where_am_i
             catch (COMException comEx) when (comEx.ErrorCode == unchecked((int)0x8007139F))
             {
                 MessageBox.Show($"WebView2 초기화 중 오류 발생: {comEx.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"WebView2 초기화 중 예외 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw;
             }
 
             // HTML 파일 로드
@@ -174,6 +197,7 @@ namespace eft_where_am_i
                     catch (Exception ex)
                     {
                         MessageBox.Show($"JavaScript 명령 전송 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw;
                     }
                 }
             };
@@ -301,7 +325,7 @@ namespace eft_where_am_i
 
         private async void WmiInitialize()
         {
-            await Task.Delay(5000);
+            await Task.Delay(4000);
             await jsExecutor.ClickButtonAsync(Constants.FULL_SCREEN_BUTTON_SELECTOR);
             if(!whereAmIClick)
             {
@@ -325,30 +349,7 @@ namespace eft_where_am_i
             }
 
             await jsExecutor.SetInputValueAsync("input[type=\"text\"]", screenshot.Replace(".png", ""));
-            // await ChangeMarkerAsync();
         }
-
-        //private async Task ChangeMarkerAsync()
-        //{
-        //    string[] styleList = {
-        //        "background: #ff0000",
-        //        "height: 20px",
-        //        "width: 20px"
-        //    };
-
-        //    foreach (var style in styleList)
-        //    {
-        //        string[] styleParts = style.Split(':');
-        //        string jsCode = $@"
-        //            var marker = document.getElementsByClassName('marker')[0];
-        //            if (marker) {{
-        //                marker.style.setProperty('{styleParts[0].Trim()}', '{styleParts[1].Trim()}', 'important');
-        //            }} else {{
-        //                console.log('Marker not found');
-        //            }}";
-        //        await jsExecutor.ExecuteScriptAsync(jsCode);
-        //    }
-        //}
 
         private void UpdateWatcherState(bool isEnabled)
         {
