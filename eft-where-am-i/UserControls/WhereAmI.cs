@@ -16,7 +16,20 @@ namespace eft_where_am_i
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
         private AppSettings appSettings; // AppSettings 참조
         private readonly JavaScriptExecutor jsExecutor;
-        private string[] mapList = { "ground-zero", "factory", "customs", "interchange", "woods", "shoreline", "lighthouse", "reserve", "streets", "lab" };
+        private string[] mapList = { 
+            "ground-zero", 
+            "factory", 
+            "customs", 
+            "interchange", 
+            "woods", 
+            "shoreline", 
+            "lighthouse",
+            "reserve", 
+            "streets", 
+            "lab", 
+            "labyrinth", 
+            "terminal" 
+        };
         private string siteUrl;
         private bool whereAmIClick = false;
         private string screenshotPath;
