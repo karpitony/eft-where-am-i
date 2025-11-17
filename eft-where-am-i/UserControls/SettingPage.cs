@@ -2,7 +2,6 @@
 using System.IO;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
-using System.Threading.Tasks;
 using eft_where_am_i.Classes;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;

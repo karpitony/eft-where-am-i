@@ -145,19 +145,28 @@ namespace eft_where_am_i.Classes
             // --- [전략 1] "내 문서"를 이용한 동적 탐지 (최우선 순위) ---
             try
             {
-                string standardPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    "Escape From Tarkov",
-                    "Screenshots"
-                );
+                string documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-                if (Directory.Exists(standardPath))
+                // Tarkov 폴더 이름 후보 2개
+                string[] folderCandidates =
                 {
-                    SetValue<string>(settings =>
+                    "Escape From Tarkov",   // 기존
+                    "Escape from Tarkov"    // 새로 추가
+                };
+
+                foreach (string folderName in folderCandidates)
+                {
+                    string candidatePath = Path.Combine(documents, folderName, "Screenshots");
+
+                    if (Directory.Exists(candidatePath))
                     {
-                        settings.screenshot_path = standardPath;
-                    });
-                    return standardPath; // 탐지 성공!
+                        SetValue<string>(settings =>
+                        {
+                            settings.screenshot_path = candidatePath;
+                        });
+
+                        return candidatePath; // 탐지 성공
+                    }
                 }
             }
             catch (Exception ex)
