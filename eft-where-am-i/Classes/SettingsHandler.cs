@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -217,14 +218,137 @@ namespace eft_where_am_i.Classes
             // 탐색 중 오류는 없었으나, 단순히 폴더를 '못 찾은' 경우
             throw new DirectoryNotFoundException("모든 경로에서 'Escape From Tarkov/Screenshots' 폴더를 자동으로 탐지하지 못했습니다. 설정에서 수동으로 지정해주세요.");
         }
+
+        /// <summary>
+        /// 캐시된 로그 경로를 가져오거나, 없으면 탐색하여 캐시하고 반환합니다.
+        /// </summary>
+        /// <returns>성공 시 폴더 경로, 실패 시 null</returns>
+        public string GetOrFindLogPath()
+        {
+            // 1. (캐시 확인) 이미 경로가 설정되어 있고 "실제로 존재하는지" 확인
+            if (!string.IsNullOrEmpty(_settings.log_path))
+            {
+                if (Directory.Exists(_settings.log_path))
+                {
+                    return _settings.log_path; // 캐시 유효, 즉시 반환
+                }
+                // 캐시된 경로는 있으나 실제 폴더가 사라진 경우: 탐색 재시도
+            }
+
+            // 2. (탐색) 캐시가 없거나 무효하므로 실제 탐색 수행
+            return LogPathSearch();
+        }
+
+        /// <summary>
+        /// EFT 로그 폴더 탐색 로직을 수행합니다.
+        /// 검사 순서:
+        /// 1. %LOCALAPPDATA%\Battlestate Games\EFT\Logs (런처 버전)
+        /// 2. C:\Program Files (x86)\Steam\steamapps\common\Escape from Tarkov\build\Logs (스팀 버전)
+        /// 3. 실행 중인 EscapeFromTarkov.exe 프로세스 경로에서 Logs 폴더
+        /// </summary>
+        /// <returns>성공 시 폴더 경로, 실패 시 null</returns>
+        public string LogPathSearch()
+        {
+            // --- [전략 1] 런처 버전 경로 ---
+            try
+            {
+                string launcherPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Battlestate Games", "EFT", "Logs"
+                );
+
+                if (Directory.Exists(launcherPath))
+                {
+                    SetValue<string>(settings =>
+                    {
+                        settings.log_path = launcherPath;
+                    });
+                    return launcherPath;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Launcher path detection failed: {ex.Message}");
+            }
+
+            // --- [전략 2] 스팀 버전 경로 ---
+            try
+            {
+                string steamPath = @"C:\Program Files (x86)\Steam\steamapps\common\Escape from Tarkov\build\Logs";
+
+                if (Directory.Exists(steamPath))
+                {
+                    SetValue<string>(settings =>
+                    {
+                        settings.log_path = steamPath;
+                    });
+                    return steamPath;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Steam path detection failed: {ex.Message}");
+            }
+
+            // --- [전략 3] 실행 중인 프로세스에서 탐지 ---
+            try
+            {
+                string processPath = GetLogPathFromProcess();
+                if (!string.IsNullOrEmpty(processPath))
+                {
+                    SetValue<string>(settings =>
+                    {
+                        settings.log_path = processPath;
+                    });
+                    return processPath;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Process path detection failed: {ex.Message}");
+            }
+
+            // 모든 탐색 실패
+            return null;
+        }
+
+        /// <summary>
+        /// 실행 중인 EscapeFromTarkov.exe 프로세스에서 로그 경로를 찾습니다.
+        /// </summary>
+        private string GetLogPathFromProcess()
+        {
+            try
+            {
+                var processes = Process.GetProcessesByName("EscapeFromTarkov");
+                if (processes.Length > 0)
+                {
+                    var exePath = processes[0].MainModule?.FileName;
+                    if (!string.IsNullOrEmpty(exePath))
+                    {
+                        var logsPath = Path.Combine(Path.GetDirectoryName(exePath), "Logs");
+                        if (Directory.Exists(logsPath)) return logsPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] GetLogPathFromProcess failed: {ex.Message}");
+            }
+            return null;
+        }
     }
 
     public class AppSettings
     {
         public bool auto_screenshot_detection { get; set; } = false;
+        public bool auto_map_detection { get; set; } = false;
+        public bool auto_panning { get; set; } = true;
         public string language { get; set; } = "en";
         public string screenshot_path { get; set; } = string.Empty;
+        public string log_path { get; set; } = string.Empty;
         public List<string> screenshot_paths_list { get; set; } = new List<string>();
         public string latest_map { get; set; } = "ground-zero";
+        public int dead_zone_percent { get; set; } = 93;
+        public Dictionary<string, bool> panel_hidden_per_map { get; set; } = new Dictionary<string, bool>();
     }
 }

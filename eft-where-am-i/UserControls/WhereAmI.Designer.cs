@@ -13,9 +13,10 @@
         /// <param name="disposing">관리되는 리소스를 삭제해야 하면 true이고, 그렇지 않으면 false입니다.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                hotkeyManager?.Dispose();
+                components?.Dispose();
             }
             base.Dispose(disposing);
         }

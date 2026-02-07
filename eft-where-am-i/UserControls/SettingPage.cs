@@ -49,6 +49,8 @@ namespace eft_where_am_i
             _ = webView2_Settings.ExecuteScriptAsync($"setLanguage('{appSettings.language}')");
             string escapedPath = appSettings.screenshot_path.Replace("\\", "\\\\");
             _ = webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{escapedPath}')");
+            string escapedLogPath = appSettings.log_path.Replace("\\", "\\\\");
+            _ = webView2_Settings.ExecuteScriptAsync($"setLogPath('{escapedLogPath}')");
         }
 
         private async Task InitializeWebViewUI()
@@ -105,6 +107,10 @@ namespace eft_where_am_i
                         // 스크린샷 경로 설정 전송
                         string screenshotPath = appSettings.screenshot_path.Replace("\\", "\\\\"); // JS에서 백슬래시 처리
                         await webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{screenshotPath}')");
+
+                        // 로그 경로 설정 전송
+                        string logPath = appSettings.log_path.Replace("\\", "\\\\");
+                        await webView2_Settings.ExecuteScriptAsync($"setLogPath('{logPath}')");
 
                     }
                     catch (Exception ex)
@@ -178,6 +184,29 @@ namespace eft_where_am_i
                         }
                         break;
 
+                    case "change-log-path":
+                        SelectLogFolder();
+                        break;
+
+                    case "auto-detect-log-path":
+                        try
+                        {
+                            string detectedLogPath = settingsHandler.LogPathSearch();
+                            if (!string.IsNullOrEmpty(detectedLogPath))
+                            {
+                                MessageBox.Show($"경로를 찾았습니다:\n{detectedLogPath}", "자동 탐지 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            else
+                            {
+                                MessageBox.Show("EFT 로그 폴더를 자동으로 탐지하지 못했습니다. 수동으로 지정해주세요.", "자동 탐지 실패", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, "자동 탐지 실패", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        break;
+
                     default:
                         MessageBox.Show($"알 수 없는 action: {action}", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         break;
@@ -216,16 +245,15 @@ namespace eft_where_am_i
 
         public async void SelectScreenshotFolder()
         {
-            string selectedPath = "";
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
             {
-                dialog.Title = "스크린샷 폴더를 선택하세요. Select the screenshot folder.";
-                dialog.IsFolderPicker = true;
+                dialog.Description = "스크린샷 폴더를 선택하세요. Select the screenshot folder.";
+                dialog.UseDescriptionForTitle = true;
 
-                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    selectedPath = dialog.FileName;
-                
+                    string selectedPath = dialog.SelectedPath;
+
                     // 설정 업데이트 및 저장
                     appSettings.screenshot_path = selectedPath;
                     SaveSettings();
@@ -233,6 +261,28 @@ namespace eft_where_am_i
                     // JavaScript에 업데이트된 경로 전송 (백슬래시 이스케이프)
                     string escapedPath = selectedPath.Replace("\\", "\\\\");
                     await webView2_Settings.ExecuteScriptAsync($"setScreenshotPath('{escapedPath}')");
+                }
+            }
+        }
+
+        public async void SelectLogFolder()
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "EFT 로그 폴더를 선택하세요. Select the EFT logs folder.";
+                dialog.UseDescriptionForTitle = true;
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedPath = dialog.SelectedPath;
+
+                    // 설정 업데이트 및 저장
+                    appSettings.log_path = selectedPath;
+                    SaveSettings();
+
+                    // JavaScript에 업데이트된 경로 전송 (백슬래시 이스케이프)
+                    string escapedPath = selectedPath.Replace("\\", "\\\\");
+                    await webView2_Settings.ExecuteScriptAsync($"setLogPath('{escapedPath}')");
                 }
             }
         }

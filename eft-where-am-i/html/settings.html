@@ -79,6 +79,38 @@
       </div>
     </div>
   </section>
+
+  <!-- Log Path Settings -->
+  <section class="mb-6">
+    <p id="resetLogPathText" class="mb-2 text-xl">
+      Log Path Settings
+    </p>
+    <div class="flex flex-col items-start space-y-4">
+      <input
+        type="text"
+        id="logPath"
+        placeholder="Enter path..."
+        class="border rounded px-4 py-1.5 text-base bg-white w-180"
+        readonly
+      />
+      <div class="flex space-x-4">
+      <button
+        id="changeLogPathButton"
+        onclick="changeLogPath()"
+        class="bg-blue-500 text-white rounded py-1.5 px-4 text-base hover:bg-blue-600"
+      >
+        Change Path
+      </button>
+      <button
+        id="autoDetectLogButton"
+        onclick="autoDetectLogPath()"
+        class="bg-gray-300 text-gray-800 rounded py-1.5 px-4 text-base hover:bg-gray-400"
+      >
+        Auto Detect
+      </button>
+      </div>
+    </div>
+  </section>
   </main>
 
   <!-- Links -->
@@ -139,6 +171,9 @@
       document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
       document.getElementById('bugLink').textContent = i18next.t('bugLink');
       document.getElementById('footerText').textContent = i18next.t('footerText');
+      document.getElementById('resetLogPathText').textContent = i18next.t('resetLogPathText');
+      document.getElementById('changeLogPathButton').textContent = i18next.t('changeLogPathButton');
+      document.getElementById('autoDetectLogButton').textContent = i18next.t('autoDetectLogButton');
     }
 
     // 언어 선택 시 호출되는 함수
@@ -193,6 +228,17 @@
       }
     }
 
+    // C#에서 호출하는 함수: 로그 경로 설정
+    function setLogPath(path) {
+      try {
+        const input = document.getElementById('logPath');
+        input.value = path;
+        console.log("Log path set to:", path);
+      } catch (error) {
+        console.error("setLogPath 오류 발생: ", error);
+      }
+    }
+
     // 경로 변경 시 C#으로 전달
     function changePath() {
       const path = document.getElementById('screenshotPath').value;
@@ -210,6 +256,24 @@
 
       window.chrome.webview.postMessage(JSON.stringify({
         action: 'auto-detect-path'
+      }));
+    }
+
+    // 로그 경로 변경 시 C#으로 전달
+    function changeLogPath() {
+      console.log("Change Log Path requested");
+
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'change-log-path'
+      }));
+    }
+
+    // 로그 경로 자동 탐색 버튼 클릭 시 C#으로 요청
+    function autoDetectLogPath() {
+      console.log("Auto-detect log path requested");
+
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'auto-detect-log-path'
       }));
     }
 

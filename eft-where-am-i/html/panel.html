@@ -16,16 +16,16 @@
     <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
       <label
         id="mapSelectionLabel"
-        class="text-lg lg:text-xl xl:text-2xl font-semibold"
+        class="text-sm lg:text-base xl:text-lg font-semibold"
       >
         Select The Map
       </label>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
-      <select 
+      <select
         id="mapSelect"
         onchange="mapSelected()"
-        class="border rounded mx-8 px-4 py-1 text-base lg:text-lg xl:text-xl font-medium bg-white w-full"
+        class="border rounded mx-4 px-2 py-0.5 text-xs lg:text-sm xl:text-base font-medium bg-white w-full"
       >
         <!-- C#에서 맵 목록 추가 -->
       </select>
@@ -33,19 +33,19 @@
 
     <!-- Cell 2: Hide/Show and Full Screen -->
     <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
-      <button 
+      <button
         id="hideShowPanelsButton"
         onclick="hideShowPanel()"
-        class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
+        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
       >
         Hide/Show Panels
       </button>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
-      <button 
+      <button
         id="fullScreenButton"
         onclick="fullScreen()"
-        class="bg-white border rounded py-2 px-4 md:px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
+        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
       >
         Full Screen
       </button>
@@ -54,44 +54,78 @@
     <!-- Cell 3: Screenshot Detection -->
     <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
       <div class="flex items-center">
-        <input type="checkbox" id="autoDetect" class="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 mr-2" onchange="checkboxChanged()">
-        <label 
+        <input type="checkbox" id="autoDetect" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="checkboxChanged()">
+        <label
           id="autoScreenshotDetectionLabel"
           for="autoDetect"
-          class="text-base lg:text-lg xl:text-xl font-medium"
+          class="text-xs lg:text-sm xl:text-base font-medium"
         >
           Auto Screenshot Detection
         </label>
       </div>
     </div>
     <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
-      <button 
+      <button
         id="forceRunButton"
         onclick="forceRun()"
-        class="bg-white border rounded py-2 px-1 lg:px-5 xl:px-6 text-base lg:text-lg xl:text-xl font-medium hover:bg-gray-100 w-full"
+        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
       >
         Force Run
       </button>
     </div>
 
-    <!-- Cell 4: Links -->
+    <!-- Cell 4: Auto Map Detection and Links -->
     <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 1;">
-      <a 
+      <div class="flex items-center">
+        <input type="checkbox" id="autoMapDetect" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoMapToggle()">
+        <label
+          id="autoMapDetectionLabel"
+          for="autoMapDetect"
+          class="text-xs lg:text-sm xl:text-base font-medium"
+        >
+          Auto Map Detection
+        </label>
+      </div>
+    </div>
+    <div class="flex justify-center items-center w-full gap-3" style="grid-column: 4; grid-row: 2;">
+      <a
         id="howToUseLink"
         href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md"
-        class="text-blue-600 hover:underline text-base lg:text-lg xl:text-xl font-semibold"
+        class="text-blue-600 hover:underline text-xs lg:text-sm xl:text-base font-semibold"
       >
         How To Use
       </a>
-    </div>
-    <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 2;">
-      <a 
+      <a
         id="bugLink"
         href="https://github.com/karpitony/eft-where-am-i/issues"
-        class="text-blue-600 hover:underline text-base lg:text-lg xl:text-xl font-semibold"
+        class="text-blue-600 hover:underline text-xs lg:text-sm xl:text-base font-semibold"
       >
         Bug Report
       </a>
+    </div>
+
+    <!-- Row 3: Auto Panning and Floor DB Editor (Debug mode only) -->
+    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 3;">
+      <div class="flex items-center">
+        <input type="checkbox" id="autoPanning" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoPanningToggle()">
+        <label
+          id="autoPanningLabel"
+          for="autoPanning"
+          class="text-xs lg:text-sm xl:text-base font-medium"
+        >
+          Auto Panning
+        </label>
+      </div>
+    </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 3;">
+      <button
+        id="floorDbEditorButton"
+        onclick="toggleFloorEditMode()"
+        style="display: none;"
+        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
+      >
+        Floor DB Editor
+      </button>
     </div>
   </div>
 
@@ -120,6 +154,9 @@
       document.getElementById('forceRunButton').textContent = i18next.t('forceRunButton');
       document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
       document.getElementById('bugLink').textContent = i18next.t('bugLink');
+      document.getElementById('autoMapDetectionLabel').textContent = i18next.t('autoMapDetectionLabel');
+      document.getElementById('autoPanningLabel').textContent = i18next.t('autoPanningLabel');
+      document.getElementById('floorDbEditorButton').textContent = i18next.t('floorDbEditorButton');
     }
 
     // C#에서 호출하는 함수: 언어 설정
@@ -138,7 +175,6 @@
           .catch(error => {
             console.error("i18next changeLanguage 오류 발생:", error);
           });
-          
         console.log("Language set to:", language); // 디버그용 출력
       } catch (error) {
         console.error("setLanguage 오류 발생: ", error);
@@ -210,6 +246,53 @@
       window.chrome.webview.postMessage(JSON.stringify({
           action: 'force-run'
       }));
+    }
+
+    // Auto Map Detection 토글
+    function autoMapToggle() {
+      const isChecked = document.getElementById('autoMapDetect').checked;
+      window.chrome.webview.postMessage(JSON.stringify({ action: 'auto-map-toggle', isChecked: isChecked }));
+    }
+
+    // C#에서 호출: 자동 맵 감지 체크박스 상태 설정
+    function setAutoMapCheckboxState(isChecked) {
+      try {
+        const checkbox = document.getElementById('autoMapDetect');
+        checkbox.checked = isChecked;
+      } catch (error) {
+        console.error("setAutoMapCheckboxState error:", error);
+      }
+    }
+
+    // Auto Panning 토글
+    function autoPanningToggle() {
+      const isChecked = document.getElementById('autoPanning').checked;
+      window.chrome.webview.postMessage(JSON.stringify({ action: 'auto-panning-toggle', isChecked: isChecked }));
+    }
+
+    // C#에서 호출: 자동 패닝 체크박스 상태 설정
+    function setAutoPanningCheckboxState(isChecked) {
+      try {
+        const checkbox = document.getElementById('autoPanning');
+        checkbox.checked = isChecked;
+      } catch (error) {
+        console.error("setAutoPanningCheckboxState error:", error);
+      }
+    }
+
+    // C#에서 호출: 디버그 모드 설정 (Floor DB Editor 버튼 표시/숨김)
+    function setDebugMode(isDebug) {
+      try {
+        const btn = document.getElementById('floorDbEditorButton');
+        btn.style.display = isDebug ? 'block' : 'none';
+      } catch (error) {
+        console.error("setDebugMode error:", error);
+      }
+    }
+
+    // Floor Zone Edit Mode 토글
+    function toggleFloorEditMode() {
+      window.chrome.webview.postMessage(JSON.stringify({ action: 'toggle-floor-edit-mode' }));
     }
 
     // How To Use 링크

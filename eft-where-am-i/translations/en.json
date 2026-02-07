@@ -12,6 +12,12 @@
     "changePathButton": "Change Path",
     "autoDetectButton": "Auto Detect",
     "openFolderButton": "Open Screenshot Folder",
+    "autoMapDetectionLabel": "Auto Map Detection",
+    "autoPanningLabel": "Auto Panning",
+    "floorDbEditorButton": "Floor DB Editor",
+    "resetLogPathText": "Log Path Settings",
+    "changeLogPathButton": "Change Path",
+    "autoDetectLogButton": "Auto Detect",
     "howToUseLink": "How To Use",
     "bugLink": "Bug Report",
     "footerText": "This program is not related to Tarkov-market."
