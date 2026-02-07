@@ -236,7 +236,7 @@ PR과 Issue 기여를 환영합니다!
 
 ## 라이선스
 
-MIT License — Copyright (c) 2024 karpitony
+MIT License — Copyright (c) 2024 karpitony, Copyright (c) 2026 supnoel
 
 자세한 내용은 [LICENSE](./LICENSE) 파일을 참조하세요.
 

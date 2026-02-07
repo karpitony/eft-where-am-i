@@ -236,7 +236,7 @@ Please report bugs, suggest features, or ask questions via [Issues](https://gith
 
 ## License
 
-MIT License — Copyright (c) 2024 karpitony
+MIT License — Copyright (c) 2024 karpitony, Copyright (c) 2026 supnoel
 
 See the [LICENSE](./LICENSE) file for details.
 
