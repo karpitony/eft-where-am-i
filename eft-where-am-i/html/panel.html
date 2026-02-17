@@ -127,6 +127,15 @@
         Floor DB Editor
       </button>
     </div>
+    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 3;">
+      <div class="flex items-center">
+        <input type="checkbox" id="autoScreenshotCleanup" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoScreenshotCleanupToggle()">
+        <label id="autoScreenshotCleanupLabel" for="autoScreenshotCleanup"
+          class="text-xs lg:text-sm xl:text-base font-medium">
+          Auto Screenshot Cleanup
+        </label>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -157,6 +166,7 @@
       document.getElementById('autoMapDetectionLabel').textContent = i18next.t('autoMapDetectionLabel');
       document.getElementById('autoPanningLabel').textContent = i18next.t('autoPanningLabel');
       document.getElementById('floorDbEditorButton').textContent = i18next.t('floorDbEditorButton');
+      document.getElementById('autoScreenshotCleanupLabel').textContent = i18next.t('autoScreenshotCleanupLabel');
     }
 
     // C#에서 호출하는 함수: 언어 설정
@@ -277,6 +287,23 @@
         checkbox.checked = isChecked;
       } catch (error) {
         console.error("setAutoPanningCheckboxState error:", error);
+      }
+    }
+
+    // Auto Screenshot Cleanup 토글
+    function autoScreenshotCleanupToggle() {
+      const isChecked = document.getElementById('autoScreenshotCleanup').checked;
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'auto-screenshot-cleanup-toggle', isChecked: isChecked
+      }));
+    }
+
+    // C#에서 호출: 스크린샷 자동 삭제 체크박스 상태 설정
+    function setAutoScreenshotCleanupCheckboxState(isChecked) {
+      try {
+        document.getElementById('autoScreenshotCleanup').checked = isChecked;
+      } catch (error) {
+        console.error("setAutoScreenshotCleanupCheckboxState error:", error);
       }
     }
 

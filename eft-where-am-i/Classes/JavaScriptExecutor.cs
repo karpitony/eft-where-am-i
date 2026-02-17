@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Reflection.Emit;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
@@ -291,6 +294,42 @@ namespace eft_where_am_i.Classes
                         if (input.parentNode.innerText.includes('{escapedName}')) {{
                             input.click();
                             return 'true';
+                        }}
+                    }}
+                    return 'false';
+                }})()";
+
+                string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
+                return result?.Trim('"') == "true";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 여러 층 이름 후보를 한 번의 JS 호출로 시도합니다. 순서대로 매칭하여 첫 번째 매칭을 클릭.
+        /// </summary>
+        public async Task<bool> ClickFloorByFirstMatchAsync(string[] floorNames)
+        {
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
+                string jsArray = "[" + string.Join(",", floorNames.Select(n => $"'{n.Replace("'", "\\'")}'")) + "]";
+
+                string script = $@"
+                (function() {{
+                    const names = {jsArray};
+                    const inputs = document.querySelectorAll('.no-wrap input[name=""layers""]');
+                    for (const name of names) {{
+                        for (const input of inputs) {{
+                            if (input.parentNode.innerText.includes(name)) {{
+                                input.click();
+                                return 'true';
+                            }}
                         }}
                     }}
                     return 'false';

@@ -15,6 +15,9 @@ namespace eft_where_am_i.Classes
         private readonly string _logsBasePath;
         private DateTime _lastFolderCheck = DateTime.MinValue;
         private static readonly Regex MapRegex = new Regex(@"scene preset path:maps/([^.]+)\.bundle", RegexOptions.Compiled);
+        private static readonly Regex TransitEndRegex = new Regex(
+            @"\[Transit\] `([a-f0-9]+)` Count:(\d+), EventPlayer:(True|False)",
+            RegexOptions.Compiled);
 
         private static readonly Dictionary<string, string> MapNameMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -45,6 +48,7 @@ namespace eft_where_am_i.Classes
         private const int FOLDER_CHECK_INTERVAL_SEC = 30;
 
         public event Action<string> MapDetected;
+        public event Action RaidEnded;
 
         public LogWatcherService(string logsBasePath)
         {
@@ -217,18 +221,27 @@ namespace eft_where_am_i.Classes
         private void ParseLine(string line)
         {
             var match = MapRegex.Match(line);
-            if (!match.Success) return;
-
-            string rawMapName = match.Groups[1].Value;
-
-            if (MapNameMapping.TryGetValue(rawMapName, out string mappedName))
+            if (match.Success)
             {
-                AppLogger.Info("LogWatcher", $"Map detected: {rawMapName} -> {mappedName}");
-                MapDetected?.Invoke(mappedName);
+                string rawMapName = match.Groups[1].Value;
+
+                if (MapNameMapping.TryGetValue(rawMapName, out string mappedName))
+                {
+                    AppLogger.Info("LogWatcher", $"Map detected: {rawMapName} -> {mappedName}");
+                    MapDetected?.Invoke(mappedName);
+                }
+                else
+                {
+                    AppLogger.Warn("LogWatcher", $"Unknown map name in log: {rawMapName}");
+                }
+                return;
             }
-            else
+
+            var transitEndMatch = TransitEndRegex.Match(line);
+            if (transitEndMatch.Success)
             {
-                AppLogger.Warn("LogWatcher", $"Unknown map name in log: {rawMapName}");
+                AppLogger.Info("LogWatcher", "Raid end detected (Transit pattern)");
+                RaidEnded?.Invoke();
             }
         }
 

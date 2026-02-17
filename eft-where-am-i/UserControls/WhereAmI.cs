@@ -222,6 +222,10 @@ namespace eft_where_am_i
                         // 자동 패닝 체크박스 상태 전송
                         await webView2_panel_ui.ExecuteScriptAsync($"setAutoPanningCheckboxState({appSettings.auto_panning.ToString().ToLower()})");
 
+                        // 스크린샷 자동 삭제 체크박스 상태 전송
+                        await webView2_panel_ui.ExecuteScriptAsync(
+                            $"setAutoScreenshotCleanupCheckboxState({appSettings.auto_screenshot_cleanup.ToString().ToLower()})");
+
                         // 디버그 모드 플래그 전송
 #if DEBUG
                         await webView2_panel_ui.ExecuteScriptAsync("setDebugMode(true)");
@@ -290,6 +294,18 @@ namespace eft_where_am_i
                     case "auto-panning-toggle":
                         appSettings.auto_panning = isChecked;
                         SaveSettings();
+                        break;
+
+                    case "auto-screenshot-cleanup-toggle":
+                        appSettings.auto_screenshot_cleanup = isChecked;
+                        SaveSettings();
+                        if (logWatcher != null)
+                        {
+                            if (isChecked && !appSettings.auto_map_detection)
+                                logWatcher.Start();
+                            else if (!isChecked && !appSettings.auto_map_detection)
+                                logWatcher.Stop();
+                        }
                         break;
 
                     case "toggle-floor-edit-mode":
@@ -716,9 +732,47 @@ namespace eft_where_am_i
 
             logWatcher = new LogWatcherService(logPath);
             logWatcher.MapDetected += OnMapDetectedFromLog;
-            if (appSettings.auto_map_detection)
+            logWatcher.RaidEnded += OnRaidEndedFromLog;
+            if (appSettings.auto_map_detection || appSettings.auto_screenshot_cleanup)
             {
                 logWatcher.Start();
+            }
+        }
+
+        private async void OnRaidEndedFromLog()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => OnRaidEndedFromLog()));
+                return;
+            }
+
+            if (!appSettings.auto_screenshot_cleanup) return;
+            if (string.IsNullOrEmpty(screenshotPath) || !Directory.Exists(screenshotPath)) return;
+
+            await Task.Delay(3000); // 게임이 마지막 스크린샷 쓰기 완료 대기
+
+            try
+            {
+                var pngFiles = Directory.GetFiles(screenshotPath, "*.png");
+                if (pngFiles.Length == 0) return;
+
+                AppLogger.Info("ScreenshotCleanup", $"Cleaning up {pngFiles.Length} PNG file(s)");
+                int deleted = 0, failed = 0;
+                foreach (var file in pngFiles)
+                {
+                    try { File.Delete(file); deleted++; }
+                    catch (Exception ex)
+                    {
+                        AppLogger.Warn("ScreenshotCleanup", $"Failed: {Path.GetFileName(file)} - {ex.Message}");
+                        failed++;
+                    }
+                }
+                AppLogger.Info("ScreenshotCleanup", $"Done. Deleted: {deleted}, Failed: {failed}");
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error("ScreenshotCleanup", $"Cleanup error: {ex.Message}");
             }
         }
 
@@ -757,7 +811,8 @@ namespace eft_where_am_i
             }
             else
             {
-                logWatcher.Stop();
+                if (!appSettings.auto_screenshot_cleanup)
+                    logWatcher.Stop();
             }
         }
 
@@ -784,12 +839,7 @@ namespace eft_where_am_i
 
             if (FloorHotkeyMap.TryGetValue(keyIndex, out string[] candidates))
             {
-                foreach (var name in candidates)
-                {
-                    bool clicked = await jsExecutor.ClickFloorByNameAsync(name);
-                    if (clicked) break;
-                    // 매칭 안되면 다음 후보 시도, 모두 실패해도 에러 없이 종료
-                }
+                await jsExecutor.ClickFloorByFirstMatchAsync(candidates);
             }
         }
 

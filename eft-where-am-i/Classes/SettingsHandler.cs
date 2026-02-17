@@ -343,6 +343,7 @@ namespace eft_where_am_i.Classes
         public bool auto_screenshot_detection { get; set; } = false;
         public bool auto_map_detection { get; set; } = false;
         public bool auto_panning { get; set; } = true;
+        public bool auto_screenshot_cleanup { get; set; } = false;
         public string language { get; set; } = "en";
         public string screenshot_path { get; set; } = string.Empty;
         public string log_path { get; set; } = string.Empty;

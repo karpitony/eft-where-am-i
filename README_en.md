@@ -9,9 +9,12 @@
 
 > **English (Current)** | **[한국어](README.md)**
 
-# EFT: Where Am I
+# EFT: Where Am I Too
 
-A companion tool that parses EFT screenshot filenames containing 3D coordinates and quaternion rotation data to show your exact location and facing direction on interactive [tarkov-market.com](https://tarkov-market.com/) maps.
+A personally modified version of the Tarkov companion tool "Where Am I".
+
+This version improves upon the original Where Am I by fixing bugs and enhancing utility features.
+Those who have used it may notice that some features from TarkovHelper have been partially implemented.
 
 > [!WARNING]
 > This program is distributed under the [MIT License](./LICENSE). **We are not responsible for any consequences (including BSG bans or sanctions) resulting from the use of this program.**
@@ -19,8 +22,7 @@ A companion tool that parses EFT screenshot filenames containing 3D coordinates 
 
 ## Table of Contents
 
-- [Features](#features)
-- [Supported Maps](#supported-maps)
+- [Differences from Where Am I](#differences-from-where-am-i)
 - [System Requirements](#system-requirements)
 - [Download & Installation](#download--installation)
 - [How to Use](#how-to-use)
@@ -30,93 +32,55 @@ A companion tool that parses EFT screenshot filenames containing 3D coordinates 
 - [Credits & Acknowledgments](#credits--acknowledgments)
 - [License](#license)
 
-## Features
+## Differences from Where Am I
 
-### Screenshot-Based Location Display
+### Fixed the frequent vertical position misalignment bug
 
-**Pinpoint your exact position from a single screenshot.**
+This was the biggest bug in the original Where Am I.
+This bug was actually the reason I decided to modify it for my own use.
+It has now been completely fixed.
 
-EFT screenshot filenames contain the player's 3D coordinates and rotation data. This tool parses that data and displays your position as a red dot on the tarkov-market.com map.
+### Auto map switch on raid start
 
-```
-2026-01-10[03-59]_-318.44, 24.84, -107.49_0.00000, 0.82497, 0.00000, 0.56518_3.98 (0).png
-│      Date       │    X,    Z,      Y    │     Quaternion Rotation (X,Y,Z,W)  │Spd │
-```
+Automatically detects raid start and switches to the corresponding map.
+This option requires the log folder path to be set.
+If auto log folder detection doesn't work, please try restarting the game.
 
-<!-- TODO: Add location marker screenshot -->
+### Auto Panning
 
-### Auto Screenshot Detection
+When the location marker reaches the edge (deadzone) of the viewport, the map automatically scrolls to keep the marker visible on screen. The deadzone percentage can be adjusted in settings.
+It can be set from 50% to 99% — closer to 50% means panning centers the marker more, while closer to 99% allows the marker to stay near the edge.
 
-**Your location updates automatically every time you take a screenshot.**
+#### At 50%
 
-Uses `FileSystemWatcher` to monitor the screenshot folder in real time. When a new screenshot is created, coordinates are automatically parsed and the location is refreshed — no need to click `Force Run` each time.
+<img src="assets/panning_50percent.gif" width="90%">
 
-<!-- TODO: Add auto screenshot detection screenshot -->
+#### At 99%
 
-### Auto Map Detection
+<img src="assets/panning_99percent.gif" width="90%">
 
-**The map switches automatically when you enter a raid.**
+### Floor switching with Ctrl + NumPad in-game
 
-Periodically monitors EFT game log files to detect which map you've loaded into. When you enter a raid, the tool automatically switches to the correct map without any manual action.
+You can switch floors directly in-game using Ctrl + NumPad combinations.
+This feature was inspired by Tarkov Helper.
+It only works while the game is the active window.
 
-<!-- TODO: Add auto map detection screenshot -->
+### Auto save & auto restore quests
 
-### Multi-Floor Auto Detection
+Right-click a quest to select it and it will be saved automatically. Right-click again to deselect and the saved entry will be removed.
+When you switch maps and return, your quests are automatically restored.
+Since it uses the tarkov-market page as-is, free users can save up to 3 quests, while paid users can save unlimited quests.
 
-**Automatically determines your current floor based on Z-coordinate.**
+### Save & restore panel hidden state
 
-On multi-floor maps like Reserve, Factory, and Streets, the tool analyzes the Z-coordinate (height) from the screenshot to automatically switch between floors (e.g., ground / underground). Manual switching via `Ctrl+Numpad` hotkeys is also available.
+Saves the state of the tarkov-market panel. When you switch maps and return, the panel state is restored.
 
-<!-- TODO: Add floor detection screenshot -->
+    The contents inside the panel (boss, sniper scav, cultist, etc.) are not saved yet — planned for a future update.
 
-### Direction Indicator
+### Auto Screenshot Cleanup
 
-**See which way you're facing with an arrow overlay.**
-
-Converts the quaternion rotation data from the screenshot filename into Euler angles, then renders an SVG triangle arrow on the map showing the player's facing direction.
-
-<!-- TODO: Add direction indicator screenshot -->
-
-### Deadzone Auto-Panning
-
-**The map automatically scrolls to keep your marker in view.**
-
-When the location marker reaches the edge of the viewport (deadzone), the map automatically pans to keep the marker visible on screen. The deadzone percentage is configurable in settings.
-
-<!-- TODO: Add deadzone panning screenshot -->
-
-### Quest Tracking
-
-**Selected quests are saved and restored per map.**
-
-Quest selections made in the tarkov-market.com quest panel are stored in a SQLite database per map. The next time you open the same map, your previously selected quests are automatically restored.
-
-<!-- TODO: Add quest tracking screenshot -->
-
-### Floor Zone Editor
-
-**Visually edit polygon-based floor zones on the map.**
-
-Click on the map to define polygonal floor zones. Holes (exclusion areas) are supported for complex multi-level buildings. Results are saved to `floor_db.json` for precise floor detection.
-
-<!-- TODO: Add floor zone editor screenshot -->
-
-## Supported Maps
-
-| # | Map Name | Internal Name |
-|---|----------|---------------|
-| 1 | Ground Zero | `ground-zero` |
-| 2 | Factory | `factory` |
-| 3 | Customs | `customs` |
-| 4 | Interchange | `interchange` |
-| 5 | Woods | `woods` |
-| 6 | Shoreline | `shoreline` |
-| 7 | Lighthouse | `lighthouse` |
-| 8 | Reserve | `reserve` |
-| 9 | Streets of Tarkov | `streets` |
-| 10 | The Lab | `lab` |
-| 11 | Labyrinth | `labyrinth` |
-| 12 | Terminal | `terminal` |
+Automatically detects raid end and cleans up screenshot files.
+If you need to preserve your screenshots, please uncheck this option.
 
 ## System Requirements
 
@@ -138,6 +102,8 @@ Download the latest `.zip` file from [Releases](https://github.com/karpitony/eft
 2. Extract it to your preferred location.
 3. Run `eft-where-am-i.exe`.
 
+> If it doesn't run, please install the runtime from [System Requirements](#system-requirements).
+
 <img src="assets/eft-wmi-exe.png" width="700">
 
 ### Windows Security Warning
@@ -157,46 +123,6 @@ On first launch, the tool automatically detects your EFT screenshot and log fold
 Choose a map from the top-left dropdown. If Auto Map Detection is enabled, the map switches automatically when you enter a raid.
 
 <img src="assets/screenshot01.png" width="700">
-
-**2. Take a screenshot during a raid.**
-
-The default EFT screenshot key is `PrtSc`.
-
-**3. Check your position on the map.**
-
-A red dot and direction arrow will show your current location and facing direction.
-
-**4. With Auto Screenshot Detection enabled, your position updates automatically.**
-
-No need to click `Force Run` — just take screenshots and see your location in real time.
-
-### Advanced Features
-
-#### Floor Switching Hotkeys
-
-When Escape From Tarkov is the active window, use the following hotkeys to manually switch floors:
-
-| Hotkey | Action |
-|--------|--------|
-| `Ctrl + Numpad 0` | Basement / Bunker |
-| `Ctrl + Numpad 1` | Ground Floor |
-| `Ctrl + Numpad 2` | Level 2 |
-| `Ctrl + Numpad 3` | Level 3 |
-| `Ctrl + Numpad 4` | Level 4 |
-| `Ctrl + Numpad 5` | Level 5 |
-
-#### Deadzone Configuration
-
-Adjust the deadzone percentage (default: 93%) in Settings to control how close the marker can get to the viewport edge before auto-panning triggers.
-
-#### Floor Zone Editor
-
-1. Click the `Floor Zone Editor` button in Settings.
-2. Click on the map to add polygon vertices.
-3. Configure floor name and Z-range.
-4. Save — changes are written to `floor_db.json`.
-
-Community contributions of floor zone data are welcome!
 
 ## Settings
 
