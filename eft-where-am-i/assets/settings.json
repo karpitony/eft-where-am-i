@@ -11,8 +11,8 @@
     "OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
     "OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
   ],
-  "latest_map": "ground-zero",
-  "dead_zone_percent": 93,
+  "latest_map": "interchange",
+  "dead_zone_percent": 90,
   "panel_hidden_per_map": {
     "interchange": true,
     "woods": true,

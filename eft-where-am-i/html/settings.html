@@ -111,6 +111,26 @@
       </div>
     </div>
   </section>
+
+  <!-- Dead Zone Percentage Settings -->
+  <section class="mb-6">
+    <p id="deadZoneLabel" class="mb-2 text-xl">
+      Dead Zone Percentage
+    </p>
+    <div class="flex items-center space-x-4">
+      <input
+        type="range"
+        id="deadZoneSlider"
+        min="50"
+        max="99"
+        step="1"
+        value="93"
+        oninput="onDeadZoneChange()"
+        class="w-64"
+      />
+      <span id="deadZoneValue" class="text-base font-medium">93%</span>
+    </div>
+  </section>
   </main>
 
   <!-- Links -->
@@ -174,6 +194,7 @@
       document.getElementById('resetLogPathText').textContent = i18next.t('resetLogPathText');
       document.getElementById('changeLogPathButton').textContent = i18next.t('changeLogPathButton');
       document.getElementById('autoDetectLogButton').textContent = i18next.t('autoDetectLogButton');
+      document.getElementById('deadZoneLabel').textContent = i18next.t('deadZoneLabel');
     }
 
     // 언어 선택 시 호출되는 함수
@@ -237,6 +258,29 @@
       } catch (error) {
         console.error("setLogPath 오류 발생: ", error);
       }
+    }
+
+    // C#에서 호출하는 함수: 데드존 비율 설정
+    function setDeadZonePercent(value) {
+      try {
+        const slider = document.getElementById('deadZoneSlider');
+        const display = document.getElementById('deadZoneValue');
+        slider.value = value;
+        display.textContent = value + '%';
+        console.log("Dead zone percent set to:", value);
+      } catch (error) {
+        console.error("setDeadZonePercent 오류 발생: ", error);
+      }
+    }
+
+    // 데드존 슬라이더 변경 시 호출
+    function onDeadZoneChange() {
+      const value = document.getElementById('deadZoneSlider').value;
+      document.getElementById('deadZoneValue').textContent = value + '%';
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'dead-zone-changed',
+        value: parseInt(value)
+      }));
     }
 
     // 경로 변경 시 C#으로 전달

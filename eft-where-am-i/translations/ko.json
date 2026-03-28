@@ -20,5 +20,6 @@
     "autoDetectLogButton": "자동 탐지",
     "howToUseLink": "사용 방법",
     "bugLink": "버그 제보",
+    "deadZoneLabel": "데드존 비율",
     "footerText": "이 프로그램은 Tarkov-market과 관련이 없습니다."
 }
