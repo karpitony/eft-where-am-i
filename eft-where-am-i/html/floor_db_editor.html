@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floor DB Editor</title>
+  <link rel="stylesheet" href="../assets/css/tailwind.css">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9fafb; }
+    .floor-entry { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .floor-entry input { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; }
+    .floor-entry input[type="text"] { width: 120px; }
+    .floor-entry input[type="number"] { width: 80px; }
+    .map-section { margin-bottom: 24px; padding: 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    button { cursor: pointer; }
+    .btn { padding: 6px 16px; border-radius: 4px; font-weight: 500; }
+    .btn-primary { background: #3b82f6; color: white; border: none; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-danger { background: #ef4444; color: white; border: none; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: #6b7280; color: white; border: none; }
+    .btn-secondary:hover { background: #4b5563; }
+    .btn-success { background: #10b981; color: white; border: none; }
+    .btn-success:hover { background: #059669; }
+    h1 { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
+    h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+    .top-bar { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
+    #status { margin-left: auto; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <h1>Floor DB Editor</h1>
+  <div class="top-bar">
+    <button class="btn btn-success" onclick="addMap()">+ Add Map</button>
+    <button class="btn btn-primary" onclick="saveAll()">Save All</button>
+    <button class="btn btn-secondary" onclick="loadDb()">Reload</button>
+    <span id="status"></span>
+  </div>
+  <div id="editor"></div>
+
+  <script>
+    let floorDb = {};
+
+    // Load the DB from the file (reads via fetch for local file or from embedded data)
+    async function loadDb() {
+      try {
+        // Try reading floor_db.json relative to this HTML file's location
+        const resp = await fetch('../floor_db.json');
+        if (resp.ok) {
+          floorDb = await resp.json();
+        } else {
+          floorDb = {};
+        }
+      } catch (e) {
+        // If fetch fails (e.g., file:// protocol), try reading from parent directory
+        try {
+          const resp2 = await fetch('./floor_db.json');
+          if (resp2.ok) {
+            floorDb = await resp2.json();
+          } else {
+            floorDb = {};
+          }
+        } catch (e2) {
+          floorDb = {};
+        }
+      }
+      renderEditor();
+      setStatus('Loaded');
+    }
+
+    function renderEditor() {
+      const container = document.getElementById('editor');
+      container.innerHTML = '';
+
+      for (const [mapName, config] of Object.entries(floorDb)) {
+        const section = document.createElement('div');
+        section.className = 'map-section';
+
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.style.marginBottom = '12px';
+
+        const title = document.createElement('h2');
+        title.textContent = mapName;
+        header.appendChild(title);
+
+        const headerBtns = document.createElement('div');
+        headerBtns.style.display = 'flex';
+        headerBtns.style.gap = '8px';
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn btn-primary';
+        addBtn.textContent = '+ Floor';
+        addBtn.onclick = () => addFloor(mapName);
+        headerBtns.appendChild(addBtn);
+
+        const removeMapBtn = document.createElement('button');
+        removeMapBtn.className = 'btn btn-danger';
+        removeMapBtn.textContent = 'Remove Map';
+        removeMapBtn.onclick = () => removeMap(mapName);
+        headerBtns.appendChild(removeMapBtn);
+
+        header.appendChild(headerBtns);
+        section.appendChild(header);
+
+        const floors = config.floors || [];
+        floors.forEach((floor, idx) => {
+          const row = document.createElement('div');
+          row.className = 'floor-entry';
+
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.value = floor.name;
+          nameInput.placeholder = 'Floor name';
+          nameInput.onchange = (e) => { floorDb[mapName].floors[idx].name = e.target.value; };
+
+          const minLabel = document.createElement('span');
+          minLabel.textContent = 'Z min:';
+          const minInput = document.createElement('input');
+          minInput.type = 'number';
+          minInput.step = '0.1';
+          minInput.value = floor.z_min;
+          minInput.onchange = (e) => { floorDb[mapName].floors[idx].z_min = parseFloat(e.target.value); };
+
+          const maxLabel = document.createElement('span');
+          maxLabel.textContent = 'Z max:';
+          const maxInput = document.createElement('input');
+          maxInput.type = 'number';
+          maxInput.step = '0.1';
+          maxInput.value = floor.z_max;
+          maxInput.onchange = (e) => { floorDb[mapName].floors[idx].z_max = parseFloat(e.target.value); };
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'btn btn-danger';
+          removeBtn.textContent = 'X';
+          removeBtn.onclick = () => removeFloor(mapName, idx);
+
+          row.appendChild(nameInput);
+          row.appendChild(minLabel);
+          row.appendChild(minInput);
+          row.appendChild(maxLabel);
+          row.appendChild(maxInput);
+          row.appendChild(removeBtn);
+
+          section.appendChild(row);
+        });
+
+        container.appendChild(section);
+      }
+    }
+
+    function addMap() {
+      const name = prompt('Enter map name (e.g., reserve, streets):');
+      if (!name) return;
+      const key = name.toLowerCase().trim();
+      if (floorDb[key]) {
+        alert('Map already exists!');
+        return;
+      }
+      floorDb[key] = { floors: [{ name: 'Ground', z_min: -5.0, z_max: 100.0 }] };
+      renderEditor();
+    }
+
+    function removeMap(mapName) {
+      if (!confirm(`Remove map "${mapName}" and all its floor data?`)) return;
+      delete floorDb[mapName];
+      renderEditor();
+    }
+
+    function addFloor(mapName) {
+      floorDb[mapName].floors.push({ name: 'New Floor', z_min: 0, z_max: 0 });
+      renderEditor();
+    }
+
+    function removeFloor(mapName, idx) {
+      floorDb[mapName].floors.splice(idx, 1);
+      renderEditor();
+    }
+
+    function saveAll() {
+      const json = JSON.stringify(floorDb, null, 2);
+
+      // If running inside WebView2, post message to C#
+      if (window.chrome && window.chrome.webview) {
+        window.chrome.webview.postMessage(JSON.stringify({
+          action: 'save-floor-db',
+          data: json
+        }));
+        setStatus('Saved via app');
+        return;
+      }
+
+      // Fallback: download as file
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'floor_db.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setStatus('Downloaded - replace floor_db.json in app folder');
+    }
+
+    function setStatus(msg) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      setTimeout(() => { el.textContent = ''; }, 3000);
+    }
+
+    // Initialize
+    loadDb();
+  </script>
+</body>
+</html>

@@ -12,7 +12,15 @@
     "changePathButton": "경로 변경",
     "autoDetectButton": "자동 감지",
     "openFolderButton": "스크린샷 폴더 열기",
+    "autoMapDetectionLabel": "자동 맵 감지",
+    "autoPanningLabel": "자동 패닝",
+    "floorDbEditorButton": "층 DB 편집기",
+    "resetLogPathText": "로그 경로 설정",
+    "changeLogPathButton": "경로 변경",
+    "autoDetectLogButton": "자동 탐지",
     "howToUseLink": "사용 방법",
     "bugLink": "버그 제보",
+    "deadZoneLabel": "데드존 비율",
+    "autoScreenshotCleanupLabel": "스크린샷 자동 삭제",
     "footerText": "이 프로그램은 Tarkov-market과 관련이 없습니다."
 }

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dead Zone Auto-Pan Test</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; }
+
+.controls {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    padding: 12px 16px; background: #16213e; border-bottom: 1px solid #0f3460;
+}
+.controls label { font-size: 13px; color: #a0a0c0; }
+.controls input[type="range"] { width: 140px; cursor: pointer; }
+.controls button {
+    padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: opacity 0.15s;
+}
+.controls button:hover { opacity: 0.85; }
+.btn-pan { background: #e94560; color: #fff; }
+.btn-css { background: #0f3460; color: #e0e0e0; border: 1px solid #e94560 !important; }
+.btn-toggle { background: #533483; color: #fff; }
+.btn-test { background: #1a8a4a; color: #fff; }
+#deadzone-val { color: #e94560; font-weight: bold; min-width: 32px; display: inline-block; }
+
+.main-area {
+    display: flex; gap: 0; height: calc(100vh - 52px - 200px);
+    min-height: 400px; position: relative;
+}
+
+/* Viewport wrapper simulates #map parent */
+.viewport-wrapper {
+    position: relative; flex: 1; overflow: hidden;
+    background: #2a2a4a; border: 2px solid #444;
+}
+
+/* #map container - larger than viewport, transformed */
+#map {
+    position: absolute; width: 2000px; height: 2000px;
+    background:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform-origin: 0 0;
+    /* initial transform centers roughly */
+    transform: translate(-600px, -750px);
+}
+
+/* Marker */
+.marker {
+    position: absolute; width: 24px; height: 24px;
+    background: #e94560; border: 2px solid #fff; border-radius: 50%;
+    cursor: grab; z-index: 10;
+    left: 1000px; top: 1000px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(233,69,96,0.6);
+    transition: box-shadow 0.15s;
+}
+.marker:active { cursor: grabbing; box-shadow: 0 0 16px rgba(233,69,96,0.9); }
+.marker::after {
+    content: 'M'; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px; font-weight: bold; color: #fff;
+    pointer-events: none;
+}
+
+/* Side panel (tarkov-market simulation) */
+.side-panel {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 220px; background: rgba(15, 52, 96, 0.85);
+    border-left: 2px solid #0f3460; z-index: 5;
+    display: flex; flex-direction: column; padding: 12px;
+    transition: transform 0.25s ease;
+}
+.side-panel.hidden { transform: translateX(100%); }
+.side-panel h3 { color: #e94560; font-size: 14px; margin-bottom: 8px; }
+.side-panel .items.scroll {
+    flex: 1; overflow-y: auto;
+    background: rgba(0,0,0,0.2); border-radius: 4px; padding: 6px;
+}
+.side-panel .items.scroll .item {
+    padding: 6px 8px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.05); border-radius: 3px;
+    font-size: 12px; color: #c0c0d0;
+}
+
+/* Dead zone boundary overlay */
+.deadzone-boundary {
+    position: absolute; pointer-events: none; z-index: 4;
+    border: 2px dashed #e94560;
+}
+.effective-viewport {
+    position: absolute; pointer-events: none; z-index: 3;
+    border: 2px dashed #2ecc71;
+}
+
+/* Labels */
+.overlay-label {
+    position: absolute; font-size: 10px; padding: 2px 6px;
+    border-radius: 2px; pointer-events: none; z-index: 6;
+    white-space: nowrap;
+}
+.label-deadzone { background: rgba(233,69,96,0.8); color: #fff; top: -18px; left: 0; }
+.label-effective { background: rgba(46,204,113,0.8); color: #fff; bottom: -18px; right: 0; }
+
+/* Log area */
+.log-area {
+    height: 200px; background: #0d1117; border-top: 1px solid #333;
+    overflow-y: auto; padding: 8px 12px; font-family: 'Consolas', monospace; font-size: 12px;
+}
+.log-area .log-entry { margin-bottom: 4px; line-height: 1.5; }
+.log-entry.result-pan { color: #e94560; }
+.log-entry.result-noaction { color: #2ecc71; }
+.log-entry.result-info { color: #a0a0c0; }
+.log-entry.result-test-pass { color: #2ecc71; font-weight: bold; }
+.log-entry.result-test-fail { color: #e94560; font-weight: bold; }
+
+/* Coordinate display */
+.coord-display {
+    position: absolute; bottom: 4px; left: 4px; z-index: 6;
+    font-size: 11px; color: #888; background: rgba(0,0,0,0.6);
+    padding: 2px 6px; border-radius: 3px; pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Controls -->
+<div class="controls">
+    <label>deadZonePercent: <input type="range" id="deadzone-slider" min="50" max="99" value="85">
+        <span id="deadzone-val">85</span>%
+    </label>
+    <button class="btn-pan" onclick="runAutoPan()">Run Auto-Pan</button>
+    <button class="btn-css" onclick="runCSSFallback()">Run CSS Fallback</button>
+    <button class="btn-toggle" onclick="togglePanel()">Toggle Panel</button>
+    <button class="btn-test" onclick="runAllTests()">Run All Tests</button>
+</div>
+
+<!-- Main Area -->
+<div class="main-area">
+    <div class="viewport-wrapper" id="viewport-wrapper">
+        <!-- Effective viewport boundary -->
+        <div class="effective-viewport" id="effective-viewport">
+            <span class="overlay-label label-effective">Effective Viewport</span>
+        </div>
+        <!-- Dead zone boundary -->
+        <div class="deadzone-boundary" id="deadzone-boundary">
+            <span class="overlay-label label-deadzone">Dead Zone Boundary</span>
+        </div>
+
+        <!-- #map - panned via transform -->
+        <div id="map">
+            <div class="marker" id="marker"></div>
+        </div>
+
+        <!-- Side panel -->
+        <div class="side-panel" id="side-panel">
+            <h3>Quest Items</h3>
+            <div class="items scroll">
+                <div class="item">Flash drive (0/2)</div>
+                <div class="item">Gas analyzer (0/3)</div>
+                <div class="item">Morphine (0/4)</div>
+                <div class="item">CPU fan (0/1)</div>
+                <div class="item">Spark plug (0/2)</div>
+            </div>
+        </div>
+
+        <!-- Coordinate display -->
+        <div class="coord-display" id="coord-display">Marker: (-, -)</div>
+    </div>
+</div>
+
+<!-- Log area -->
+<div class="log-area" id="log-area"></div>
+
+<!-- ======== Production JS (from Constants.cs DEAD_ZONE_AUTO_PAN_SCRIPT) ======== -->
+<script>
+(function() {
+    'use strict';
+
+    window.__deadZoneAutoPan = function(deadZonePercent) {
+        // 1. Find marker
+        var markers = document.querySelectorAll('.marker');
+        if (markers.length === 0) return JSON.stringify({ panned: false, reason: 'no-marker' });
+        var marker = markers[markers.length - 1];
+        var markerRect = marker.getBoundingClientRect();
+        var markerCX = markerRect.left + markerRect.width / 2;
+        var markerCY = markerRect.top + markerRect.height / 2;
+
+        // 2. Viewport calculation (#map parent or #map itself)
+        var mapEl = document.querySelector('#map');
+        if (!mapEl) return JSON.stringify({ panned: false, reason: 'no-map' });
+        var viewportEl = mapEl.parentElement || mapEl;
+        var viewportRect = viewportEl.getBoundingClientRect();
+
+        // 3. Panel detection (tarkov-market side panel)
+        var effectiveLeft = viewportRect.left;
+        var effectiveRight = viewportRect.right;
+        var effectiveTop = viewportRect.top;
+        var effectiveBottom = viewportRect.bottom;
+
+        var questPanel = document.querySelector('div.items.scroll');
+        if (questPanel) {
+            var panelParent = questPanel.closest('.panel') || questPanel.parentElement;
+            var panelRect = panelParent ? panelParent.getBoundingClientRect() : questPanel.getBoundingClientRect();
+
+            if (panelRect.width > 50 && panelRect.height > 50) {
+                var panelCenterX = panelRect.left + panelRect.width / 2;
+                var viewportCenterX = viewportRect.left + viewportRect.width / 2;
+                if (panelCenterX > viewportCenterX) {
+                    effectiveRight = Math.min(effectiveRight, panelRect.left);
+                } else {
+                    effectiveLeft = Math.max(effectiveLeft, panelRect.right);
+                }
+            }
+        }
+
+        // 4. Calculate inner boundary rectangle based on deadZonePercent
+        var effectiveWidth = effectiveRight - effectiveLeft;
+        var effectiveHeight = effectiveBottom - effectiveTop;
+        var inset = (100 - deadZonePercent) / 200;
+        var boundLeft = effectiveLeft + effectiveWidth * inset;
+        var boundRight = effectiveRight - effectiveWidth * inset;
+        var boundTop = effectiveTop + effectiveHeight * inset;
+        var boundBottom = effectiveBottom - effectiveHeight * inset;
+
+        // 5. No pan needed if marker inside boundary
+        if (markerCX >= boundLeft && markerCX <= boundRight &&
+            markerCY >= boundTop && markerCY <= boundBottom) {
+            return JSON.stringify({ panned: false, reason: 'inside-boundary' });
+        }
+
+        // 6. Calculate displacement
+        var dx = 0, dy = 0;
+        if (markerCX < boundLeft) dx = markerCX - boundLeft;
+        else if (markerCX > boundRight) dx = markerCX - boundRight;
+        if (markerCY < boundTop) dy = markerCY - boundTop;
+        else if (markerCY > boundBottom) dy = markerCY - boundBottom;
+
+        // 7. Simulate pointer events to pan map
+        var panTarget = mapEl.parentElement || mapEl;
+        var startX = effectiveLeft + effectiveWidth / 2;
+        var startY = effectiveTop + effectiveHeight / 2;
+        var endX = startX - dx;
+        var endY = startY - dy;
+
+        var pointerOpts = { bubbles: true, cancelable: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons: 1 };
+
+        // pointerdown
+        pointerOpts.clientX = startX;
+        pointerOpts.clientY = startY;
+        panTarget.dispatchEvent(new PointerEvent('pointerdown', pointerOpts));
+
+        // pointermove in 5 steps
+        var steps = 5;
+        for (var s = 1; s <= steps; s++) {
+            var t = s / steps;
+            pointerOpts.clientX = startX + (endX - startX) * t;
+            pointerOpts.clientY = startY + (endY - startY) * t;
+            panTarget.dispatchEvent(new PointerEvent('pointermove', pointerOpts));
+        }
+
+        // pointerup
+        pointerOpts.clientX = endX;
+        pointerOpts.clientY = endY;
+        pointerOpts.buttons = 0;
+        panTarget.dispatchEvent(new PointerEvent('pointerup', pointerOpts));
+
+        return JSON.stringify({ panned: true, dx: Math.round(dx), dy: Math.round(dy), method: 'pointer' });
+    };
+
+    window.__deadZoneAutoPanCSS = function(deadZonePercent) {
+        // CSS transform direct modification fallback
+        var markers = document.querySelectorAll('.marker');
+        if (markers.length === 0) return JSON.stringify({ panned: false, reason: 'no-marker' });
+        var marker = markers[markers.length - 1];
+        var markerRect = marker.getBoundingClientRect();
+        var markerCX = markerRect.left + markerRect.width / 2;
+        var markerCY = markerRect.top + markerRect.height / 2;
+
+        var mapEl = document.querySelector('#map');
+        if (!mapEl) return JSON.stringify({ panned: false, reason: 'no-map' });
+        var viewportEl = mapEl.parentElement || mapEl;
+        var viewportRect = viewportEl.getBoundingClientRect();
+
+        var effectiveLeft = viewportRect.left;
+        var effectiveRight = viewportRect.right;
+        var effectiveTop = viewportRect.top;
+        var effectiveBottom = viewportRect.bottom;
+
+        var questPanel = document.querySelector('div.items.scroll');
+        if (questPanel) {
+            var panelParent = questPanel.closest('.panel') || questPanel.parentElement;
+            var panelRect = panelParent ? panelParent.getBoundingClientRect() : questPanel.getBoundingClientRect();
+            if (panelRect.width > 50 && panelRect.height > 50) {
+                var panelCenterX = panelRect.left + panelRect.width / 2;
+                var viewportCenterX = viewportRect.left + viewportRect.width / 2;
+                if (panelCenterX > viewportCenterX) {
+                    effectiveRight = Math.min(effectiveRight, panelRect.left);
+                } else {
+                    effectiveLeft = Math.max(effectiveLeft, panelRect.right);
+                }
+            }
+        }
+
+        var effectiveWidth = effectiveRight - effectiveLeft;
+        var effectiveHeight = effectiveBottom - effectiveTop;
+        var inset = (100 - deadZonePercent) / 200;
+        var boundLeft = effectiveLeft + effectiveWidth * inset;
+        var boundRight = effectiveRight - effectiveWidth * inset;
+        var boundTop = effectiveTop + effectiveHeight * inset;
+        var boundBottom = effectiveBottom - effectiveHeight * inset;
+
+        if (markerCX >= boundLeft && markerCX <= boundRight &&
+            markerCY >= boundTop && markerCY <= boundBottom) {
+            return JSON.stringify({ panned: false, reason: 'inside-boundary' });
+        }
+
+        var dx = 0, dy = 0;
+        if (markerCX < boundLeft) dx = markerCX - boundLeft;
+        else if (markerCX > boundRight) dx = markerCX - boundRight;
+        if (markerCY < boundTop) dy = markerCY - boundTop;
+        else if (markerCY > boundBottom) dy = markerCY - boundBottom;
+
+        // Read current transform via DOMMatrix, adjust translate
+        var currentTransform = window.getComputedStyle(mapEl).transform;
+        var matrix = new DOMMatrix(currentTransform && currentTransform !== 'none' ? currentTransform : 'matrix(1,0,0,1,0,0)');
+        matrix.e -= dx;
+        matrix.f -= dy;
+        mapEl.style.transform = matrix.toString();
+
+        return JSON.stringify({ panned: true, dx: Math.round(dx), dy: Math.round(dy), method: 'css' });
+    };
+
+    window.__deadZoneCalc = function(deadZonePercent) {
+        // Pure calculation: returns pan coordinates without executing any events
+        var markers = document.querySelectorAll('.marker');
+        if (markers.length === 0) return JSON.stringify({ needsPan: false, reason: 'no-marker' });
+        var marker = markers[markers.length - 1];
+        var markerRect = marker.getBoundingClientRect();
+        var markerCX = markerRect.left + markerRect.width / 2;
+        var markerCY = markerRect.top + markerRect.height / 2;
+
+        var mapEl = document.querySelector('#map');
+        if (!mapEl) return JSON.stringify({ needsPan: false, reason: 'no-map' });
+        var viewportEl = mapEl.parentElement || mapEl;
+        var viewportRect = viewportEl.getBoundingClientRect();
+
+        var effectiveLeft = viewportRect.left;
+        var effectiveRight = viewportRect.right;
+        var effectiveTop = viewportRect.top;
+        var effectiveBottom = viewportRect.bottom;
+
+        var questPanel = document.querySelector('div.items.scroll');
+        if (questPanel) {
+            var panelParent = questPanel.closest('.panel') || questPanel.parentElement;
+            var panelRect = panelParent ? panelParent.getBoundingClientRect() : questPanel.getBoundingClientRect();
+            if (panelRect.width > 50 && panelRect.height > 50) {
+                var panelCenterX = panelRect.left + panelRect.width / 2;
+                var viewportCenterX = viewportRect.left + viewportRect.width / 2;
+                if (panelCenterX > viewportCenterX) {
+                    effectiveRight = Math.min(effectiveRight, panelRect.left);
+                } else {
+                    effectiveLeft = Math.max(effectiveLeft, panelRect.right);
+                }
+            }
+        }
+
+        var effectiveWidth = effectiveRight - effectiveLeft;
+        var effectiveHeight = effectiveBottom - effectiveTop;
+        var inset = (100 - deadZonePercent) / 200;
+        var boundLeft = effectiveLeft + effectiveWidth * inset;
+        var boundRight = effectiveRight - effectiveWidth * inset;
+        var boundTop = effectiveTop + effectiveHeight * inset;
+        var boundBottom = effectiveBottom - effectiveHeight * inset;
+
+        if (markerCX >= boundLeft && markerCX <= boundRight &&
+            markerCY >= boundTop && markerCY <= boundBottom) {
+            return JSON.stringify({ needsPan: false, reason: 'inside-boundary' });
+        }
+
+        var dx = 0, dy = 0;
+        if (markerCX < boundLeft) dx = markerCX - boundLeft;
+        else if (markerCX > boundRight) dx = markerCX - boundRight;
+        if (markerCY < boundTop) dy = markerCY - boundTop;
+        else if (markerCY > boundBottom) dy = markerCY - boundBottom;
+
+        var startX = effectiveLeft + effectiveWidth / 2;
+        var startY = effectiveTop + effectiveHeight / 2;
+        var endX = startX - dx;
+        var endY = startY - dy;
+
+        return JSON.stringify({
+            needsPan: true,
+            reason: 'outside-boundary',
+            dx: Math.round(dx),
+            dy: Math.round(dy),
+            startX: Math.round(startX),
+            startY: Math.round(startY),
+            endX: Math.round(endX),
+            endY: Math.round(endY)
+        });
+    };
+})();
+</script>
+
+<!-- ======== Test Page Logic ======== -->
+<script>
+(function() {
+    'use strict';
+
+    var marker = document.getElementById('marker');
+    var mapEl = document.getElementById('map');
+    var viewportWrapper = document.getElementById('viewport-wrapper');
+    var sidePanel = document.getElementById('side-panel');
+    var slider = document.getElementById('deadzone-slider');
+    var dzVal = document.getElementById('deadzone-val');
+    var logArea = document.getElementById('log-area');
+    var coordDisplay = document.getElementById('coord-display');
+    var dzBoundary = document.getElementById('deadzone-boundary');
+    var effViewport = document.getElementById('effective-viewport');
+
+    // ---- Pointer-event based panning for the test page ----
+    // (simulates tarkov-market's pan behavior so the pointer-event method works)
+    var isPanning = false;
+    var panStartX = 0, panStartY = 0;
+    var mapStartTx = 0, mapStartTy = 0;
+
+    function getMapTranslate() {
+        var st = window.getComputedStyle(mapEl).transform;
+        if (!st || st === 'none') return { tx: 0, ty: 0 };
+        var m = new DOMMatrix(st);
+        return { tx: m.e, ty: m.f };
+    }
+
+    viewportWrapper.addEventListener('pointerdown', function(e) {
+        // Ignore if dragging marker
+        if (e.target === marker || e.target.closest('.marker')) return;
+        isPanning = true;
+        panStartX = e.clientX;
+        panStartY = e.clientY;
+        var t = getMapTranslate();
+        mapStartTx = t.tx;
+        mapStartTy = t.ty;
+        viewportWrapper.setPointerCapture(e.pointerId);
+    });
+    viewportWrapper.addEventListener('pointermove', function(e) {
+        if (!isPanning) return;
+        var dx = e.clientX - panStartX;
+        var dy = e.clientY - panStartY;
+        mapEl.style.transform = 'translate(' + (mapStartTx + dx) + 'px, ' + (mapStartTy + dy) + 'px)';
+        updateOverlays();
+    });
+    viewportWrapper.addEventListener('pointerup', function(e) {
+        isPanning = false;
+    });
+
+    // ---- Marker drag ----
+    var isDragging = false;
+    var dragOffsetX = 0, dragOffsetY = 0;
+
+    marker.addEventListener('pointerdown', function(e) {
+        isDragging = true;
+        e.stopPropagation();
+        var rect = marker.getBoundingClientRect();
+        dragOffsetX = e.clientX - (rect.left + rect.width / 2);
+        dragOffsetY = e.clientY - (rect.top + rect.height / 2);
+        marker.setPointerCapture(e.pointerId);
+    });
+    marker.addEventListener('pointermove', function(e) {
+        if (!isDragging) return;
+        // Convert client coords to map-local coords
+        var mapRect = mapEl.getBoundingClientRect();
+        var localX = (e.clientX - dragOffsetX) - mapRect.left;
+        var localY = (e.clientY - dragOffsetY) - mapRect.top;
+        marker.style.left = localX + 'px';
+        marker.style.top = localY + 'px';
+        updateCoordDisplay();
+    });
+    marker.addEventListener('pointerup', function(e) {
+        isDragging = false;
+        updateOverlays();
+    });
+
+    // ---- Slider ----
+    slider.addEventListener('input', function() {
+        dzVal.textContent = slider.value;
+        updateOverlays();
+    });
+
+    // ---- Overlays ----
+    function updateOverlays() {
+        var vpRect = viewportWrapper.getBoundingClientRect();
+        var deadZonePercent = parseInt(slider.value);
+
+        // Calculate effective viewport (accounting for panel)
+        var eLeft = 0;
+        var eRight = vpRect.width;
+        var eTop = 0;
+        var eBottom = vpRect.height;
+
+        if (!sidePanel.classList.contains('hidden')) {
+            var panelRect = sidePanel.getBoundingClientRect();
+            if (panelRect.width > 50 && panelRect.height > 50) {
+                var panelCenterX = panelRect.left + panelRect.width / 2;
+                var vpCenterX = vpRect.left + vpRect.width / 2;
+                if (panelCenterX > vpCenterX) {
+                    eRight = panelRect.left - vpRect.left;
+                } else {
+                    eLeft = panelRect.right - vpRect.left;
+                }
+            }
+        }
+
+        // Show effective viewport
+        effViewport.style.left = eLeft + 'px';
+        effViewport.style.top = eTop + 'px';
+        effViewport.style.width = (eRight - eLeft) + 'px';
+        effViewport.style.height = (eBottom - eTop) + 'px';
+
+        // Dead zone boundary
+        var effW = eRight - eLeft;
+        var effH = eBottom - eTop;
+        var inset = (100 - deadZonePercent) / 200;
+        var bLeft = eLeft + effW * inset;
+        var bRight = eRight - effW * inset;
+        var bTop = eTop + effH * inset;
+        var bBottom = eBottom - effH * inset;
+
+        dzBoundary.style.left = bLeft + 'px';
+        dzBoundary.style.top = bTop + 'px';
+        dzBoundary.style.width = (bRight - bLeft) + 'px';
+        dzBoundary.style.height = (bBottom - bTop) + 'px';
+
+        updateCoordDisplay();
+    }
+
+    function updateCoordDisplay() {
+        var markerRect = marker.getBoundingClientRect();
+        var vpRect = viewportWrapper.getBoundingClientRect();
+        var mx = Math.round(markerRect.left + markerRect.width / 2 - vpRect.left);
+        var my = Math.round(markerRect.top + markerRect.height / 2 - vpRect.top);
+        coordDisplay.textContent = 'Marker: (' + mx + ', ' + my + ') in viewport';
+    }
+
+    // ---- Logging ----
+    function log(msg, cls) {
+        var div = document.createElement('div');
+        div.className = 'log-entry ' + (cls || 'result-info');
+        var ts = new Date().toLocaleTimeString();
+        div.textContent = '[' + ts + '] ' + msg;
+        logArea.appendChild(div);
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    // ---- Exposed functions ----
+    window.runAutoPan = function() {
+        var dz = parseInt(slider.value);
+        log('Calling __deadZoneAutoPan(' + dz + ')...', 'result-info');
+        var result = window.__deadZoneAutoPan(dz);
+        var obj = JSON.parse(result);
+        if (obj.panned) {
+            log('PANNED: dx=' + obj.dx + ', dy=' + obj.dy + ', method=' + obj.method, 'result-pan');
+        } else {
+            log('NO PAN: reason=' + obj.reason, 'result-noaction');
+        }
+        log('Raw: ' + result, 'result-info');
+        updateOverlays();
+    };
+
+    window.runCSSFallback = function() {
+        var dz = parseInt(slider.value);
+        log('Calling __deadZoneAutoPanCSS(' + dz + ')...', 'result-info');
+        var result = window.__deadZoneAutoPanCSS(dz);
+        var obj = JSON.parse(result);
+        if (obj.panned) {
+            log('PANNED (CSS): dx=' + obj.dx + ', dy=' + obj.dy + ', method=' + obj.method, 'result-pan');
+        } else {
+            log('NO PAN (CSS): reason=' + obj.reason, 'result-noaction');
+        }
+        log('Raw: ' + result, 'result-info');
+        updateOverlays();
+    };
+
+    window.togglePanel = function() {
+        sidePanel.classList.toggle('hidden');
+        var state = sidePanel.classList.contains('hidden') ? 'OFF' : 'ON';
+        log('Panel toggled: ' + state, 'result-info');
+        updateOverlays();
+    };
+
+    // ---- Automated Tests ----
+    window.runAllTests = function() {
+        log('========== Running Automated Tests ==========', 'result-info');
+        var passed = 0;
+        var failed = 0;
+
+        function assert(name, condition) {
+            if (condition) {
+                log('PASS: ' + name, 'result-test-pass');
+                passed++;
+            } else {
+                log('FAIL: ' + name, 'result-test-fail');
+                failed++;
+            }
+        }
+
+        // Save original state
+        var origTransform = mapEl.style.transform;
+        var origLeft = marker.style.left;
+        var origTop = marker.style.top;
+        var origPanelHidden = sidePanel.classList.contains('hidden');
+
+        // Helper: place marker at a position relative to viewport
+        function placeMarkerAtViewportPos(vx, vy) {
+            var mapRect = mapEl.getBoundingClientRect();
+            var vpRect = viewportWrapper.getBoundingClientRect();
+            // vx, vy are relative to viewport
+            var absX = vpRect.left + vx;
+            var absY = vpRect.top + vy;
+            var localX = absX - mapRect.left;
+            var localY = absY - mapRect.top;
+            marker.style.left = localX + 'px';
+            marker.style.top = localY + 'px';
+        }
+
+        var vpRect = viewportWrapper.getBoundingClientRect();
+        var vpW = vpRect.width;
+        var vpH = vpRect.height;
+
+        // Ensure panel is visible for accurate effective viewport calculation
+        sidePanel.classList.remove('hidden');
+        var panelRect = sidePanel.getBoundingClientRect();
+        var effRight = panelRect.left - vpRect.left;
+
+        // Test 1: Marker at center -> inside-boundary
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        placeMarkerAtViewportPos(effRight / 2, vpH / 2);
+        var r1 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        assert('Test 1: Marker center -> inside-boundary', r1.panned === false && r1.reason === 'inside-boundary');
+
+        // Test 2: Marker at right edge -> panned, dx > 0
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        placeMarkerAtViewportPos(effRight - 5, vpH / 2);
+        var r2 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        assert('Test 2: Marker right edge -> panned, dx>0', r2.panned === true && r2.dx > 0);
+
+        // Test 3: Marker at left edge -> panned, dx < 0
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        placeMarkerAtViewportPos(5, vpH / 2);
+        var r3 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        assert('Test 3: Marker left edge -> panned, dx<0', r3.panned === true && r3.dx < 0);
+
+        // Test 4: Marker at top edge -> panned, dy < 0
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        placeMarkerAtViewportPos(effRight / 2, 5);
+        var r4 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        assert('Test 4: Marker top edge -> panned, dy<0', r4.panned === true && r4.dy < 0);
+
+        // Test 5: Marker at bottom edge -> panned, dy > 0
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        placeMarkerAtViewportPos(effRight / 2, vpH - 5);
+        var r5 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        assert('Test 5: Marker bottom edge -> panned, dy>0', r5.panned === true && r5.dy > 0);
+
+        // Test 6: Panel ON + marker behind panel -> effectiveRight shrinks, pan occurs
+        sidePanel.classList.remove('hidden');
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        // Place marker where the panel is (right side of full viewport)
+        placeMarkerAtViewportPos(vpW - 30, vpH / 2);
+        var r6 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        assert('Test 6: Panel ON + marker behind panel -> panned', r6.panned === true && r6.dx > 0);
+
+        // Test 7: Panel OFF + same position -> may not need pan (wider effective area)
+        sidePanel.classList.add('hidden');
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        // Place marker at a position that was outside with panel but might be inside without
+        var testX7 = effRight - 5; // This was edge WITH panel
+        placeMarkerAtViewportPos(testX7, vpH / 2);
+        var r7 = JSON.parse(window.__deadZoneAutoPanCSS(85));
+        // With panel OFF, this position should be comfortably inside if viewport is wider
+        assert('Test 7: Panel OFF + same position -> inside (or smaller dx)', r7.panned === false || (r7.panned === true && Math.abs(r7.dx) < Math.abs(r6.dx)));
+
+        // Test 8: deadZonePercent=99 -> almost always pan (tiny safe area)
+        sidePanel.classList.remove('hidden');
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        // Place marker slightly off center
+        placeMarkerAtViewportPos(effRight / 2 + 20, vpH / 2 + 20);
+        var r8 = JSON.parse(window.__deadZoneAutoPanCSS(99));
+        assert('Test 8: deadZonePercent=99 -> almost always pan', r8.panned === true);
+
+        // Test 9: deadZonePercent=50 -> wide safe area, center should be safe
+        mapEl.style.transform = 'translate(-600px, -750px)';
+        placeMarkerAtViewportPos(effRight / 2, vpH / 2);
+        var r9 = JSON.parse(window.__deadZoneAutoPanCSS(50));
+        assert('Test 9: deadZonePercent=50 + center -> inside-boundary', r9.panned === false && r9.reason === 'inside-boundary');
+
+        // Restore state
+        mapEl.style.transform = origTransform;
+        marker.style.left = origLeft;
+        marker.style.top = origTop;
+        if (origPanelHidden) sidePanel.classList.add('hidden');
+        else sidePanel.classList.remove('hidden');
+        updateOverlays();
+
+        log('========== Results: ' + passed + ' passed, ' + failed + ' failed ==========',
+            failed === 0 ? 'result-test-pass' : 'result-test-fail');
+    };
+
+    // Initial overlay update
+    updateOverlays();
+    log('Test page loaded. Drag marker, adjust slider, click buttons.', 'result-info');
+})();
+</script>
+
+</body>
+</html>

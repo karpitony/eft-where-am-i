@@ -1,12 +1,22 @@
-﻿{
-  "auto_screenshot_detection": false,
+{
+  "auto_screenshot_detection": true,
   "language": "en",
   "screenshot_path": "",
+  "auto_map_detection": true,
+  "auto_panning": true,
+  "auto_screenshot_cleanup": false,
+  "log_path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Escape from Tarkov\\build\\Logs",
   "screenshot_paths_list": [
     "Documents\\Escape from Tarkov\\Screenshots\\",
     "문서\\Escape from Tarkov\\Screenshots\\",
     "OneDrive\\Documents\\Escape from Tarkov\\Screenshots\\",
     "OneDrive\\문서\\Escape from Tarkov\\Screenshots\\"
   ],
-  "latest_map": "ground-zero"
+  "latest_map": "interchange",
+  "dead_zone_percent": 99,
+  "panel_hidden_per_map": {
+    "interchange": true,
+    "woods": true,
+    "customs": true
+  }
 }

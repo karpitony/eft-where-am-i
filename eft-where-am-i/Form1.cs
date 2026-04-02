@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms;
 using eft_where_am_i;
 
@@ -93,6 +94,12 @@ namespace eft_where_am_i_chasrp
         {
             panelSideMenu.Width = _posSliding;
             checkBoxHide.Checked = false;
+
+            // .csproj의 <Version>에서 자동 생성된 버전을 타이틀바에 표시
+            var version = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?";
+            this.Text = $"EFT Where am I? (v{version})";
         }
 
         private void btnSetting_Click(object sender, EventArgs e)

@@ -1,0 +1,33 @@
+{
+  "reserve": {
+    "default_floor": "Ground",
+    "floors": [
+      { "name": "Ground", "z_min": -5.0, "z_max": 100.0 },
+      { "name": "Underground", "z_min": -50.0, "z_max": -5.0 }
+    ],
+    "zones": []
+  },
+  "factory": {
+    "default_floor": "Ground",
+    "floors": [
+      { "name": "Ground", "z_min": -5.0, "z_max": 100.0 },
+      { "name": "Underground", "z_min": -50.0, "z_max": -5.0 }
+    ],
+    "zones": []
+  },
+  "lab": {
+    "default_floor": "Ground",
+    "floors": [
+      { "name": "Ground", "z_min": -5.0, "z_max": 100.0 }
+    ],
+    "zones": []
+  },
+  "streets": {
+    "default_floor": "Ground",
+    "floors": [
+      { "name": "Ground", "z_min": -5.0, "z_max": 100.0 },
+      { "name": "Underground", "z_min": -50.0, "z_max": -5.0 }
+    ],
+    "zones": []
+  }
+}

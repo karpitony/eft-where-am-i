@@ -28,110 +28,116 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.panelSideMenu = new System.Windows.Forms.Panel();
-            this.btnWhereAmI = new System.Windows.Forms.Button();
-            this.btnSetting = new System.Windows.Forms.Button();
-            this.checkBoxHide = new System.Windows.Forms.CheckBox();
-            this.timerSliding = new System.Windows.Forms.Timer(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.panelSideMenu.SuspendLayout();
-            this.SuspendLayout();
+            panelSideMenu = new Panel();
+            btnWhereAmI = new Button();
+            btnSetting = new Button();
+            checkBoxHide = new CheckBox();
+            timerSliding = new System.Windows.Forms.Timer(components);
+            panel1 = new Panel();
+            panelSideMenu.SuspendLayout();
+            SuspendLayout();
             // 
             // panelSideMenu
             // 
-            this.panelSideMenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.panelSideMenu.Controls.Add(this.btnWhereAmI);
-            this.panelSideMenu.Controls.Add(this.btnSetting);
-            this.panelSideMenu.Controls.Add(this.checkBoxHide);
-            this.panelSideMenu.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panelSideMenu.Location = new System.Drawing.Point(0, 0);
-            this.panelSideMenu.Name = "panelSideMenu";
-            this.panelSideMenu.Size = new System.Drawing.Size(75, 1061);
-            this.panelSideMenu.TabIndex = 12;
+            panelSideMenu.BackColor = Color.FromArgb(64, 64, 64);
+            panelSideMenu.Controls.Add(btnWhereAmI);
+            panelSideMenu.Controls.Add(btnSetting);
+            panelSideMenu.Controls.Add(checkBoxHide);
+            panelSideMenu.Dock = DockStyle.Left;
+            panelSideMenu.Location = new Point(0, 0);
+            panelSideMenu.Margin = new Padding(3, 4, 3, 4);
+            panelSideMenu.Name = "panelSideMenu";
+            panelSideMenu.Size = new Size(75, 1022);
+            panelSideMenu.TabIndex = 12;
             // 
             // btnWhereAmI
             // 
-            this.btnWhereAmI.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnWhereAmI.FlatAppearance.BorderSize = 0;
-            this.btnWhereAmI.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.btnWhereAmI.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.btnWhereAmI.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnWhereAmI.Font = new System.Drawing.Font("굴림", 15F, System.Drawing.FontStyle.Bold);
-            this.btnWhereAmI.ForeColor = System.Drawing.Color.White;
-            this.btnWhereAmI.Image = ((System.Drawing.Image)(resources.GetObject("btnWhereAmI.Image")));
-            this.btnWhereAmI.Location = new System.Drawing.Point(0, 75);
-            this.btnWhereAmI.Name = "btnWhereAmI";
-            this.btnWhereAmI.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.btnWhereAmI.Size = new System.Drawing.Size(75, 75);
-            this.btnWhereAmI.TabIndex = 2;
-            this.btnWhereAmI.UseVisualStyleBackColor = true;
-            this.btnWhereAmI.Click += new System.EventHandler(this.btnWhereAmI_Click);
+            btnWhereAmI.Dock = DockStyle.Top;
+            btnWhereAmI.FlatAppearance.BorderSize = 0;
+            btnWhereAmI.FlatAppearance.MouseDownBackColor = Color.FromArgb(60, 60, 60);
+            btnWhereAmI.FlatAppearance.MouseOverBackColor = Color.FromArgb(70, 70, 70);
+            btnWhereAmI.FlatStyle = FlatStyle.Flat;
+            btnWhereAmI.Font = new Font("굴림", 15F, FontStyle.Bold);
+            btnWhereAmI.ForeColor = Color.White;
+            btnWhereAmI.Image = (Image)resources.GetObject("btnWhereAmI.Image");
+            btnWhereAmI.Location = new Point(0, 94);
+            btnWhereAmI.Margin = new Padding(3, 4, 3, 4);
+            btnWhereAmI.Name = "btnWhereAmI";
+            btnWhereAmI.RightToLeft = RightToLeft.No;
+            btnWhereAmI.Size = new Size(75, 94);
+            btnWhereAmI.TabIndex = 2;
+            btnWhereAmI.UseVisualStyleBackColor = true;
+            btnWhereAmI.Click += btnWhereAmI_Click;
             // 
             // btnSetting
             // 
-            this.btnSetting.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnSetting.FlatAppearance.BorderSize = 0;
-            this.btnSetting.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.btnSetting.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.btnSetting.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSetting.Font = new System.Drawing.Font("굴림", 15F, System.Drawing.FontStyle.Bold);
-            this.btnSetting.ForeColor = System.Drawing.Color.White;
-            this.btnSetting.Image = ((System.Drawing.Image)(resources.GetObject("btnSetting.Image")));
-            this.btnSetting.Location = new System.Drawing.Point(0, 0);
-            this.btnSetting.Name = "btnSetting";
-            this.btnSetting.Size = new System.Drawing.Size(75, 75);
-            this.btnSetting.TabIndex = 1;
-            this.btnSetting.UseVisualStyleBackColor = true;
-            this.btnSetting.Click += new System.EventHandler(this.btnSetting_Click);
+            btnSetting.Dock = DockStyle.Top;
+            btnSetting.FlatAppearance.BorderSize = 0;
+            btnSetting.FlatAppearance.MouseDownBackColor = Color.FromArgb(60, 60, 60);
+            btnSetting.FlatAppearance.MouseOverBackColor = Color.FromArgb(70, 70, 70);
+            btnSetting.FlatStyle = FlatStyle.Flat;
+            btnSetting.Font = new Font("굴림", 15F, FontStyle.Bold);
+            btnSetting.ForeColor = Color.White;
+            btnSetting.Image = (Image)resources.GetObject("btnSetting.Image");
+            btnSetting.Location = new Point(0, 0);
+            btnSetting.Margin = new Padding(3, 4, 3, 4);
+            btnSetting.Name = "btnSetting";
+            btnSetting.Size = new Size(75, 94);
+            btnSetting.TabIndex = 1;
+            btnSetting.UseVisualStyleBackColor = true;
+            btnSetting.Click += btnSetting_Click;
             // 
             // checkBoxHide
             // 
-            this.checkBoxHide.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBoxHide.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.checkBoxHide.FlatAppearance.BorderSize = 0;
-            this.checkBoxHide.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.checkBoxHide.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.checkBoxHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBoxHide.Font = new System.Drawing.Font("굴림", 15F, System.Drawing.FontStyle.Bold);
-            this.checkBoxHide.ForeColor = System.Drawing.Color.White;
-            this.checkBoxHide.Location = new System.Drawing.Point(0, 986);
-            this.checkBoxHide.Name = "checkBoxHide";
-            this.checkBoxHide.Size = new System.Drawing.Size(75, 75);
-            this.checkBoxHide.TabIndex = 0;
-            this.checkBoxHide.Text = ">";
-            this.checkBoxHide.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.checkBoxHide.UseVisualStyleBackColor = true;
-            this.checkBoxHide.CheckedChanged += new System.EventHandler(this.checkBoxHide_CheckedChanged);
+            checkBoxHide.Appearance = Appearance.Button;
+            checkBoxHide.Dock = DockStyle.Bottom;
+            checkBoxHide.FlatAppearance.BorderSize = 0;
+            checkBoxHide.FlatAppearance.MouseDownBackColor = Color.FromArgb(60, 60, 60);
+            checkBoxHide.FlatAppearance.MouseOverBackColor = Color.FromArgb(70, 70, 70);
+            checkBoxHide.FlatStyle = FlatStyle.Flat;
+            checkBoxHide.Font = new Font("굴림", 15F, FontStyle.Bold);
+            checkBoxHide.ForeColor = Color.White;
+            checkBoxHide.Location = new Point(0, 928);
+            checkBoxHide.Margin = new Padding(3, 4, 3, 4);
+            checkBoxHide.Name = "checkBoxHide";
+            checkBoxHide.Size = new Size(75, 94);
+            checkBoxHide.TabIndex = 0;
+            checkBoxHide.Text = ">";
+            checkBoxHide.TextAlign = ContentAlignment.MiddleCenter;
+            checkBoxHide.UseVisualStyleBackColor = true;
+            checkBoxHide.CheckedChanged += checkBoxHide_CheckedChanged;
             // 
             // timerSliding
             // 
-            this.timerSliding.Interval = 5;
-            this.timerSliding.Tick += new System.EventHandler(this.timerSliding_Tick);
+            timerSliding.Interval = 5;
+            timerSliding.Tick += timerSliding_Tick;
             // 
             // panel1
             // 
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(75, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1309, 1061);
-            this.panel1.TabIndex = 13;
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(75, 0);
+            panel1.Margin = new Padding(3, 4, 3, 4);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(1293, 1022);
+            panel1.TabIndex = 13;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1384, 1061);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.panelSideMenu);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
-            this.Text = "EFT Where am I? (v2.2.3)";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.panelSideMenu.ResumeLayout(false);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.Control;
+            ClientSize = new Size(1368, 1022);
+            Controls.Add(panel1);
+            Controls.Add(panelSideMenu);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "Form1";
+            Text = "EFT Where am I? (v2.2.3)";
+            Load += Form1_Load;
+            panelSideMenu.ResumeLayout(false);
+            ResumeLayout(false);
 
         }
 
@@ -144,4 +150,3 @@
         private System.Windows.Forms.Panel panel1;
     }
 }
-
