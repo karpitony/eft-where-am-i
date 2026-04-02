@@ -120,7 +120,9 @@ namespace eft_where_am_i.Classes
 
     injectStyle();
 
-    const container = document.querySelector('#map') || document.querySelector('#map-layer') || document.body;
+    // SPA (Single Page Application) 라우팅 시 #map 엘리먼트가 아예 지워지고 새로 생성됩니다.
+    // 기존처럼 #map에 붙여놓으면 MutationObserver가 같이 죽어버리므로 절대 지워지지 않는 document.body를 감시합니다.
+    const container = document.body;
     const observer = new MutationObserver(mutations => {
         for (const mutation of mutations) {
             if (mutation.type === 'childList') {

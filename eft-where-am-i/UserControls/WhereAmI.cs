@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq; 
 using System.Collections.Generic;
@@ -140,11 +140,17 @@ namespace eft_where_am_i
                 throw;
             }
 
+            // 영구 주입 스크립트 (새로고침 시에도 유지되도록 웹 콘텐츠가 로딩되기 전에 주입)
+            await webView2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(Constants.DEAD_ZONE_AUTO_PAN_SCRIPT);
+
             // WebView2 콘텐츠 메시지 수신 핸들러 등록
             webView2.CoreWebView2.WebMessageReceived += WebView2Content_WebMessageReceived;
 
             // 페이지 로드 완료 핸들러 등록 (퀘스트 복원/리스너 주입을 페이지 로드 완료 후 수행)
             webView2.NavigationCompleted += WebView2_NavigationCompleted;
+
+            // SPA (Single Page Application) 내부 라우팅 감지 핸들러 등록
+            webView2.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
 
             // 외부 URL 로드 (예외 처리 포함)
             try
@@ -379,6 +385,53 @@ namespace eft_where_am_i
                 await jsExecutor.InjectQuestClickListenerAsync();
                 // 퀘스트 복원
                 await RestoreQuestsAsync(appSettings.latest_map);
+            }
+        }
+
+        private async void CoreWebView2_SourceChanged(object sender, CoreWebView2SourceChangedEventArgs e)
+        {
+            // URL 변경을 감지하고, "tarkov-market.com/maps/맵이름" 인 경우 내부 상태 업데이트 및 스크립트 재주입
+            string currentUrl = webView2.Source?.ToString();
+            if (currentUrl != null && currentUrl.Contains("/maps/"))
+            {
+                string mapName = currentUrl.Substring(currentUrl.LastIndexOf('/') + 1);
+
+                // 기존 설정과 다르다면 맵이 변경된 것으로 간주 (마켓 웹 내부에서 다른 맵을 클릭한 경우)
+                if (!string.Equals(appSettings.latest_map, mapName, StringComparison.OrdinalIgnoreCase))
+                {
+                    appSettings.latest_map = mapName;
+                    SaveSettings();
+
+                    // UI 패널(WhereAmIPanel)의 ComboBox 상태도 함께 변경
+                    if (webView2_panel_ui.CoreWebView2 != null)
+                    {
+                        _ = webView2_panel_ui.ExecuteScriptAsync($"document.getElementById('mapSelect').value = '{mapName}';");
+                    }
+                }
+
+                // SPA 라우팅으로 인해 재생성된 DOM 요소에 대응하여 각종 초기화 작업 재개
+                if (jsExecutor != null)
+                {
+                    // Nuxt 컨테이너 로드 대기
+                    bool containerReady = await jsExecutor.WaitForQuestContainerAsync(15000);
+
+                    // 패널 숨김 상태 복원
+                    if (appSettings.panel_hidden_per_map.TryGetValue(appSettings.latest_map, out bool isHidden))
+                    {
+                        if (isHidden)
+                        {
+                            await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
+                        }
+                    }
+
+                    if (containerReady)
+                    {
+                        // 맵 재생성 시 증발해버린 스크립트와 리스너를 다시 붙여줌
+                        await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
+                        await jsExecutor.InjectQuestClickListenerAsync();
+                        await RestoreQuestsAsync(appSettings.latest_map);
+                    }
+                }
             }
         }
 
