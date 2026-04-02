@@ -1,9 +1,11 @@
 using System;
 using System.Drawing;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using eft_where_am_i;
-
+using Velopack;
+using Velopack.Sources;
 namespace eft_where_am_i_chasrp
 {
     public partial class Form1 : Form
@@ -90,7 +92,7 @@ namespace eft_where_am_i_chasrp
             panelSideMenu.Width = _posSliding;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
             panelSideMenu.Width = _posSliding;
             checkBoxHide.Checked = false;
@@ -100,6 +102,44 @@ namespace eft_where_am_i_chasrp
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?";
             this.Text = $"EFT Where am I? (v{version})";
+
+            await CheckForUpdatesAsync();
+        }
+
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                // 세 번째 파라미터를 true로 설정하여 -test 같은 Pre-release 버전도 감지할 수 있도록 합니다.
+                var mgr = new UpdateManager(new GithubSource("https://github.com/karpitony/eft-where-am-i", null, true));
+                if (!mgr.IsInstalled)
+                {
+                    // 개발 환경이거나 설치되지 않은 상태면 업데이트를 건너뜁니다
+                    return;
+                }
+
+                var newVersion = await mgr.CheckForUpdatesAsync();
+                if (newVersion != null)
+                {
+                    var message = $"새로운 업데이트(v{newVersion.TargetFullRelease.Version})가 있습니다.\n다운로드 및 설치 후 앱을 재시작하시겠습니까?\n\n" +
+                                  $"A new update (v{newVersion.TargetFullRelease.Version}) is available.\nWould you like to download, install, and restart the app?";
+                                  
+                    var result = MessageBox.Show(
+                        message,
+                        "업데이트 알림 / Update Notification", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        await mgr.DownloadUpdatesAsync(newVersion);
+                        mgr.ApplyUpdatesAndRestart(newVersion);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 업데이트 오류 시 앱 실행을 방해하지 않도록 무시 또는 로깅
+                Console.WriteLine($"업데이트 확인 중 오류: {ex.Message}");
+            }
         }
 
         private void btnSetting_Click(object sender, EventArgs e)

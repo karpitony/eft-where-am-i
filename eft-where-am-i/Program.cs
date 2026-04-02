@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Velopack;
 
 namespace eft_where_am_i_chasrp
 {
@@ -14,9 +15,11 @@ namespace eft_where_am_i_chasrp
         [STAThread]
         static void Main()
         {
+            VelopackApp.Build().Run();
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
         }
     }
-}
+}

@@ -1,0 +1,41 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - 'v*' # v로 시작하는 태그(예: v1.0.0, v1.1.2) 푸시 시 동작
+
+jobs:
+  build_and_release:
+    runs-on: windows-latest
+    permissions:
+      contents: write # Release 생성 및 파일 업로드를 위해 필수
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '7.0.x'
+
+    # 1. Velopack CLI(vpk) 도구 설치
+    - name: Install vpk
+      run: dotnet tool install -g vpk
+
+    # 2. 앱 빌드 및 Publish
+    # 경로를 eft-where-am-i/eft-where-am-i.csproj와 같이 하위 디렉토리에 맞춤
+    - name: Publish App
+      run: dotnet publish eft-where-am-i/eft-where-am-i.csproj -c Release -r win-x64 --self-contained false -o ./publish_output
+
+    # 3. Velopack 패키징
+    # GITHUB_REF_NAME은 현재 태그 이름
+    - name: Pack App with Velopack
+      run: |
+        vpk pack -u eft-where-am-i -v ${{ github.ref_name }} -p ./publish_output -e "eft-where-am-i.exe" -o ./ReleaseBuild
+
+    # 4. GitHub Release로 배포
+    - name: Velopack GitHub Release Upload
+      run: |
+        vpk upload github -o ./ReleaseBuild --repoUrl "https://github.com/karpitony/eft-where-am-i" --token ${{ secrets.GITHUB_TOKEN }}
