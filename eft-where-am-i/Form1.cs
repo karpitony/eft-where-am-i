@@ -110,8 +110,7 @@ namespace eft_where_am_i_chasrp
         {
             try
             {
-                // 세 번째 파라미터를 true로 설정하여 -test 같은 Pre-release 버전도 감지할 수 있도록 합니다.
-                var mgr = new UpdateManager(new GithubSource("https://github.com/karpitony/eft-where-am-i", null, true));
+                var mgr = new UpdateManager(new GithubSource("https://github.com/karpitony/eft-where-am-i", null, false));
                 if (!mgr.IsInstalled)
                 {
                     // 개발 환경이거나 설치되지 않은 상태면 업데이트를 건너뜁니다

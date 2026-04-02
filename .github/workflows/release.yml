@@ -31,10 +31,13 @@ jobs:
 
     # 3. Velopack 패키징
     # GITHUB_REF_NAME은 현재 태그 이름
+    # vpk는 v 접두사를 허용하지 않으므로 제거
     - name: Pack App with Velopack
+      shell: bash
       run: |
-        vpk pack -u eft-where-am-i -v ${{ github.ref_name }} -p ./publish_output -e "eft-where-am-i.exe" -o ./ReleaseBuild
-
+        VERSION="${{ github.ref_name }}"
+        VERSION=${VERSION#v}
+        vpk pack -u eft-where-am-i -v $VERSION -p ./publish_output -e "eft-where-am-i.exe" -o ./ReleaseBuild
     # 4. GitHub Release로 배포
     - name: Velopack GitHub Release Upload
       run: |
