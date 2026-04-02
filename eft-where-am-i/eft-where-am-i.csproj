@@ -10,9 +10,18 @@
 
     <!-- 버전을 여기서만 관리 -->
     <Version>2.4.0</Version>
+    <AssemblyName>EFT-Where-Am-I</AssemblyName>
+    <AssemblyTitle>EFT WHERE AM I v$(Version)</AssemblyTitle>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <ApplicationIcon>eft-where-am-i.ico</ApplicationIcon>
+    
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="eft-where-am-i.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft-WindowsAPICodePack-Core" Version="1.1.5" />
@@ -40,6 +49,9 @@
     </None>
     <None Update="assets\settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="eft-where-am-i.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="floor_db.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
