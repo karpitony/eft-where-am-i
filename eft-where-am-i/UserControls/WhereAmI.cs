@@ -18,19 +18,19 @@ namespace eft_where_am_i
         private JavaScriptExecutor jsExecutor;
         private QuestRepository questRepository;
         private FloorManager floorManager;
-        private string[] mapList = { 
-            "ground-zero", 
-            "factory", 
-            "customs", 
-            "interchange", 
-            "woods", 
-            "shoreline", 
+        private string[] mapList = {
+            "ground-zero",
+            "factory",
+            "customs",
+            "interchange",
+            "woods",
+            "shoreline",
             "lighthouse",
-            "reserve", 
-            "streets", 
-            "lab", 
-            "labyrinth", 
-            "terminal" 
+            "reserve",
+            "streets",
+            "lab",
+            "labyrinth",
+            "terminal"
         };
         private string siteUrl;
         private bool whereAmIClick = false;
@@ -49,7 +49,7 @@ namespace eft_where_am_i
             settingsHandler.SettingsChanged += OnSettingsChanged;   // 세팅 변경될 때마다 호출됨
             LoadSettings();                                         // 동기작업
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
-            
+
             // Load 이벤트 핸들러 등록
             this.Load += WhereAmI_Load;
         }
@@ -432,7 +432,7 @@ namespace eft_where_am_i
         {
             await Task.Delay(4000);
             await jsExecutor.ClickButtonAsync(Constants.FULL_SCREEN_BUTTON_SELECTOR);
-            if(!whereAmIClick)
+            if (!whereAmIClick)
             {
                 whereAmIClick = true;
                 await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
@@ -843,10 +843,10 @@ namespace eft_where_am_i
             }
         }
 
-        const int MAX_SLIDING_HEIGHT = 110;
+        const int MAX_SLIDING_HEIGHT = 138;
         const int MIN_SLIDING_HEIGHT = 0;
         const int STEP_SLIDING = 10;
-        int _posSliding = 110;
+        int _posSliding = 138;
 
         private void checkBoxHide_CheckedChanged(object sender, EventArgs e)
         {
@@ -881,6 +881,16 @@ namespace eft_where_am_i
             }
 
             panel1.Height = _posSliding;
+        }
+
+        private void webView2_panel_ui_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void webView2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

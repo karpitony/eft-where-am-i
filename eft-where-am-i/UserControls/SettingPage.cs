@@ -6,7 +6,6 @@ using eft_where_am_i.Classes;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Runtime.InteropServices;
 
 namespace eft_where_am_i

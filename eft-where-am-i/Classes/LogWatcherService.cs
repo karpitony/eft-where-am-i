@@ -8,7 +8,7 @@ namespace eft_where_am_i.Classes
 {
     public class LogWatcherService : IDisposable
     {
-        private Timer _pollTimer;
+        private System.Threading.Timer _pollTimer;
         private string _currentLogFolder;
         private string _currentLogFile;
         private long _lastReadPosition;
@@ -66,7 +66,7 @@ namespace eft_where_am_i.Classes
             FindLatestLogFolder();
 
             // Start polling timer
-            _pollTimer = new Timer(OnPollTick, null, POLL_INTERVAL_MS, POLL_INTERVAL_MS);
+            _pollTimer = new System.Threading.Timer(OnPollTick, null, POLL_INTERVAL_MS, POLL_INTERVAL_MS);
             AppLogger.Info("LogWatcher", $"Started polling every {POLL_INTERVAL_MS}ms");
         }
 

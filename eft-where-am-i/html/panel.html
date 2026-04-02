@@ -8,20 +8,29 @@
   <script src="../assets/js/i18nextHttpBackend.min.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="../assets/css/tailwind.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden; /* 스크롤바 방지 */
+    }
+  </style>
 </head>
-<body class="flex items-center justify-center bg-gray-50">
-  <div class="grid grid-cols-4 grid-rows-2 gap-x-6 gap-y-2 px-4 pt-1 rounded-md bg-gray-200 shadow-md w-full">
-
+<body class="flex items-center justify-center bg-gray-200 w-full h-full">
+  <div class="grid grid-cols-4 grid-rows-3 gap-x-6 gap-y-0 w-full h-full">
+ 
     <!-- Cell 1: Map Selection -->
-    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
+    <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
       <label
         id="mapSelectionLabel"
         class="text-sm lg:text-base xl:text-lg font-semibold"
       >
         Select The Map
       </label>
-    </div>
-    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
+    </section>
+    <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
       <select
         id="mapSelect"
         onchange="mapSelected()"
@@ -29,10 +38,10 @@
       >
         <!-- C#에서 맵 목록 추가 -->
       </select>
-    </div>
+    </section>
 
     <!-- Cell 2: Hide/Show and Full Screen -->
-    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
+    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
       <button
         id="hideShowPanelsButton"
         onclick="hideShowPanel()"
@@ -40,8 +49,8 @@
       >
         Hide/Show Panels
       </button>
-    </div>
-    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
+    </section>
+    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
       <button
         id="fullScreenButton"
         onclick="fullScreen()"
@@ -49,10 +58,10 @@
       >
         Full Screen
       </button>
-    </div>
+    </section>
 
     <!-- Cell 3: Screenshot Detection -->
-    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
+    <section class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
       <div class="flex items-center">
         <input type="checkbox" id="autoDetect" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="checkboxChanged()">
         <label
@@ -63,8 +72,8 @@
           Auto Screenshot Detection
         </label>
       </div>
-    </div>
-    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
+    </section>
+    <section class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
       <button
         id="forceRunButton"
         onclick="forceRun()"
@@ -72,10 +81,10 @@
       >
         Force Run
       </button>
-    </div>
+    </section>
 
     <!-- Cell 4: Auto Map Detection and Links -->
-    <div class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 1;">
+    <section class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 1;">
       <div class="flex items-center">
         <input type="checkbox" id="autoMapDetect" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoMapToggle()">
         <label
@@ -86,8 +95,8 @@
           Auto Map Detection
         </label>
       </div>
-    </div>
-    <div class="flex justify-center items-center w-full gap-3" style="grid-column: 4; grid-row: 2;">
+    </section>
+    <section class="flex justify-center items-center w-full gap-3" style="grid-column: 4; grid-row: 2;">
       <a
         id="howToUseLink"
         href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md"
@@ -102,10 +111,10 @@
       >
         Bug Report
       </a>
-    </div>
+    </section>
 
     <!-- Row 3: Auto Panning and Floor DB Editor (Debug mode only) -->
-    <div class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 3;">
+    <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 3;">
       <div class="flex items-center">
         <input type="checkbox" id="autoPanning" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoPanningToggle()">
         <label
@@ -116,8 +125,8 @@
           Auto Panning
         </label>
       </div>
-    </div>
-    <div class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 3;">
+    </section>
+    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 3;">
       <button
         id="floorDbEditorButton"
         onclick="toggleFloorEditMode()"
@@ -126,8 +135,8 @@
       >
         Floor DB Editor
       </button>
-    </div>
-    <div class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 3;">
+    </section>
+    <section class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 3;">
       <div class="flex items-center">
         <input type="checkbox" id="autoScreenshotCleanup" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoScreenshotCleanupToggle()">
         <label id="autoScreenshotCleanupLabel" for="autoScreenshotCleanup"
@@ -135,7 +144,7 @@
           Auto Screenshot Cleanup
         </label>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>

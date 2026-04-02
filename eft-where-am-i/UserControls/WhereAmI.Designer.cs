@@ -29,83 +29,90 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.webView2_panel_ui = new Microsoft.Web.WebView2.WinForms.WebView2();
-            this.checkBoxHide = new System.Windows.Forms.CheckBox();
-            this.timerSliding = new System.Windows.Forms.Timer(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
-            this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.webView2_panel_ui)).BeginInit();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            panel1 = new Panel();
+            webView2_panel_ui = new Microsoft.Web.WebView2.WinForms.WebView2();
+            checkBoxHide = new CheckBox();
+            timerSliding = new System.Windows.Forms.Timer(components);
+            ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
+            panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)webView2_panel_ui).BeginInit();
+            SuspendLayout();
             // 
             // webView2
             // 
-            this.webView2.AllowExternalDrop = true;
-            this.webView2.CreationProperties = null;
-            this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webView2.Location = new System.Drawing.Point(0, 110);
-            this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(1309, 951);
-            this.webView2.TabIndex = 17;
-            this.webView2.ZoomFactor = 1D;
+            webView2.AllowExternalDrop = true;
+            webView2.CreationProperties = null;
+            webView2.DefaultBackgroundColor = Color.White;
+            webView2.Dock = DockStyle.Fill;
+            webView2.Location = new Point(0, 138);
+            webView2.Margin = new Padding(3, 4, 3, 4);
+            webView2.Name = "webView2";
+            webView2.Size = new Size(1309, 1188);
+            webView2.TabIndex = 17;
+            webView2.ZoomFactor = 1D;
+            webView2.Click += webView2_Click;
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.webView2_panel_ui);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1309, 110);
-            this.panel1.TabIndex = 22;
+            panel1.Controls.Add(webView2_panel_ui);
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(0, 0);
+            panel1.Margin = new Padding(3, 4, 3, 4);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(1309, 138);
+            panel1.TabIndex = 22;
             // 
             // webView2_panel_ui
             // 
-            this.webView2_panel_ui.AllowExternalDrop = true;
-            this.webView2_panel_ui.CreationProperties = null;
-            this.webView2_panel_ui.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2_panel_ui.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webView2_panel_ui.Location = new System.Drawing.Point(0, 0);
-            this.webView2_panel_ui.Name = "webView2_panel_ui";
-            this.webView2_panel_ui.Size = new System.Drawing.Size(1309, 110);
-            this.webView2_panel_ui.TabIndex = 0;
-            this.webView2_panel_ui.ZoomFactor = 1D;
+            webView2_panel_ui.AllowExternalDrop = true;
+            webView2_panel_ui.CreationProperties = null;
+            webView2_panel_ui.DefaultBackgroundColor = Color.White;
+            webView2_panel_ui.Dock = DockStyle.Fill;
+            webView2_panel_ui.Location = new Point(0, 0);
+            webView2_panel_ui.Margin = new Padding(3, 4, 3, 4);
+            webView2_panel_ui.Name = "webView2_panel_ui";
+            webView2_panel_ui.Size = new Size(1309, 138);
+            webView2_panel_ui.TabIndex = 0;
+            webView2_panel_ui.ZoomFactor = 1D;
+            webView2_panel_ui.Click += webView2_panel_ui_Click;
             // 
             // checkBoxHide
             // 
-            this.checkBoxHide.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBoxHide.FlatAppearance.BorderSize = 0;
-            this.checkBoxHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBoxHide.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold);
-            this.checkBoxHide.Location = new System.Drawing.Point(0, 110);
-            this.checkBoxHide.Name = "checkBoxHide";
-            this.checkBoxHide.Size = new System.Drawing.Size(170, 30);
-            this.checkBoxHide.TabIndex = 23;
-            this.checkBoxHide.Text = "∧ Click to Fold";
-            this.checkBoxHide.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.checkBoxHide.UseVisualStyleBackColor = true;
-            this.checkBoxHide.CheckedChanged += new System.EventHandler(this.checkBoxHide_CheckedChanged);
+            checkBoxHide.Appearance = Appearance.Button;
+            checkBoxHide.FlatAppearance.BorderSize = 0;
+            checkBoxHide.FlatStyle = FlatStyle.Flat;
+            checkBoxHide.Font = new Font("굴림", 12F, FontStyle.Bold);
+            checkBoxHide.Location = new Point(0, 138);
+            checkBoxHide.Margin = new Padding(3, 4, 3, 4);
+            checkBoxHide.Name = "checkBoxHide";
+            checkBoxHide.Size = new Size(170, 38);
+            checkBoxHide.TabIndex = 23;
+            checkBoxHide.Text = "∧ Click to Fold";
+            checkBoxHide.TextAlign = ContentAlignment.MiddleCenter;
+            checkBoxHide.UseVisualStyleBackColor = true;
+            checkBoxHide.CheckedChanged += checkBoxHide_CheckedChanged;
             // 
             // timerSliding
             // 
-            this.timerSliding.Interval = 10;
-            this.timerSliding.Tick += new System.EventHandler(this.timerSliding_Tick);
+            timerSliding.Interval = 10;
+            timerSliding.Tick += timerSliding_Tick;
             // 
             // WhereAmI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.checkBoxHide);
-            this.Controls.Add(this.webView2);
-            this.Controls.Add(this.panel1);
-            this.Name = "WhereAmI";
-            this.Size = new System.Drawing.Size(1309, 1061);
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
-            this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.webView2_panel_ui)).EndInit();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(checkBoxHide);
+            Controls.Add(webView2);
+            Controls.Add(panel1);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "WhereAmI";
+            Size = new Size(1309, 1326);
+            ((System.ComponentModel.ISupportInitialize)webView2).EndInit();
+            panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)webView2_panel_ui).EndInit();
+            ResumeLayout(false);
 
         }
 
