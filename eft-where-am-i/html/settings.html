@@ -131,6 +131,23 @@
       <span id="deadZoneValue" class="text-base font-medium">93%</span>
     </div>
   </section>
+
+  <!-- App Version Settings -->
+  <section class="mb-6">
+    <p id="appVersionText" class="mb-2 text-xl">
+      App Version
+    </p>
+    <div class="flex items-center space-x-4">
+      <span id="currentVersionLabel" class="text-base font-medium bg-white border px-4 py-1.5 rounded text-gray-700 min-w-[80px] text-center">...</span>
+      <button 
+        id="checkUpdateButton"
+        onclick="checkUpdate()"
+        class="bg-blue-500 text-white rounded py-1.5 px-4 text-base font-medium hover:bg-blue-600 shadow-sm"
+      >
+        Check for Update
+      </button>
+    </div>
+  </section>
   </main>
 
   <!-- Links -->
@@ -195,6 +212,8 @@
       document.getElementById('changeLogPathButton').textContent = i18next.t('changeLogPathButton');
       document.getElementById('autoDetectLogButton').textContent = i18next.t('autoDetectLogButton');
       document.getElementById('deadZoneLabel').textContent = i18next.t('deadZoneLabel');
+      document.getElementById('appVersionText').textContent = i18next.t('appVersionText');
+      document.getElementById('checkUpdateButton').textContent = i18next.t('checkUpdateButton');
     }
 
     // 언어 선택 시 호출되는 함수
@@ -318,6 +337,25 @@
 
       window.chrome.webview.postMessage(JSON.stringify({
         action: 'auto-detect-log-path'
+      }));
+    }
+
+    // C#에서 호출하는 함수: 앱 버전 텍스트 세팅
+    function setCurrentVersion(version) {
+      try {
+        const span = document.getElementById('currentVersionLabel');
+        span.textContent = 'v' + version;
+        console.log("Current version set to:", version);
+      } catch (error) {
+        console.error("setCurrentVersion 오류 발생: ", error);
+      }
+    }
+
+    // 업데이트 확인 버튼 클릭 시 C#으로 전달
+    function checkUpdate() {
+      console.log("Check update requested");
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'check-update'
       }));
     }
 
