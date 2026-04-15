@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write # Release 생성 및 파일 업로드를 위해 필수
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -18,27 +18,79 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '7.0.x'
+        dotnet-version: '10.0.x'
+
+    # Node.js 설치 (Tailwind CSS 빌드를 위해 필요)
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
 
     # 1. Velopack CLI(vpk) 도구 설치
     - name: Install vpk
-      run: dotnet tool install -g vpk
+      run: |
+        dotnet tool install -g vpk
+        echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     # 2. 앱 빌드 및 Publish
-    # 경로를 eft-where-am-i/eft-where-am-i.csproj와 같이 하위 디렉토리에 맞춤
     - name: Publish App
-      run: dotnet publish eft-where-am-i/eft-where-am-i.csproj -c Release -r win-x64 --self-contained false -o ./publish_output
+      run: |
+        dotnet publish eft-where-am-i/eft-where-am-i.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained false `
+          -p:PublishSingleFile=false `
+          -p:IncludeNativeLibrariesForSelfExtract=false `
+          -o ./publish_output
 
     # 3. Velopack 패키징
-    # GITHUB_REF_NAME은 현재 태그 이름
-    # vpk는 v 접두사를 허용하지 않으므로 제거
     - name: Pack App with Velopack
       shell: bash
       run: |
         VERSION="${{ github.ref_name }}"
         VERSION=${VERSION#v}
-        vpk pack -u eft-where-am-i -v $VERSION -p ./publish_output -e "eft-where-am-i.exe" -o ./ReleaseBuild
-    # 4. GitHub Release로 배포
-    - name: Velopack GitHub Release Upload
+        vpk pack \
+          -u eft-where-am-i \
+          -v $VERSION \
+          -p ./publish_output \
+          -e "EFT-Where-Am-I.exe" \
+          -o ./ReleaseBuild
+        rm -f ./ReleaseBuild/*Setup.exe
+
+    # 4. GitHub Release 생성 및 파일 업로드
+    - name: Upload to GitHub Release
+      shell: bash
       run: |
-        vpk upload github -o ./ReleaseBuild --repoUrl "https://github.com/karpitony/eft-where-am-i" --token ${{ secrets.GITHUB_TOKEN }}
+        vpk upload github \
+          -o ./ReleaseBuild \
+          --repoUrl "https://github.com/karpitony/eft-where-am-i" \
+          --token "${{ secrets.GITHUB_TOKEN }}" \
+          --tag "${{ github.ref_name }}" \
+          --merge
+
+    # 5. 릴리즈 노트에 .NET 런타임 안내 추가
+    # vpk가 먼저 Release를 생성한 뒤 이 단계에서 본문을 덧붙임
+    - name: Append runtime notice to Release notes
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: bash
+      run: |
+        EXISTING_BODY=$(gh release view "${{ github.ref_name }}" --json body -q .body 2>/dev/null || echo "")
+        NOTICE="
+
+        ---
+        ### ⚙️ Requirements
+
+        This app requires **.NET 10 Desktop Runtime (x64)** to run.
+        If you get an error on launch, please install the runtime from the link below.
+
+        👉 [Download .NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+
+        ---
+
+        이 앱은 **.NET 10 Desktop Runtime (x64)** 이 설치되어 있어야 합니다.
+        실행 시 오류가 발생한다면 아래 링크에서 런타임을 설치해 주세요.
+
+        👉 [.NET 10 Desktop Runtime 다운로드](https://dotnet.microsoft.com/ko-kr/download/dotnet/10.0)"
+
+        gh release edit "${{ github.ref_name }}" --notes "${EXISTING_BODY}${NOTICE}"

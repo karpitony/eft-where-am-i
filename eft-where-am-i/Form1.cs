@@ -111,9 +111,10 @@ namespace eft_where_am_i_chasrp
             try
             {
                 var mgr = new UpdateManager(new GithubSource("https://github.com/karpitony/eft-where-am-i", null, false));
-                if (!mgr.IsInstalled)
+                
+                // 개발 환경(디버거 모드)일 경우에만 건너뛰고, 무설치(Portable) 형태로 압축을 풀어 쓰는 유저도 업데이트를 받을 수 있게 합니다.
+                if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    // 개발 환경이거나 설치되지 않은 상태면 업데이트를 건너뜁니다
                     return;
                 }
 
