@@ -34,7 +34,7 @@ jobs:
 
     # 2. Tailwind CSS 빌드
     - name: Build Tailwind CSS
-      working-directory: eft-where-am-i/eft-where-am-i
+      working-directory: eft-where-am-i
       run: |
         npm install
         npm run build:css
