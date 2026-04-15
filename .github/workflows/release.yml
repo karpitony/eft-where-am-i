@@ -43,7 +43,18 @@ jobs:
           -p:IncludeNativeLibrariesForSelfExtract=false `
           -o ./publish_output
 
-    # 3. Velopack 패키징
+    # 3. Portable zip 생성
+    - name: Create Portable zip
+      shell: bash
+      run: |
+        TAG="${{ github.ref_name }}"
+        ZIP_NAME="eft-where-am-i-${TAG}-win-Portable.zip"
+        cd ./publish_output
+        7z a "../${ZIP_NAME}" .
+        cd ..
+        echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+
+    # 4. Velopack 패키징
     - name: Pack App with Velopack
       shell: bash
       run: |
@@ -55,9 +66,8 @@ jobs:
           -p ./publish_output \
           -e "EFT-Where-Am-I.exe" \
           -o ./ReleaseBuild
-        rm -f ./ReleaseBuild/*Setup.exe
 
-    # 4. GitHub Release 생성 및 파일 업로드
+    # 5. GitHub Release 생성 및 Velopack 파일 업로드 (nupkg, Setup.exe, RELEASES.json)
     - name: Upload to GitHub Release
       shell: bash
       run: |
@@ -68,17 +78,33 @@ jobs:
           --tag "${{ github.ref_name }}" \
           --merge
 
-    # 5. 릴리즈 노트에 .NET 런타임 안내 추가
-    # vpk가 먼저 Release를 생성한 뒤 이 단계에서 본문을 덧붙임
-    - name: Append runtime notice to Release notes
+    # 5-1. Portable zip 별도 업로드 (vpk upload는 매니페스트 기준으로만 올림)
+    - name: Upload Portable zip to GitHub Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: bash
+      run: |
+        gh release upload "${{ github.ref_name }}" "./${{ env.ZIP_NAME }}" --clobber
+
+    # 6. 릴리즈 노트에 다운로드 안내 및 .NET 런타임 안내 추가
+    - name: Append install guide to Release notes
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
         EXISTING_BODY=$(gh release view "${{ github.ref_name }}" --json body -q .body 2>/dev/null || echo "")
+        ZIP="${{ env.ZIP_NAME }}"
         NOTICE="
 
         ---
+        ### 📥 Download / 다운로드 방법
+
+        **① Download \`${ZIP}\`, extract, and run.** (Recommended)
+        **② \`*-win-Setup.exe\`** is the Velopack installer and may trigger antivirus warnings — prefer the zip.
+
+        **① \`${ZIP}\`** 를 다운로드 후 압축해제하고 바로 실행하세요. (Recommended)
+        **② \`*-win-Setup.exe\`** 는 Velopack 설치 프로그램이며 백신에서 오탐할 수 있어 zip 사용을 권장합니다.
+
         ### ⚙️ Requirements
 
         This app requires **.NET 10 Desktop Runtime (x64)** to run.
@@ -86,7 +112,6 @@ jobs:
 
         👉 [Download .NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
-        ---
 
         이 앱은 **.NET 10 Desktop Runtime (x64)** 이 설치되어 있어야 합니다.
         실행 시 오류가 발생한다면 아래 링크에서 런타임을 설치해 주세요.
