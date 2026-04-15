@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
@@ -6,7 +6,10 @@ using eft_where_am_i.Classes;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using Velopack;
+using Velopack.Sources;
 
 namespace eft_where_am_i
 {
@@ -115,6 +118,12 @@ namespace eft_where_am_i
                         // 데드존 비율 설정 전송
                         await webView2_Settings.ExecuteScriptAsync($"setDeadZonePercent({appSettings.dead_zone_percent})");
 
+                        // 앱 버전 정보 전송
+                        var version = Assembly.GetExecutingAssembly()
+                            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                            ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?";
+                        await webView2_Settings.ExecuteScriptAsync($"setCurrentVersion('{version}')");
+
                     }
                     catch (Exception ex)
                     {
@@ -126,7 +135,7 @@ namespace eft_where_am_i
         }
 
         // WebView2 메시지 수신 핸들러
-        private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        private async void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
             {
@@ -142,6 +151,10 @@ namespace eft_where_am_i
                 // 메시지 처리
                 switch (action.ToLower())
                 {
+                    case "check-update":
+                        await CheckForUpdatesAsync();
+                        break;
+
                     case "language-updated":
                         if (!string.IsNullOrEmpty(language))
                         {
@@ -227,6 +240,42 @@ namespace eft_where_am_i
             }
         }
 
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                var mgr = new UpdateManager(new GithubSource("https://github.com/karpitony/eft-where-am-i", null, false));
+                
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    MessageBox.Show("Cannot check for updates in debugger mode.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var newVersion = await mgr.CheckForUpdatesAsync();
+                if (newVersion != null)
+                {
+                    var message = $"새로운 업데이트(v{newVersion.TargetFullRelease.Version})가 있습니다.\n다운로드 및 설치 후 앱을 재시작하시겠습니까?\n\n" +
+                                  $"A new update (v{newVersion.TargetFullRelease.Version}) is available.\nWould you like to download, install, and restart the app?";
+                                  
+                    var result = MessageBox.Show(message, "업데이트 알림 / Update Notification", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        await mgr.DownloadUpdatesAsync(newVersion);
+                        mgr.ApplyUpdatesAndRestart(newVersion);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("현재 최신 버전을 사용 중입니다.\nYou are using the latest version.", "업데이트 확인 / Update Check", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"업데이트 확인 중 오류가 발생했습니다: {ex.Message}", "오류 / Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void LoadSettings()
         {

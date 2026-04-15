@@ -22,5 +22,7 @@
     "bugLink": "Bug Report",
     "deadZoneLabel": "Dead Zone Percentage",
     "autoScreenshotCleanupLabel": "Auto Screenshot Cleanup",
-    "footerText": "This program is not related to Tarkov-market."
+    "footerText": "This program is not related to Tarkov-market.",
+    "appVersionText": "App Version",
+    "checkUpdateButton": "Check for Update"
 }
