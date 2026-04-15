@@ -33,7 +33,7 @@ jobs:
         echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     # 2. Tailwind CSS 빌드
-   - name: Build Tailwind CSS
+    - name: Build Tailwind CSS
       working-directory: eft-where-am-i/eft-where-am-i
       run: |
         npm install
