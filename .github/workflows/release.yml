@@ -102,6 +102,7 @@ jobs:
         
         vpk upload github \
           -o ./ReleaseBuild_SC \
+          -c win-sc \
           --repoUrl "https://github.com/karpitony/eft-where-am-i" \
           --token "${{ secrets.GITHUB_TOKEN }}" \
           --tag "${{ github.ref_name }}" \
