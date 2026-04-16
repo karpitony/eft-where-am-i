@@ -3,18 +3,18 @@
 [![GitHub Release](https://img.shields.io/github/v/release/karpitony/eft-where-am-i?include_prereleases&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
 [![GitHub total downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?include_prerelease&logo=github)](https://github.com/karpitony/eft-where-am-i/releases)
 [![GitHub License](https://img.shields.io/github/license/karpitony/eft-where-am-i)](./LICENSE)
-[![.NET 8.0](https://img.shields.io/badge/.NET-8.0-purple?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![.NET 10.0](https://img.shields.io/badge/.NET-10.0-purple?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 </p>
 
 > **[English](README_en.md)** | **한국어 (현재)**
 
-# EFT: Where Am I Too
+# EFT: Where Am I
 
-타르코프 보조 프로그램 Where Am I을 개인적으로 수정한 버전입니다.
+타르코프 보조 프로그램 Where Am I 입니다.
 
-기존의 Where Am I가 오류와 부족한 유틸성을 강화한 버전입니다.
-써본 사람들은 알 수 있는데 기존의 TarkovHelper의 기능들을 조금 구현해 놨습니다.
+게임 내 위치 확인, 맵 자동 전환 등 다양한 편의 기능을 제공합니다.
+TarkovHelper의 기능들도 일부 구현되어 있습니다.
 
 > [!WARNING]
 > 본 프로그램은 [MIT 라이선스](./LICENSE)로 배포되며, **본 프로그램 사용으로 인한 어떠한 피해(BSG에 의한 제재 등)에 대해서도 책임지지 않습니다.**
@@ -22,7 +22,7 @@
 
 ## 목차
 
-- [Where Am I와 다른점](#where-am-i와-다른점)
+- [주요 기능](#주요-기능)
 - [시스템 요구 사항](#시스템-요구-사항)
 - [다운로드 및 설치](#다운로드-및-설치)
 - [사용 방법](#사용-방법)
@@ -32,13 +32,7 @@
 - [크레딧 및 감사](#크레딧-및-감사)
 - [라이선스](#라이선스)
 
-## Where Am I와 다른점
-
-### 위 아래로 위치가 자주 어긋나던 버그 수정
-
-기존 Where Am I에서 있었던 가장 큰 버그입니다.
-저도 이 버그때문에 제가 쓰려고 수정을 결심했습니다.
-현재는 완벽히 수정되었습니다.
+## 주요 기능
 
 ### 레이드 시작시 자동으로 해당 맵 열기
 
@@ -87,7 +81,7 @@
 | 항목 | 요구 사항 |
 |------|-----------|
 | OS | Windows 10 1809+ / Windows 11 |
-| 런타임 | [.NET 8.0 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| 런타임 | [.NET 10.0 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) |
 | 브라우저 | [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (대부분 사전 설치됨) |
 | 네트워크 | 인터넷 연결 필수 (tarkov-market.com 접속) |
 | 디스크 | ~50 MB |
@@ -96,21 +90,26 @@
 
 ### 다운로드
 
+![github-release-screenshot.png](assets/github-release-screenshot.png)
+
 [Releases](https://github.com/karpitony/eft-where-am-i/releases/latest)에서 최신 버전의 `.zip` 파일을 다운로드하세요.
 
 1. `.zip` 파일을 다운로드합니다.
 2. 원하는 위치에 압축을 해제합니다.
-3. `eft-where-am-i.exe`를 실행합니다.
-
-> 혹 실행이 안된다면 [시스템 요구사항](#시스템-요구-사항)의 런타임을 받아주세요.
+3. `eft-where-am-i.exe`를 클릭하여 실행합니다.
 
 <img src="assets/eft-wmi-exe.png" width="700">
 
-### Windows 보안 경고
+### ⚠️ 실행 오류 해결 (.NET 런타임 설치)
 
-Windows SmartScreen 경고가 표시될 수 있습니다. `추가 정보` → `실행`을 클릭하세요. 바이러스가 포함되어 있지 않으며, [VirusTotal 검사 결과](https://www.virustotal.com/gui/file/d0642330aaf009d3cf57a2bf55cb665f6c60178fd433c29600323fe6eb121f10?nocache=1/detection)를 확인할 수 있습니다.
+프로그램을 실행했을 때 아무 반응이 없거나 시스템 오류가 발생한다면, **.NET 10.0 Desktop Runtime**이 설치되어 있지 않기 때문일 수 있습니다. 다음 안내에 따라 런타임을 설치해 주세요.
 
-    MaxSecure에 1개 걸려있긴한데, 네이버 사이트도 걸면 한개정도는 걸립니다. 1개 걸린다고 바이러스 아니에요
+1. [.NET 10.0 다운로드 페이지](https://dotnet.microsoft.com/download/dotnet/10.0)로 이동합니다.
+2. 화면에서 `앱 실행 - 런타임` 분류 안의 **`.NET 데스크톱 런타임 (Desktop Runtime) 10.0.x`** 항목을 찾습니다.
+3. 운영체제 목록의 **`Windows`** 줄에서 설치 관리자 **`x64`**를 클릭하여 다운로드한 뒤 설치합니다.
+
+> 💡 **주의사항** 
+> - 페이지 내의 다른 런타임(SDK, ASP.NET Core 등)이나 단순 `.NET 런타임`이 아닙니다. 이 앱은 화면(UI)이 있는 프로그램이므로 꼭 **데스크톱 런타임(Desktop Runtime)**의 **x64** 버전을 다운로드하셔야 합니다.
 
 ### 첫 실행
 

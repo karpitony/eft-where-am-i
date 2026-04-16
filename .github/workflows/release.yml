@@ -74,7 +74,7 @@ jobs:
           --tag "${{ github.ref_name }}" \
           --merge
 
-    # 5. 릴리즈 노트에 다운로드 안내 및 .NET 런타임 안내 추가
+    # 5. 릴리즈 노트에 설치 가이드 README 링크 추가
     - name: Append install guide to Release notes
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,31 +82,10 @@ jobs:
       run: |
         EXISTING_BODY=$(gh release view "${{ github.ref_name }}" --json body -q .body 2>/dev/null || echo "")
         NOTICE="
-
+        
         ---
-        ### 📥 Download
+        ### 📖 설치 안내 및 요구사항 (Installation & Requirements)
 
-        **① Download \`*-Portable.zip\`, extract, and run.** (Recommended)
-        **② \`*-win-Setup.exe\`** is the Velopack installer and may trigger antivirus warnings — prefer the zip.
-
-        ### 📥 다운로드 방법
-
-        **① \`*-Portable.zip\`** 를 다운로드 후 압축해제하고 바로 실행하세요. (Recommended)
-        **② \`*-win-Setup.exe\`** 는 Velopack 설치 프로그램이며 백신에서 오탐할 수 있어 zip 사용을 권장합니다.
-
-        ---
-        ### ⚙️ Requirements
-
-        This app requires **.NET 10 Desktop Runtime (x64)** to run.
-        If you get an error on launch, please install the runtime from the link below.
-
-        👉 [Download .NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-
-        ### ⚙️ 요구사항
-
-        이 앱은 **.NET 10 Desktop Runtime (x64)** 이 설치되어 있어야 합니다.
-        실행 시 오류가 발생한다면 아래 링크에서 런타임을 설치해 주세요.
-
-        👉 [.NET 10 Desktop Runtime 다운로드](https://dotnet.microsoft.com/ko-kr/download/dotnet/10.0)"
-
+        - 자세한 다운로드/설치 방법 및 시스템 요구사항(.NET 10)은 [**README 문서**](https://github.com/karpitony/eft-where-am-i#%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C-%EB%B0%8F-%EC%84%A4%EC%B9%98)를 확인해 주세요.
+        - For detailed installation instructions and system requirements(.NET 10), please refer to the [**README**](https://github.com/karpitony/eft-where-am-i/blob/main/README_en.md#download--installation)."
         gh release edit "${{ github.ref_name }}" --notes "${EXISTING_BODY}${NOTICE}"

@@ -3,18 +3,18 @@
 [![GitHub Release](https://img.shields.io/github/v/release/karpitony/eft-where-am-i?include_prereleases&logo=github)](https://github.com/karpitony/eft-where-am-i/releases/latest)
 [![GitHub total downloads](https://img.shields.io/github/downloads/karpitony/eft-where-am-i/total.svg?include_prerelease&logo=github)](https://github.com/karpitony/eft-where-am-i/releases)
 [![GitHub License](https://img.shields.io/github/license/karpitony/eft-where-am-i)](./LICENSE)
-[![.NET 8.0](https://img.shields.io/badge/.NET-8.0-purple?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![.NET 10.0](https://img.shields.io/badge/.NET-10.0-purple?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 </p>
 
 > **English (Current)** | **[한국어](README.md)**
 
-# EFT: Where Am I Too
+# EFT: Where Am I
 
-A personally modified version of the Tarkov companion tool "Where Am I".
+A Tarkov companion tool "Where Am I".
 
-This version improves upon the original Where Am I by fixing bugs and enhancing utility features.
-Those who have used it may notice that some features from TarkovHelper have been partially implemented.
+It provides various convenience features such as in-game location tracking and automatic map switching.
+Some features from TarkovHelper have also been implemented.
 
 > [!WARNING]
 > This program is distributed under the [MIT License](./LICENSE). **We are not responsible for any consequences (including BSG bans or sanctions) resulting from the use of this program.**
@@ -22,7 +22,7 @@ Those who have used it may notice that some features from TarkovHelper have been
 
 ## Table of Contents
 
-- [Differences from Where Am I](#differences-from-where-am-i)
+- [Key Features](#key-features)
 - [System Requirements](#system-requirements)
 - [Download & Installation](#download--installation)
 - [How to Use](#how-to-use)
@@ -32,13 +32,7 @@ Those who have used it may notice that some features from TarkovHelper have been
 - [Credits & Acknowledgments](#credits--acknowledgments)
 - [License](#license)
 
-## Differences from Where Am I
-
-### Fixed the frequent vertical position misalignment bug
-
-This was the biggest bug in the original Where Am I.
-This bug was actually the reason I decided to modify it for my own use.
-It has now been completely fixed.
+## Key Features
 
 ### Auto map switch on raid start
 
@@ -87,7 +81,7 @@ If you need to preserve your screenshots, please uncheck this option.
 | Component | Requirement |
 |-----------|-------------|
 | OS | Windows 10 1809+ / Windows 11 |
-| Runtime | [.NET 8.0 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| Runtime | [.NET 10.0 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) |
 | Browser | [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on most systems) |
 | Network | Internet connection required (connects to tarkov-market.com) |
 | Disk | ~50 MB |
@@ -96,19 +90,25 @@ If you need to preserve your screenshots, please uncheck this option.
 
 ### Download
 
+![github-release-screenshot.png](assets/github-release-screenshot.png)
+
 Download the latest `.zip` file from [Releases](https://github.com/karpitony/eft-where-am-i/releases/latest).
 
 1. Download the `.zip` file.
 2. Extract it to your preferred location.
-3. Run `eft-where-am-i.exe`.
-
-> If it doesn't run, please install the runtime from [System Requirements](#system-requirements).
+3. Click and run `eft-where-am-i.exe`.
 
 <img src="assets/eft-wmi-exe.png" width="700">
 
-### Windows Security Warning
+### ⚠️ App not launching or throwing errors? (.NET Runtime)
 
-Windows SmartScreen may display a warning. Click `More info` → `Run anyway`. The program contains no viruses — you can verify with the [VirusTotal scan results](https://www.virustotal.com/gui/file/4aa4768640a4c29ddc42ad1bc736d70c98630149985477e153bdae93aa91f010/detection).
+If the program does nothing when you open it or throws a system error, you likely need to install the **.NET 10.0 Desktop Runtime**.
+
+1. Go to the [.NET 10.0 Download Page](https://dotnet.microsoft.com/download/dotnet/10.0).
+2. Look for the **`.NET Desktop Runtime 10.0.x`** section under the "Run apps - Runtime" category.
+3. Under the Installers column for **`Windows`**, click **`x64`** to download and install it.
+
+> 💡 **NOTE:** Make sure you specifically download the **Desktop Runtime**. Standard `.NET Runtime` or `SDK` will not work for running this application.
 
 ### First Launch
 
