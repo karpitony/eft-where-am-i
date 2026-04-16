@@ -118,8 +118,11 @@ jobs:
         NOTICE="
         
         ---
-        ### 📖 설치 안내 및 요구사항 (Installation & Requirements)
+        ### 📖 설치 안내 및 권장사항 (Installation & Recommendation)
 
-        - 자세한 다운로드/설치 방법 및 시스템 요구사항(.NET 10)은 [**README 문서**](https://github.com/karpitony/eft-where-am-i#%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C-%EB%B0%8F-%EC%84%A4%EC%B9%98)를 확인해 주세요.
-        - For detailed installation instructions and system requirements(.NET 10), please refer to the [**README**](https://github.com/karpitony/eft-where-am-i/blob/main/README_en.md#download--installation)."
+        - **🔥 권장(Recommended): \`*win-sc-Portable.zip\`**
+          - 백신 오탐(False Positive)이 적고 .NET 런타임 설치가 필요 없는 해당 버전을 권장합니다.
+          - We highly recommend this version as it has fewer antivirus false positives and requires no .NET runtime installation.
+        - 자세한 안내는 [**README 문서**](https://github.com/karpitony/eft-where-am-i#%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C-%EB%B0%8F-%EC%84%A4%EC%B9%98)를 확인해 주세요.
+        - For detailed instructions, please refer to the [**README**](https://github.com/karpitony/eft-where-am-i/blob/main/README_en.md#download--installation)."
         gh release edit "${{ github.ref_name }}" --notes "${EXISTING_BODY}${NOTICE}"

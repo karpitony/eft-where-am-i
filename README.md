@@ -92,7 +92,10 @@ TarkovHelper의 기능들도 일부 구현되어 있습니다.
 
 ![github-release-screenshot.png](assets/github-release-screenshot.png)
 
-[Releases](https://github.com/karpitony/eft-where-am-i/releases/latest)에서 최신 버전의 `.zip` 파일을 다운로드하세요.
+> **💡 권장 다운로드: `*win-sc-Portable.zip`**
+> 백신 오탐(False Positive)을 피하고 별도의 .NET 런타임 설치 없이 바로 실행하려면 **`win-sc-Portable.zip`** 버전을 다운로드하는 것을 강력히 권장합니다.
+
+[Releases](https://github.com/karpitony/eft-where-am-i/releases/latest)에서 최신 버전의 파일을 다운로드하세요.
 
 1. `.zip` 파일을 다운로드합니다.
 2. 원하는 위치에 압축을 해제합니다.

@@ -92,7 +92,10 @@ If you need to preserve your screenshots, please uncheck this option.
 
 ![github-release-screenshot.png](assets/github-release-screenshot.png)
 
-Download the latest `.zip` file from [Releases](https://github.com/karpitony/eft-where-am-i/releases/latest).
+> **💡 Recommended: `*win-sc-Portable.zip`**
+> We highly recommend downloading the **`win-sc-Portable.zip`** version to avoid antivirus false positives and to run the app immediately without needing to separately install the .NET runtime.
+
+Download the latest release files from [Releases](https://github.com/karpitony/eft-where-am-i/releases/latest).
 
 1. Download the `.zip` file.
 2. Extract it to your preferred location.
