@@ -39,8 +39,8 @@ jobs:
         npm install
         npm run build:css
 
-    # 3. 앱 빌드 및 Publish
-    - name: Publish App
+    # 3. 앱 빌드 및 Publish (런타임 미포함 - 기존)
+    - name: Publish App (Framework Dependent)
       run: |
         dotnet publish eft-where-am-i/eft-where-am-i.csproj `
           -c Release `
@@ -48,10 +48,21 @@ jobs:
           --self-contained false `
           -p:PublishSingleFile=false `
           -p:IncludeNativeLibrariesForSelfExtract=false `
-          -o ./publish_output
+          -o ./publish_output_fd
 
-    # 3. Velopack 패키징
-    - name: Pack App with Velopack
+    # 4. 앱 빌드 및 Publish (런타임 포함 - 독립 실행형)
+    - name: Publish App (Self-Contained)
+      run: |
+        dotnet publish eft-where-am-i/eft-where-am-i.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishSingleFile=false `
+          -p:IncludeNativeLibrariesForSelfExtract=false `
+          -o ./publish_output_sc
+
+    # 5. Velopack 패키징 (런타임 미포함)
+    - name: Pack App with Velopack (Framework Dependent)
       shell: bash
       run: |
         VERSION="${{ github.ref_name }}"
@@ -59,22 +70,44 @@ jobs:
         vpk pack \
           -u eft-where-am-i \
           -v $VERSION \
-          -p ./publish_output \
+          -p ./publish_output_fd \
           -e "EFT-Where-Am-I.exe" \
-          -o ./ReleaseBuild
+          -o ./ReleaseBuild_FD
 
-    # 4. GitHub Release 생성 및 파일 업로드
-    - name: Upload to GitHub Release
+    # 6. Velopack 패키징 (런타임 포함)
+    # '-c win-sc' 채널을 지정하여 기존(런타임 미포함) 업데이트 파이프라인과 분리합니다.
+    - name: Pack App with Velopack (Self-Contained)
+      shell: bash
+      run: |
+        VERSION="${{ github.ref_name }}"
+        VERSION=${VERSION#v}
+        vpk pack \
+          -u eft-where-am-i \
+          -v $VERSION \
+          -c win-sc \
+          -p ./publish_output_sc \
+          -e "EFT-Where-Am-I.exe" \
+          -o ./ReleaseBuild_SC
+
+    # 7. GitHub Release 생성 및 파일 업로드 (Velopack Setup)
+    - name: Upload Velopack Releases to GitHub
       shell: bash
       run: |
         vpk upload github \
-          -o ./ReleaseBuild \
+          -o ./ReleaseBuild_FD \
+          --repoUrl "https://github.com/karpitony/eft-where-am-i" \
+          --token "${{ secrets.GITHUB_TOKEN }}" \
+          --tag "${{ github.ref_name }}" \
+          --merge
+        
+        vpk upload github \
+          -o ./ReleaseBuild_SC \
           --repoUrl "https://github.com/karpitony/eft-where-am-i" \
           --token "${{ secrets.GITHUB_TOKEN }}" \
           --tag "${{ github.ref_name }}" \
           --merge
 
-    # 5. 릴리즈 노트에 설치 가이드 README 링크 추가
+    # 8. 릴리즈 노트에 설치 가이드 README 링크 추가
     - name: Append install guide to Release notes
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
