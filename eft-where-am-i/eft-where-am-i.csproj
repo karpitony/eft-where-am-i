@@ -9,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- 버전을 여기서만 관리 -->
-    <Version>2.3.1</Version>
+    <Version>2.3.2</Version>
     <AssemblyName>EFT-Where-Am-I</AssemblyName>
     <AssemblyTitle>EFT WHERE AM I v$(Version)</AssemblyTitle>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>

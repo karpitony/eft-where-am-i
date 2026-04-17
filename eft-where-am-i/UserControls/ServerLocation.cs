@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using eft_where_am_i.Classes;
@@ -11,12 +13,120 @@ namespace eft_where_am_i
 {
     public partial class ServerLocation : UserControl
     {
+        private string OFFLINE_MSG = "오프라인 / 매칭안됨";
+        private dynamic _langStrings;
+        
+        // IP 별 위치 정보를 저장하는 캐시 딕셔너리 (앱 구동 중 유지)
+        private Dictionary<string, dynamic> _geoCache = new Dictionary<string, dynamic>();
+
         public ServerLocation()
         {
             InitializeComponent();
+
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint |
+                          ControlStyles.UserPaint |
+                          ControlStyles.OptimizedDoubleBuffer, true);
+
+            typeof(DataGridView).InvokeMember("DoubleBuffered", 
+                System.Reflection.BindingFlags.NonPublic | 
+                System.Reflection.BindingFlags.Instance | 
+                System.Reflection.BindingFlags.SetProperty, 
+                null, dataGridViewHistory, new object[] { true });
+
+            LoadLanguage();
+            SettingsHandler.Instance.SettingsChanged += (s) =>
+            {
+                LoadLanguage();
+            };
         }
 
-        private void btnFindServer_Click(object sender, EventArgs e)
+        private void LoadLanguage()
+        {
+            try
+            {
+                string lang = SettingsHandler.Instance.GetSettings().language;
+                if (string.IsNullOrEmpty(lang)) lang = "en";
+                string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "translations", $"{lang}.json");
+                if (File.Exists(jsonPath))
+                {
+                    string json = File.ReadAllText(jsonPath);
+                    _langStrings = JsonConvert.DeserializeObject(json);
+                }
+                
+                if (_langStrings != null)
+                {
+                    ApplyTranslations();
+                }
+            }
+            catch (Exception) { }
+        }
+
+        private string GetString(string key, string fallback)
+        {
+            if (_langStrings != null && _langStrings[key] != null)
+                return _langStrings[key].ToString();
+            return fallback;
+        }
+
+        private void ApplyTranslations()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(ApplyTranslations));
+                return;
+            }
+            
+            groupBox1.Text = GetString("serverLocation_Title", groupBox1.Text);
+            lblHistory.Text = GetString("serverLocation_HistoryTitle", lblHistory.Text);
+            btnFindLatest.Text = GetString("serverLocation_BtnFindLatest", btnFindLatest.Text);
+            
+            colCheck.HeaderText = GetString("serverLocation_ColCheck", colCheck.HeaderText);
+            colCheck.Text = GetString("serverLocation_BtnCheck", colCheck.Text);
+            colDate.HeaderText = GetString("serverLocation_ColDate", colDate.HeaderText);
+            colIp.HeaderText = GetString("serverLocation_ColIp", colIp.HeaderText);
+            colCity.HeaderText = GetString("serverLocation_ColCity", colCity.HeaderText);
+            colFolder.HeaderText = GetString("serverLocation_ColFolder", colFolder.HeaderText);
+            
+            string oldOfflineMsg = OFFLINE_MSG;
+            OFFLINE_MSG = GetString("serverLocation_OfflineCol", OFFLINE_MSG);
+            
+            // 기존 표에 들어가 있는 오프라인 메시지도 실시간 변경
+            if (oldOfflineMsg != OFFLINE_MSG && dataGridViewHistory.Rows.Count > 0)
+            {
+                foreach (DataGridViewRow row in dataGridViewHistory.Rows)
+                {
+                    if (row.Cells["colIp"].Value?.ToString() == oldOfflineMsg)
+                    {
+                        row.Cells["colIp"].Value = OFFLINE_MSG;
+                    }
+                }
+            }
+            
+            if (lblCurrentLogFile.Text.Contains("Current Log") || lblCurrentLogFile.Text.Contains("선택된 로그"))
+            {
+                lblCurrentLogFile.Text = GetString("serverLocation_CurrentLog", "Current Log: ") + "None";
+            }
+            
+            ClearGeoLocationLabels();
+        }
+
+        private async void ServerLocation_Load(object sender, EventArgs e)
+        {
+            if (this.DesignMode) return;
+            await LoadAllHistoryAsync();
+        }
+
+        private async void btnFindLatest_Click(object sender, EventArgs e)
+        {
+            btnFindLatest.Enabled = false;
+            btnFindLatest.Text = "...";
+            await LoadAllHistoryAsync();
+            btnFindLatest.Text = GetString("serverLocation_BtnFindLatest", "최신 접속 갱신");
+            btnFindLatest.Enabled = true;
+        }
+
+        private async Task LoadAllHistoryAsync()
         {
             try
             {
@@ -24,59 +134,83 @@ namespace eft_where_am_i
 
                 if (string.IsNullOrEmpty(logsFolderPath) || !Directory.Exists(logsFolderPath))
                 {
-                    MessageBox.Show("로그 폴더 경로를 찾을 수 없습니다. 설정을 확인해주세요.", "경로 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                // 가장 최근 로그 폴더 찾기
-                var latestDir = new DirectoryInfo(logsFolderPath)
-                    .GetDirectories()
-                    .OrderByDescending(d => d.CreationTime)
-                    .FirstOrDefault();
+                dataGridViewHistory.Rows.Clear();
 
-                if (latestDir == null)
+                await Task.Run(() =>
                 {
-                    MessageBox.Show("로그 폴더(세션 폴더)를 찾을 수 없습니다.", "폴더 없음", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
+                    var dirs = new DirectoryInfo(logsFolderPath)
+                        .GetDirectories()
+                        .OrderByDescending(d => d.CreationTime)
+                        .ToList();
 
-                // 해당 폴더에서 가장 최근 application 로그 파일 찾기
-                var latestFile = latestDir.GetFiles("*application*.log")
-                    .OrderByDescending(f => f.LastWriteTime)
-                    .FirstOrDefault();
-
-                if (latestFile != null)
-                {
-                    // 파일에서 가장 최근 IP 주소 추출
-                    string lastIpAddress = GetFirstIpAddress(latestFile.FullName);
-                    if (!string.IsNullOrEmpty(lastIpAddress))
+                    foreach (var dir in dirs)
                     {
-                        labelIpAddress.Text = $"IP 주소 : {lastIpAddress}";
-                        SetGeoLocationLabels(lastIpAddress);
+                        var latestFile = dir.GetFiles("*application*.log")
+                            .OrderByDescending(f => f.LastWriteTime)
+                            .FirstOrDefault();
+
+                        string ip = OFFLINE_MSG;
+                        string cityVal = "";
+
+                        if (latestFile != null)
+                        {
+                            ip = GetMatchedIpAddress(latestFile.FullName) ?? OFFLINE_MSG;
+                        }
+
+                        // 캐시에 있는 경우 도시명 바로 주입
+                        if (ip != OFFLINE_MSG && _geoCache.ContainsKey(ip))
+                        {
+                            cityVal = _geoCache[ip]["city"]?.ToString();
+                        }
+
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            dataGridViewHistory.Rows.Add(
+                                GetString("serverLocation_BtnCheck", "확인하기"), 
+                                dir.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"), 
+                                ip, 
+                                cityVal, /* 새로운 City 컬럼 (캐시에 없으면 공백) */
+                                dir.Name
+                            );
+                        });
+                    }
+                });
+
+                if (dataGridViewHistory.Rows.Count > 0)
+                {
+                    var firstRow = dataGridViewHistory.Rows[0];
+                    string latestIp = firstRow.Cells["colIp"].Value?.ToString();
+                    string folderName = firstRow.Cells["colFolder"].Value?.ToString();
+                    
+                    lblCurrentLogFile.Text = GetString("serverLocation_CurrentLog", "선택된 로그: ") + $"{folderName} (*application*.log)";
+
+                    if (string.IsNullOrEmpty(latestIp) || !IPAddress.TryParse(latestIp, out _))
+                    {
+                        ClearGeoLocationLabels();
+                        labelIpAddress.Text = GetString("serverLocation_IpText", "IP 주소 : ") + OFFLINE_MSG;
+                        labelCountryName.Text = GetString("serverLocation_OfflineInfo", "해당 세션은 오프라인 게임이거나 아직 서버가 잡히지 않았습니다.");
                     }
                     else
                     {
-                        MessageBox.Show("로그 파일에서 IP 주소를 찾을 수 없습니다.", "IP 주소 없음", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        await UpdateGeoLocationAsync(latestIp, firstRow);
                     }
-                }
-                else
-                {
-                    MessageBox.Show("해당 폴더에 '*application*.log' 파일을 찾을 수 없습니다.", "파일 없음", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine($"오류 발생: {ex.Message}");
             }
         }
 
-        private string GetFirstIpAddress(string logFilePath)
+        private string GetMatchedIpAddress(string logFilePath)
         {
             try
             {
-                string firstIpAddress = null;
+                string matchedIpAddress = null;
 
-                // FileStream을 사용하여 파일을 읽기 전용으로 엽니다.
                 using (FileStream fileStream = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (StreamReader reader = new StreamReader(fileStream))
@@ -88,58 +222,127 @@ namespace eft_where_am_i
 
                             if (match.Success)
                             {
-                                firstIpAddress = match.Groups[1].Value;
-                                // 루프를 계속 돌아서 파일 내 가장 마지막(최근) IP를 얻습니다.
+                                matchedIpAddress = match.Groups[1].Value;
                             }
                         }
                     }
                 }
 
-                return firstIpAddress;
+                return matchedIpAddress;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"오류 발생: {ex.Message}");
                 return null;
             }
         }
 
-        // IP 주소를 받아서 지리적 위치 정보를 가져와 라벨에 표시하는 메서드
-        private void SetGeoLocationLabels(string ipAddress)
+        private async void dataGridViewHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == colCheck.Index)
+            {
+                var row = dataGridViewHistory.Rows[e.RowIndex];
+                string ip = row.Cells["colIp"].Value?.ToString();
+                string folderName = row.Cells["colFolder"].Value?.ToString();
+
+                lblCurrentLogFile.Text = GetString("serverLocation_CurrentLog", "선택된 로그: ") + $"{folderName} (*application*.log)";
+
+                if (string.IsNullOrEmpty(ip) || !IPAddress.TryParse(ip, out _))
+                {
+                    ClearGeoLocationLabels();
+                    labelIpAddress.Text = GetString("serverLocation_IpText", "IP 주소 : ") + OFFLINE_MSG;
+                    labelCountryName.Text = GetString("serverLocation_OfflineInfo", "해당 세션은 오프라인 게임이거나 아직 매칭된 서버가 없습니다.");
+                    row.Cells["colCity"].Value = "-";
+                }
+                else
+                {
+                    await UpdateGeoLocationAsync(ip, row);
+                }
+            }
+        }
+
+        private void ClearGeoLocationLabels()
+        {
+            labelIpAddress.Text = GetString("serverLocation_IpText", "IP 주소 : ");
+            labelCountryName.Text = GetString("serverLocation_CountryText", "국가 : ");
+            labelRegionName.Text = GetString("serverLocation_RegionText", "지역 : ");
+            labelCityName.Text = GetString("serverLocation_CityText", "도시 : ");
+        }
+
+        private async Task UpdateGeoLocationAsync(string ipAddress, DataGridViewRow targetRow = null)
         {
             try
             {
-                string apiUrl = $"http://ip-api.com/json/{ipAddress}";
-                using (WebClient client = new WebClient())
+                labelIpAddress.Text = GetString("serverLocation_IpText", "IP 주소 : ") + ipAddress;
+                
+                if (!IPAddress.TryParse(ipAddress, out _))
                 {
-                    // Adding a User-Agent is sometimes required by ip-api
-                    client.Headers.Add("User-Agent", "EFT-Where-Am-I Desktop App");
-                    string response = client.DownloadString(apiUrl);
-                    dynamic geoInfo = JsonConvert.DeserializeObject(response);
+                    labelCountryName.Text = GetString("serverLocation_OfflineInfo", "해당 세션은 오프라인 게임이거나 아직 서버가 잡히지 않았습니다.");
+                    labelRegionName.Text = GetString("serverLocation_RegionText", "지역 : ");
+                    labelCityName.Text = GetString("serverLocation_CityText", "도시 : ");
+                    return;
+                }
 
+                dynamic geoInfo = null;
+
+                // 캐시 확인
+                if (_geoCache.ContainsKey(ipAddress))
+                {
+                    geoInfo = _geoCache[ipAddress];
+                }
+                else
+                {
+                    // 비동기 API 요청 (UI 멈춤 방지)
+                    string apiUrl = $"http://ip-api.com/json/{ipAddress}";
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Headers.Add("User-Agent", "EFT-Where-Am-I Desktop App");
+                        string response = await Task.Run(() => client.DownloadString(apiUrl));
+                        geoInfo = JsonConvert.DeserializeObject(response);
+                        
+                        if (geoInfo != null && geoInfo["status"] == "success")
+                        {
+                            _geoCache[ipAddress] = geoInfo; // 딕셔너리에 저장
+                        }
+                    }
+                }
+
+                if (geoInfo != null)
+                {
                     if (geoInfo["status"] == "success")
                     {
-                        // 국가, 도시 정보를 라벨에 표시
-                        labelCountryName.Text = $"국가 : {geoInfo["country"]}";
-                        labelRegionName.Text = $"지역 : {geoInfo["regionName"]}";
-                        labelCityName.Text = $"도시 : {geoInfo["city"]}";
+                        labelCountryName.Text = GetString("serverLocation_CountryText", "국가 : ") + geoInfo["country"];
+                        labelRegionName.Text = GetString("serverLocation_RegionText", "지역 : ") + geoInfo["regionName"];
+                        string cityResult = geoInfo["city"]?.ToString();
+                        labelCityName.Text = GetString("serverLocation_CityText", "도시 : ") + cityResult;
+
+                        if (targetRow != null)
+                        {
+                            targetRow.Cells["colCity"].Value = cityResult;
+                        }
                     }
                     else
                     {
-                        labelCountryName.Text = "상태 : 실패 API 오류";
-                        labelRegionName.Text = $"지역 : {geoInfo["message"]}";
-                        labelCityName.Text = $"도시 : ";
+                        labelCountryName.Text = GetString("serverLocation_StatusFail", "상태 : 실패 (API 오류)");
+                        labelRegionName.Text = GetString("serverLocation_Reason", "사유 : ") + geoInfo["message"];
+                        labelCityName.Text = GetString("serverLocation_CityText", "도시 : ");
+                        
+                        if (targetRow != null)
+                        {
+                            targetRow.Cells["colCity"].Value = "(실패)";
+                        }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"오류 발생: {ex.Message}");
-
-                // 오류 발생 시 라벨에 오류 메시지 표시
-                labelCountryName.Text = "국가 : 오류";
-                labelRegionName.Text = "지역 : 오류";
-                labelCityName.Text = "도시 : 오류";
+                labelCountryName.Text = GetString("serverLocation_Error", "오류 발생");
+                labelRegionName.Text = GetString("serverLocation_Error", "오류 발생");
+                labelCityName.Text = GetString("serverLocation_Error", "오류 발생");
+                
+                if (targetRow != null)
+                {
+                    targetRow.Cells["colCity"].Value = "(오류)";
+                }
             }
         }
     }
