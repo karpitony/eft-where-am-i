@@ -1,4 +1,4 @@
-﻿namespace eft_where_am_i_chasrp
+namespace eft_where_am_i_chasrp
 {
     partial class Form1
     {
@@ -33,6 +33,7 @@
             panelSideMenu = new Panel();
             btnWhereAmI = new Button();
             btnSetting = new Button();
+            btnServerLocation = new Button();
             checkBoxHide = new CheckBox();
             timerSliding = new System.Windows.Forms.Timer(components);
             panel1 = new Panel();
@@ -42,6 +43,7 @@
             // panelSideMenu
             // 
             panelSideMenu.BackColor = Color.FromArgb(64, 64, 64);
+            panelSideMenu.Controls.Add(btnServerLocation);
             panelSideMenu.Controls.Add(btnWhereAmI);
             panelSideMenu.Controls.Add(btnSetting);
             panelSideMenu.Controls.Add(checkBoxHide);
@@ -88,6 +90,24 @@
             btnSetting.TabIndex = 1;
             btnSetting.UseVisualStyleBackColor = true;
             btnSetting.Click += btnSetting_Click;
+            // 
+            // btnServerLocation
+            // 
+            btnServerLocation.Dock = DockStyle.Top;
+            btnServerLocation.FlatAppearance.BorderSize = 0;
+            btnServerLocation.FlatAppearance.MouseDownBackColor = Color.FromArgb(60, 60, 60);
+            btnServerLocation.FlatAppearance.MouseOverBackColor = Color.FromArgb(70, 70, 70);
+            btnServerLocation.FlatStyle = FlatStyle.Flat;
+            btnServerLocation.Font = new Font("굴림", 15F, FontStyle.Bold);
+            btnServerLocation.ForeColor = Color.White;
+            btnServerLocation.Image = Image.FromFile(@"assets\images\server.png");
+            btnServerLocation.Location = new Point(0, 188);
+            btnServerLocation.Margin = new Padding(3, 4, 3, 4);
+            btnServerLocation.Name = "btnServerLocation";
+            btnServerLocation.Size = new Size(75, 94);
+            btnServerLocation.TabIndex = 3;
+            btnServerLocation.UseVisualStyleBackColor = true;
+            btnServerLocation.Click += btnServerLocation_Click;
             // 
             // checkBoxHide
             // 
@@ -146,6 +166,7 @@
         private System.Windows.Forms.CheckBox checkBoxHide;
         private System.Windows.Forms.Button btnSetting;
         private System.Windows.Forms.Button btnWhereAmI;
+        private System.Windows.Forms.Button btnServerLocation;
         private System.Windows.Forms.Timer timerSliding;
         private System.Windows.Forms.Panel panel1;
     }

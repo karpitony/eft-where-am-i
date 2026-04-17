@@ -161,7 +161,7 @@ PR과 Issue 기여를 환영합니다!
 
 - [Tarkov-Market](https://tarkov-market.com/) — 맵 데이터 및 UI
 - [Tarkov-Client](https://github.com/byeong1/Tarkov-Client) by byeong1 — 방향 표시기 코드 (MIT License)
-- [Freepik - Flaticon](https://www.flaticon.com/free-icons/map) — 맵 아이콘
+- [Freepik - Flaticon](https://www.flaticon.com/free-icons/map) — 맵 아이콘, [서버 아이콘](https://www.flaticon.com/free-icon/server_4227991?term=server&page=1&position=8&origin=search&related_id=4227991)
 - [Microsoft WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) — 브라우저 컴포넌트
 
 ## 라이선스
