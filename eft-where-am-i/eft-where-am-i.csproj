@@ -9,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- 버전을 여기서만 관리 -->
-    <Version>2.3.1</Version>
+    <Version>2.3.2</Version>
     <AssemblyName>EFT-Where-Am-I</AssemblyName>
     <AssemblyTitle>EFT WHERE AM I v$(Version)</AssemblyTitle>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -37,6 +37,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="assets\images\eft-where-am-i_icon_resize.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\server.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="assets\images\settings_icon2_resize.png">
