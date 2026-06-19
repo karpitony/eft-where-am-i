@@ -6,7 +6,7 @@ namespace eft_where_am_i.Classes
 
         public const string FULL_SCREEN_BUTTON_SELECTOR = "#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > button";
 
-        public const string WHERE_AM_I_BUTTON_SELECTOR = "#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15.fs-0 > button";
+        public const string WHERE_AM_I_BUTTON_SELECTOR = "#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.d-flex.ml-15 > button";
 
         /*
          * The following code (ADD_DIRECTION_INDICATORS_SCRIPT) is from 'Tarkov-Client' by 'byeong1'
