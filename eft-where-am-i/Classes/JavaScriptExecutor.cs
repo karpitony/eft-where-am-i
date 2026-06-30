@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,6 +18,16 @@ namespace eft_where_am_i.Classes
         public JavaScriptExecutor(WebView2 webView)
         {
             this.webView = webView ?? throw new ArgumentNullException(nameof(webView));
+        }
+
+        /// <summary>
+        /// C# 문자열을 안전한 JavaScript 문자열 리터럴로 변환합니다.
+        /// 따옴표, 백슬래시, 줄바꿈 등 모든 특수문자를 올바르게 이스케이프하여
+        /// JS 코드 인젝션을 방지합니다. null 입력도 안전하게 처리합니다.
+        /// </summary>
+        private static string JsLiteral(string value)
+        {
+            return JsonConvert.SerializeObject(value ?? string.Empty);
         }
 
         /// <summary>
@@ -58,8 +68,9 @@ namespace eft_where_am_i.Classes
         /// <param name="selector">버튼의 CSS 셀렉터</param>
         public async Task ClickButtonAsync(string selector)
         {
+            string Selector = JsLiteral(selector);
             string script = $@"
-                var button = document.querySelector('{selector}');
+                var button = document.querySelector({Selector});
                 if (button) {{
                     button.click();
                     console.log('Button clicked');
@@ -111,18 +122,19 @@ namespace eft_where_am_i.Classes
         /// <param name="value">설정할 값</param>
         public async Task SetInputValueAsync(string selector, string value)
         {
-            string escapedValue = value.Replace("\\", "\\\\").Replace("'", "\\'");
+            string Selector = JsLiteral(selector);
+            string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
-                    var input = document.querySelector('{selector}');
+                    var input = document.querySelector({Selector});
                     if (!input) {{ console.log('Input not found'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
                     var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-                    nativeSetter.call(input, '{escapedValue}');
+                    nativeSetter.call(input, {escapedValue});
 
                     // Dispatch multiple events for framework compatibility
-                    input.dispatchEvent(new InputEvent('input', {{ bubbles: true, cancelable: true, inputType: 'insertText', data: '{escapedValue}' }}));
+                    input.dispatchEvent(new InputEvent('input', {{ bubbles: true, cancelable: true, inputType: 'insertText', data: {escapedValue} }}));
                     input.dispatchEvent(new Event('change', {{ bubbles: true }}));
 
                     // Also try focus/blur to trigger validation
@@ -140,7 +152,7 @@ namespace eft_where_am_i.Classes
         /// </summary>
         /// <param name="timeoutMs">최대 대기 시간 (밀리초)</param>
         /// <returns>컨테이너 로드 성공 여부</returns>
-        public async Task<bool> WaitForQuestContainerAsync(int timeoutMs = 15000)
+        public async Task<bool> WaitForQuestContainerAsync(int timeoutMs = 15000, System.Threading.CancellationToken cancellationToken = default)
         {
             string script = @"
             (function() {
@@ -151,12 +163,13 @@ namespace eft_where_am_i.Classes
             var startTime = DateTime.Now;
             while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     await EnsureWebViewInitializedAsync();
                     if (webView.CoreWebView2 == null)
                     {
-                        await Task.Delay(500);
+                        await Task.Delay(500, cancellationToken);
                         continue;
                     }
 
@@ -166,12 +179,16 @@ namespace eft_where_am_i.Classes
                         return true;
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"[JS] WaitForQuestContainer polling error: {ex.Message}");
                 }
 
-                await Task.Delay(500);
+                await Task.Delay(500, cancellationToken);
             }
 
             Console.WriteLine($"[JS] WaitForQuestContainer timed out after {timeoutMs}ms");
@@ -180,7 +197,7 @@ namespace eft_where_am_i.Classes
 
         /// <summary>
         /// 현재 선택된 퀘스트 이름 목록을 추출합니다.
-        /// 선택된 퀘스트는 'selected' CSS 클래스로 구분됩니다.
+        /// 선택된 퀘스트는 'data-quest-selected' 속성으로 구분됩니다.
         /// </summary>
         public async Task<List<string>> GetSelectedQuestsAsync()
         {
@@ -188,10 +205,25 @@ namespace eft_where_am_i.Classes
             (function() {
                 const container = document.querySelector('div.items.scroll');
                 if (!container) return JSON.stringify([]);
-                const items = container.querySelectorAll('div.no-wrap.d-flex');
+
+                const isSelectedState = (el) => {
+                    if (!el) return false;
+                    // Primary check: data attribute
+                    if (el.getAttribute('data-quest-selected') === 'true') return true;
+                    if (el.classList.contains('selected')) return true;
+                    if (el.classList.contains('active')) return true;
+                    if (el.getAttribute('aria-selected') === 'true') return true;
+                    if (el.getAttribute('data-selected') === 'true') return true;
+                    if (el.getAttribute('data-state') === 'selected') return true;
+                    if (el.getAttribute('aria-pressed') === 'true') return true;
+                    return false;
+                };
+
+                const items = container.querySelectorAll('div.no-wrap.d-flex, div.no-wrap, .quest, .quest-item, [data-quest-name]');
                 const selected = [];
                 for (const item of items) {
-                    if (item.classList.contains('selected')) {
+                    // Only check the item itself
+                    if (isSelectedState(item)) {
                         const span = item.querySelector('span:not(.alt)');
                         if (span) {
                             selected.push(span.innerText.trim());
@@ -224,10 +256,10 @@ namespace eft_where_am_i.Classes
         /// </summary>
         public async Task SelectQuestByNameAsync(string questName)
         {
-            string escapedName = questName.Replace("'", "\\'").Replace("\"", "\\\"");
+            string escapedName = JsLiteral(questName);
             string script = $@"
             (function() {{
-                console.log('[Quest Load] Searching for:', '{escapedName}');
+                console.log('[Quest Load] Searching for:', {escapedName});
 
                 const container = document.querySelector('div.items.scroll');
                 if (!container) {{
@@ -238,15 +270,76 @@ namespace eft_where_am_i.Classes
                 const items = container.querySelectorAll('div.no-wrap.d-flex');
                 console.log('[Quest Load] Items count:', items.length);
 
+                // Set flag to prevent observer from triggering during operations
+                window.__questRestoreInProgress = true;
+
+                // Find and select ONLY the target quest (add to existing selections)
                 for (const item of items) {{
                     const span = item.querySelector('span:not(.alt)');
-                    if (span && span.innerText.trim() === '{escapedName}') {{
-                        console.log('[Quest Load] Found, dispatching contextmenu');
-                        item.dispatchEvent(new MouseEvent('contextmenu', {{ bubbles: true, cancelable: true }}));
+                    if (span && span.innerText.trim() === {escapedName}) {{
+                        console.log('[Quest Load] Found, marking as selected');
+                        // Use data attribute as source of truth - don't clear others
+                        item.setAttribute('data-quest-selected', 'true');
+                        item.classList.add('selected', 'active');
+                        item.setAttribute('aria-selected', 'true');
+                        setTimeout(() => {{ window.__questRestoreInProgress = false; }}, 300);
                         return;
                     }}
                 }}
 
+                window.__questRestoreInProgress = false;
+                console.log('[Quest Load] Quest not found in list');
+            }})()";
+
+            await ExecuteScriptAsync(script);
+        }
+
+        /// <summary>
+        /// 모든 퀘스트 선택을 해제하고 새로운 퀘스트만 선택합니다.
+        /// </summary>
+        public async Task SelectQuestByNameAsyncExclusive(string questName)
+        {
+            string escapedName = JsLiteral(questName);
+            string script = $@"
+            (function() {{
+                console.log('[Quest Load] Exclusive search for:', {escapedName});
+
+                const container = document.querySelector('div.items.scroll');
+                if (!container) {{
+                    console.log('[Quest Load] Container not found');
+                    return;
+                }}
+
+                const items = container.querySelectorAll('div.no-wrap.d-flex');
+                console.log('[Quest Load] Items count:', items.length);
+
+                window.__questRestoreInProgress = true;
+
+                // Clear ALL selection markers
+                const allElements = container.querySelectorAll('*');
+                allElements.forEach(el => {{
+                    el.removeAttribute('data-quest-selected');
+                    el.classList.remove('selected', 'active');
+                    el.removeAttribute('aria-selected');
+                    el.removeAttribute('data-selected');
+                    el.removeAttribute('data-state');
+                    el.removeAttribute('aria-pressed');
+                }});
+
+                // Select ONLY the target quest
+                for (const item of items) {{
+                    const span = item.querySelector('span:not(.alt)');
+                    if (span && span.innerText.trim() === {escapedName}) {{
+                        console.log('[Quest Load] Found, applying selected state');
+                        item.setAttribute('data-quest-selected', 'true');
+                        item.classList.add('selected', 'active');
+                        item.setAttribute('aria-selected', 'true');
+                        setTimeout(() => {{ window.__questRestoreInProgress = false; }}, 300);
+                        return;
+                    }}
+                }}
+
+                window.__questRestoreInProgress = false;
                 console.log('[Quest Load] Quest not found in list');
             }})()";
 
@@ -258,12 +351,12 @@ namespace eft_where_am_i.Classes
         /// </summary>
         public async Task ClickFloorAsync(string floorName)
         {
-            string escapedName = floorName.Replace("'", "\\'");
+            string escapedName = JsLiteral(floorName);
             string script = $@"
             (function() {{
                 const inputs = document.querySelectorAll('.no-wrap input[name=""layers""]');
                 for (const input of inputs) {{
-                    if (input.parentNode.innerText.includes('{escapedName}')) {{
+                    if (input.parentNode.innerText.includes({escapedName})) {{
                         input.click();
                         break;
                     }}
@@ -283,12 +376,12 @@ namespace eft_where_am_i.Classes
                 await EnsureWebViewInitializedAsync();
                 if (webView.CoreWebView2 == null) return false;
 
-                string escapedName = floorName.Replace("'", "\\'");
+                string escapedName = JsLiteral(floorName);
                 string script = $@"
                 (function() {{
                     const inputs = document.querySelectorAll('.no-wrap input[name=""layers""]');
                     for (const input of inputs) {{
-                        if (input.parentNode.innerText.includes('{escapedName}')) {{
+                        if (input.parentNode.innerText.includes({escapedName})) {{
                             input.click();
                             return 'true';
                         }}
@@ -315,7 +408,7 @@ namespace eft_where_am_i.Classes
                 await EnsureWebViewInitializedAsync();
                 if (webView.CoreWebView2 == null) return false;
 
-                string jsArray = "[" + string.Join(",", floorNames.Select(n => $"'{n.Replace("'", "\\'")}'")) + "]";
+                string jsArray = "[" + string.Join(",", (floorNames ?? Array.Empty<string>()).Select(n => JsLiteral(n))) + "]";
 
                 string script = $@"
                 (function() {{
@@ -493,12 +586,12 @@ namespace eft_where_am_i.Classes
             await ExecuteScriptAsync(Constants.POLYGON_OVERLAY_SCRIPT);
 
             // Set existing zones data
-            string escapedZonesJson = existingZonesJson.Replace("\\", "\\\\").Replace("'", "\\'");
-            await ExecuteScriptAsync($"window.__floorEditorZones = JSON.parse('{escapedZonesJson}');");
+            string escapedZonesJson = JsLiteral(existingZonesJson ?? "[]");
+            await ExecuteScriptAsync($"window.__floorEditorZones = JSON.parse({escapedZonesJson});");
 
             // Set floors data for select dropdown
-            string escapedFloorsJson = floorsJson.Replace("\\", "\\\\").Replace("'", "\\'");
-            await ExecuteScriptAsync($"window.__floorEditorFloors = JSON.parse('{escapedFloorsJson}');");
+            string escapedFloorsJson = JsLiteral(floorsJson ?? "[]");
+            await ExecuteScriptAsync($"window.__floorEditorFloors = JSON.parse({escapedFloorsJson});");
 
             // Render existing zones
             await ExecuteScriptAsync("if(window.__renderFloorZones) window.__renderFloorZones(window.__floorEditorZones);");
@@ -649,7 +742,7 @@ namespace eft_where_am_i.Classes
 
         /// <summary>
         /// 패널이 현재 숨겨져 있는지 확인합니다.
-        /// 버튼 텍스트가 "Show pannels"를 포함하면 패널이 숨겨진 상태입니다.
+        /// 버튼 텍스트가 "Show panels"를 포함하면 패널이 숨겨진 상태입니다.
         /// </summary>
         public async Task<bool> IsPanelHiddenAsync()
         {
@@ -658,15 +751,58 @@ namespace eft_where_am_i.Classes
                 await EnsureWebViewInitializedAsync();
                 if (webView.CoreWebView2 == null) return false;
 
-                string script = @"
-                (function() {
-                    var btn = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.mr-15 > button');
+                string script = $@"
+                (function() {{
+                    var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR)});
                     if (!btn) return 'false';
-                    return btn.textContent.includes('Show pannels') ? 'true' : 'false';
-                })()";
+
+                    var text = (btn.textContent || '').toLowerCase();
+                    var isHidden = text.includes('show pannels') || text.includes('show panels') || text.includes('show panel');
+                    return isHidden ? 'true' : 'false';
+                }})()";
 
                 string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
                 return result?.Trim('"') == "true";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 패널이 닫혀 있으면 빠르게 열어줍니다.
+        /// </summary>
+        public async Task<bool> OpenPanelIfHiddenAsync(int attempts = 3, int delayMs = 100)
+        {
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
+                for (int i = 0; i < attempts; i++)
+                {
+                    if (!await IsPanelHiddenAsync())
+                    {
+                        return true;
+                    }
+
+                    string script = $@"
+                    (function() {{
+                        var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR)});
+                        if (!btn) return 'not-found';
+                        btn.click();
+                        return 'clicked';
+                    }})();";
+
+                    await webView.CoreWebView2.ExecuteScriptAsync(script);
+                    if (delayMs > 0)
+                    {
+                        await Task.Delay(delayMs);
+                    }
+                }
+
+                return !await IsPanelHiddenAsync();
             }
             catch
             {
@@ -680,38 +816,122 @@ namespace eft_where_am_i.Classes
         /// </summary>
         public async Task InjectQuestClickListenerAsync()
         {
-            string script = @"
+            string script = """
             (function() {
                 const container = document.querySelector('div.items.scroll');
                 if (!container || container.dataset.questListenerAttached) return;
                 container.dataset.questListenerAttached = 'true';
 
-                container.addEventListener('contextmenu', function(e) {
-                    const item = e.target.closest('div.no-wrap.d-flex');
+                const isSelectedState = (el) => {
+                    if (!el) return false;
+                    // Check data attribute as source of truth
+                    if (el.getAttribute('data-quest-selected') === 'true') return true;
+                    if (el.classList.contains('selected')) return true;
+                    if (el.classList.contains('active')) return true;
+                    if (el.getAttribute('aria-selected') === 'true') return true;
+                    if (el.getAttribute('data-selected') === 'true') return true;
+                    if (el.getAttribute('data-state') === 'selected') return true;
+                    if (el.getAttribute('aria-pressed') === 'true') return true;
+                    return false;
+                };
+
+                const findQuestItem = (target) => {
+                    if (!target || target === container) return null;
+                    let current = target;
+                    while (current && current !== container) {
+                        if (current.matches('div.no-wrap.d-flex, div.no-wrap, .quest, .quest-item, [data-quest-name]')) {
+                            return current;
+                        }
+                        const parent = current.parentElement;
+                        if (!parent || parent === current) break;
+                        current = parent;
+                    }
+                    return target.closest('div.no-wrap.d-flex, div.no-wrap, .quest, .quest-item, [data-quest-name]');
+                };
+
+                const clearSelectionForItem = (item) => {
                     if (!item) return;
+                    
+                    // Remove all selection markers
+                    item.removeAttribute('data-quest-selected');
+                    item.classList.remove('selected', 'active');
+                    item.removeAttribute('aria-selected');
+                    item.removeAttribute('data-selected');
+                    item.removeAttribute('data-state');
+                    item.removeAttribute('aria-pressed');
+                };
+
+                const lastSentState = new WeakMap();
+                let pendingTimer = null;
+
+                const sendQuestState = (item) => {
+                    if (!item || window.__questRestoreInProgress) return;
 
                     const span = item.querySelector('span:not(.alt)');
                     if (!span) return;
 
                     const questName = span.innerText.trim();
+                    const isSelected = isSelectedState(item);
+                    const previous = lastSentState.get(item);
+                    if (previous === isSelected) return;
+                    lastSentState.set(item, isSelected);
 
-                    // 약간의 딜레이 후 상태 확인 (클릭 처리 완료 대기)
-                    setTimeout(() => {
-                        const isSelected = item.classList.contains('selected');
+                    console.log('[Quest Save]', questName, 'isSelected:', isSelected);
 
-                        console.log('[Quest Save]', questName, 'isSelected:', isSelected);
-                        console.log('[Quest Save] classList:', item.classList.toString());
+                    if (!isSelected) {
+                        clearSelectionForItem(item);
+                    } else {
+                        // Mark as selected using data attribute
+                        item.setAttribute('data-quest-selected', 'true');
+                        item.classList.add('selected', 'active');
+                        item.setAttribute('aria-selected', 'true');
+                    }
 
-                        window.chrome.webview.postMessage(JSON.stringify({
-                            action: 'quest-toggled',
-                            questName: questName,
-                            isSelected: isSelected
-                        }));
-                    }, 100);
+                    window.chrome.webview.postMessage(JSON.stringify({
+                        action: 'quest-toggled',
+                        questName: questName,
+                        isSelected: isSelected
+                    }));
+                };
+
+                const queueQuestState = (item) => {
+                    if (!item || window.__questRestoreInProgress) return;
+                    if (pendingTimer) clearTimeout(pendingTimer);
+                    pendingTimer = setTimeout(() => sendQuestState(item), 180);
+                };
+
+                container.addEventListener('contextmenu', function(e) {
+                    const item = findQuestItem(e.target);
+                    if (!item) return;
+                    queueQuestState(item);
                 }, true);
 
-                console.log('[Quest] Click listener attached');
-            })()";
+                const observer = new MutationObserver((mutations) => {
+                    for (const mutation of mutations) {
+                        if (mutation.type !== 'attributes') continue;
+                        const item = findQuestItem(mutation.target);
+                        if (!item) continue;
+                        if (['class', 'aria-selected', 'data-selected', 'aria-pressed', 'data-state', 'data-quest-selected'].includes(mutation.attributeName)) {
+                            queueQuestState(item);
+                        }
+                    }
+                });
+
+                container.querySelectorAll('div.no-wrap.d-flex, div.no-wrap, .quest, .quest-item, [data-quest-name]').forEach((item) => {
+                    observer.observe(item, {
+                        attributes: true,
+                        attributeFilter: ['class', 'aria-selected', 'data-selected', 'aria-pressed', 'data-state', 'data-quest-selected']
+                    });
+                });
+
+                observer.observe(container, {
+                    childList: true,
+                    subtree: true
+                });
+
+                console.log('[Quest] Observer listener attached');
+            })()
+            """;
 
             await ExecuteScriptAsync(script);
         }
