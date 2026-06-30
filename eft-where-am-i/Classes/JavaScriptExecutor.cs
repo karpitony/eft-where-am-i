@@ -68,7 +68,7 @@ namespace eft_where_am_i.Classes
         /// <param name="selector">버튼의 CSS 셀렉터</param>
         public async Task ClickButtonAsync(string selector)
         {
-            string selector = JsLiteral(selector);
+            string Selector = JsLiteral(selector);
             string script = $@"
                 var button = document.querySelector({selector});
                 if (button) {{
@@ -122,7 +122,7 @@ namespace eft_where_am_i.Classes
         /// <param name="value">설정할 값</param>
         public async Task SetInputValueAsync(string selector, string value)
         {
-            selector = JsLiteral(selector);
+            string Selector = JsLiteral(selector);
             string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
@@ -302,7 +302,7 @@ namespace eft_where_am_i.Classes
             string escapedName = JsLiteral(questName);
             string script = $@"
             (function() {{
-                console.log('[Quest Load] Searching for:', {escapedName});
+                console.log('[Quest Load] Exclusive search for:', {escapedName});
 
                 const container = document.querySelector('div.items.scroll');
                 if (!container) {{
@@ -771,7 +771,7 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
-        /// 패널이 닫혀 있으면 열어줍니다.
+        /// 패널이 닫혀 있으면 빠르게 열어줍니다.
         /// </summary>
         public async Task<bool> OpenPanelIfHiddenAsync(int attempts = 3, int delayMs = 100)
         {
