@@ -70,7 +70,7 @@ namespace eft_where_am_i.Classes
         {
             string Selector = JsLiteral(selector);
             string script = $@"
-                var button = document.querySelector({selector});
+                var button = document.querySelector({Selector});
                 if (button) {{
                     button.click();
                     console.log('Button clicked');
@@ -126,7 +126,7 @@ namespace eft_where_am_i.Classes
             string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
-                    var input = document.querySelector({selector});
+                    var input = document.querySelector({Selector});
                     if (!input) {{ console.log('Input not found'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
