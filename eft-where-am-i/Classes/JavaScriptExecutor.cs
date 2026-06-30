@@ -302,7 +302,7 @@ namespace eft_where_am_i.Classes
             string escapedName = JsLiteral(questName);
             string script = $@"
             (function() {{
-                console.log('[Quest Load] Exclusive search for:', {escapedName});
+                console.log('[Quest Load] Searching for:', {escapedName});
 
                 const container = document.querySelector('div.items.scroll');
                 if (!container) {{
@@ -742,7 +742,7 @@ namespace eft_where_am_i.Classes
 
         /// <summary>
         /// 패널이 현재 숨겨져 있는지 확인합니다.
-        /// 버튼 텍스트가 "Show pannels/Show panels"를 포함하면 패널이 숨겨진 상태입니다.
+        /// 버튼 텍스트가 "Show panels"를 포함하면 패널이 숨겨진 상태입니다.
         /// </summary>
         public async Task<bool> IsPanelHiddenAsync()
         {
@@ -771,7 +771,7 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
-        /// 패널이 닫혀 있으면 빠르게 열어줍니다.
+        /// 패널이 닫혀 있으면 열어줍니다.
         /// </summary>
         public async Task<bool> OpenPanelIfHiddenAsync(int attempts = 3, int delayMs = 100)
         {
