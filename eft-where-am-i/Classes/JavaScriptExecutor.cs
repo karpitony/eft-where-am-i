@@ -68,9 +68,9 @@ namespace eft_where_am_i.Classes
         /// <param name="selector">버튼의 CSS 셀렉터</param>
         public async Task ClickButtonAsync(string selector)
         {
-            string Selector = JsLiteral(selector);
+            string selector = JsLiteral(selector);
             string script = $@"
-                var button = document.querySelector({Selector});
+                var button = document.querySelector({selector});
                 if (button) {{
                     button.click();
                     console.log('Button clicked');
