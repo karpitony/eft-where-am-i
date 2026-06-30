@@ -122,11 +122,11 @@ namespace eft_where_am_i.Classes
         /// <param name="value">설정할 값</param>
         public async Task SetInputValueAsync(string selector, string value)
         {
-            string Selector = JsLiteral(selector);
+            selector = JsLiteral(selector);
             string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
-                    var input = document.querySelector({Selector});
+                    var input = document.querySelector({selector});
                     if (!input) {{ console.log('Input not found'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
