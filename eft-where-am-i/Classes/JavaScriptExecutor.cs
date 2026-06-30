@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -57,9 +58,7 @@ namespace eft_where_am_i.Classes
             }
             catch (Exception ex)
             {
-                // UI 스레드에서 매번 MessageBox를 띄우면 폴링/반복 호출 시 팝업이 누적되거나
-                // 백그라운드 스레드 호출 시 크래시할 수 있어 로깅으로 대체합니다.
-                AppLogger.Error("JavaScriptExecutor", $"JavaScript 실행 중 오류가 발생했습니다: {ex.Message}");
+                MessageBox.Show($"JavaScript 실행 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -105,10 +104,7 @@ namespace eft_where_am_i.Classes
             ";
             try
             {
-                await EnsureWebViewInitializedAsync();
-                if (webView.CoreWebView2 == null) return false;
-
-                string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
+                string result = await webView.ExecuteScriptAsync(script);
                 return result.Trim().ToLower() == "true";
             }
             catch (Exception ex)
@@ -239,13 +235,12 @@ namespace eft_where_am_i.Classes
 
             try
             {
-                await EnsureWebViewInitializedAsync();
-                if (webView.CoreWebView2 == null) return new List<string>();
-
-                string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
+                string result = await webView.ExecuteScriptAsync(script);
+                // Result comes back as a JSON string wrapped in quotes
                 if (string.IsNullOrEmpty(result) || result == "null")
                     return new List<string>();
 
+                // Unescape the JSON string (WebView2 returns it double-encoded)
                 string json = JsonConvert.DeserializeObject<string>(result);
                 return JsonConvert.DeserializeObject<List<string>>(json) ?? new List<string>();
             }
