@@ -608,6 +608,50 @@ namespace eft_where_am_i.Classes
 (function() {
     'use strict';
 
+    const selectors = [
+    // 여기에 개발자 도구 selector 방식으로 추가해서 지움
+        '#__nuxt > div > div > div.footer-wrap'
+    ];
+
+    const removeUnwantedElements = () => {
+        const elements = document.querySelectorAll(selectors.join(','));
+        if (!elements.length) return;
+
+        elements.forEach(el => el.remove());
+        window.dispatchEvent(new Event('resize'));
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overscrollBehavior = 'none';
+        document.body.style.overscrollBehavior = 'none';
+    };
+
+    removeUnwantedElements();
+
+    const observer = new MutationObserver(() => {
+        removeUnwantedElements();
+    });
+
+    if (document.body) {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    window.addEventListener('wheel', function(event) {
+        event.preventDefault();
+    }, { passive: false, capture: true });
+
+    window.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+    }, { passive: false, capture: true });
+
+    window.addEventListener('keydown', function(event) {
+        if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', ' '].includes(event.key)) {
+            event.preventDefault();
+        }
+    }, { capture: true });
+
     window.__deadZoneAutoPan = function(deadZonePercent) {
         // 1. 마커 찾기
         var markers = document.querySelectorAll('.marker');
