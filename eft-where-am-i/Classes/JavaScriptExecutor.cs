@@ -68,9 +68,9 @@ namespace eft_where_am_i.Classes
         /// <param name="selector">버튼의 CSS 셀렉터</param>
         public async Task ClickButtonAsync(string selector)
         {
-            string safeSelector = JsLiteral(selector);
+            string escapedSelector = JsLiteral(selector);
             string script = $@"
-                var button = document.querySelector({safeSelector});
+                var button = document.querySelector({escapedSelector});
                 if (button) {{
                     button.click();
                     console.log('Button clicked');
@@ -122,19 +122,19 @@ namespace eft_where_am_i.Classes
         /// <param name="value">설정할 값</param>
         public async Task SetInputValueAsync(string selector, string value)
         {
-            string safeSelector = JsLiteral(selector);
-            string safeValue = JsLiteral(value);
+            string escapedSelector = JsLiteral(selector);
+            string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
-                    var input = document.querySelector({safeSelector});
+                    var input = document.querySelector({escapedSelector});
                     if (!input) {{ console.log('Input not found'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
                     var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-                    nativeSetter.call(input, {safeValue});
+                    nativeSetter.call(input, {escapedValue});
 
                     // Dispatch multiple events for framework compatibility
-                    input.dispatchEvent(new InputEvent('input', {{ bubbles: true, cancelable: true, inputType: 'insertText', data: {safeValue} }}));
+                    input.dispatchEvent(new InputEvent('input', {{ bubbles: true, cancelable: true, inputType: 'insertText', data: {escapedValue} }}));
                     input.dispatchEvent(new Event('change', {{ bubbles: true }}));
 
                     // Also try focus/blur to trigger validation
@@ -256,10 +256,10 @@ namespace eft_where_am_i.Classes
         /// </summary>
         public async Task SelectQuestByNameAsync(string questName)
         {
-            string safeName = JsLiteral(questName);
+            string escapedName = JsLiteral(questName);
             string script = $@"
             (function() {{
-                console.log('[Quest Load] Searching for:', {safeName});
+                console.log('[Quest Load] Searching for:', {escapedName});
 
                 const container = document.querySelector('div.items.scroll');
                 if (!container) {{
@@ -276,7 +276,7 @@ namespace eft_where_am_i.Classes
                 // Find and select ONLY the target quest (add to existing selections)
                 for (const item of items) {{
                     const span = item.querySelector('span:not(.alt)');
-                    if (span && span.innerText.trim() === {safeName}) {{
+                    if (span && span.innerText.trim() === {escapedName}) {{
                         console.log('[Quest Load] Found, marking as selected');
                         // Use data attribute as source of truth - don't clear others
                         item.setAttribute('data-quest-selected', 'true');
@@ -299,10 +299,10 @@ namespace eft_where_am_i.Classes
         /// </summary>
         public async Task SelectQuestByNameAsyncExclusive(string questName)
         {
-            string safeName = JsLiteral(questName);
+            string escapedName = JsLiteral(questName);
             string script = $@"
             (function() {{
-                console.log('[Quest Load] Exclusive search for:', {safeName});
+                console.log('[Quest Load] Exclusive search for:', {escapedName});
 
                 const container = document.querySelector('div.items.scroll');
                 if (!container) {{
@@ -329,7 +329,7 @@ namespace eft_where_am_i.Classes
                 // Select ONLY the target quest
                 for (const item of items) {{
                     const span = item.querySelector('span:not(.alt)');
-                    if (span && span.innerText.trim() === {safeName}) {{
+                    if (span && span.innerText.trim() === {escapedName}) {{
                         console.log('[Quest Load] Found, applying selected state');
                         item.setAttribute('data-quest-selected', 'true');
                         item.classList.add('selected', 'active');
@@ -351,12 +351,12 @@ namespace eft_where_am_i.Classes
         /// </summary>
         public async Task ClickFloorAsync(string floorName)
         {
-            string safeName = JsLiteral(floorName);
+            string escapedName = JsLiteral(floorName);
             string script = $@"
             (function() {{
                 const inputs = document.querySelectorAll('.no-wrap input[name=""layers""]');
                 for (const input of inputs) {{
-                    if (input.parentNode.innerText.includes({safeName})) {{
+                    if (input.parentNode.innerText.includes({escapedName})) {{
                         input.click();
                         break;
                     }}
@@ -376,12 +376,12 @@ namespace eft_where_am_i.Classes
                 await EnsureWebViewInitializedAsync();
                 if (webView.CoreWebView2 == null) return false;
 
-                string safeName = JsLiteral(floorName);
+                string escapedName = JsLiteral(floorName);
                 string script = $@"
                 (function() {{
                     const inputs = document.querySelectorAll('.no-wrap input[name=""layers""]');
                     for (const input of inputs) {{
-                        if (input.parentNode.innerText.includes({safeName})) {{
+                        if (input.parentNode.innerText.includes({escapedName})) {{
                             input.click();
                             return 'true';
                         }}
@@ -586,12 +586,12 @@ namespace eft_where_am_i.Classes
             await ExecuteScriptAsync(Constants.POLYGON_OVERLAY_SCRIPT);
 
             // Set existing zones data
-            string safeZonesJson = JsLiteral(existingZonesJson ?? "[]");
-            await ExecuteScriptAsync($"window.__floorEditorZones = JSON.parse({safeZonesJson});");
+            string escapedZonesJson = JsLiteral(existingZonesJson ?? "[]");
+            await ExecuteScriptAsync($"window.__floorEditorZones = JSON.parse({escapedZonesJson});");
 
             // Set floors data for select dropdown
-            string safeFloorsJson = JsLiteral(floorsJson ?? "[]");
-            await ExecuteScriptAsync($"window.__floorEditorFloors = JSON.parse({safeFloorsJson});");
+            string escapedFloorsJson = JsLiteral(floorsJson ?? "[]");
+            await ExecuteScriptAsync($"window.__floorEditorFloors = JSON.parse({escapedFloorsJson});");
 
             // Render existing zones
             await ExecuteScriptAsync("if(window.__renderFloorZones) window.__renderFloorZones(window.__floorEditorZones);");
