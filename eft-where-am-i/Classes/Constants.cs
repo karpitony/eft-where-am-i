@@ -620,14 +620,26 @@ namespace eft_where_am_i.Classes
 
     // 1-2. 등록된 selector 요소 제거 + 오버스크롤 차단
     function removeUnwantedElements() {
-        document.querySelectorAll(selectors.join(','))
-            .forEach(el => el.remove());
+        for (var i = 0; i < selectors.length; i++) {
+            var sel = selectors[i];
+            try {
+                document.querySelectorAll(sel).forEach(el => el.remove());
+            } catch (e) {
+                console.warn('[deadZoneAutoPan] Invalid selector:', sel, e);
+            }
+        }
     }
     removeUnwantedElements();
 
-    // 1-3. DOM 변경 감지 시 재실행
+    // 1-3. DOM 변경 감지 시 재실행 (debounced)
+    var removeScheduled = false;
     var unwantedObserver = new MutationObserver(function() {
-        removeUnwantedElements();
+        if (removeScheduled) return;
+        removeScheduled = true;
+        requestAnimationFrame(function() {
+            removeScheduled = false;
+            removeUnwantedElements();
+        });
     });
     if (document.body) {
         unwantedObserver.observe(document.body, { childList: true, subtree: true });
