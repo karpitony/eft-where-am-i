@@ -30,7 +30,8 @@ namespace eft_where_am_i
             "streets",
             "lab",
             "labyrinth",
-            "terminal"
+            "terminal",
+            "icebreaker"
         };
         private string siteUrl;
         private bool whereAmIClick = false;
