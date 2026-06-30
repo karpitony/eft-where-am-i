@@ -4,6 +4,9 @@
     <Compile Update="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="UserControls\ServerLocation.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="UserControls\SettingPage.cs">
       <SubType>UserControl</SubType>
     </Compile>

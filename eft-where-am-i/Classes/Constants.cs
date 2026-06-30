@@ -608,8 +608,45 @@ namespace eft_where_am_i.Classes
 (function() {
     'use strict';
 
+    // 1. 원치 않는 요소 제거
+    // 1-1. 제거할 요소 selector 목록 (개발자 도구에서 selector 복사해서 추가)
+    var selectors = [
+        '#__nuxt > div > div > div.page-content > div > div > div.panel_right > div.user-layers-panel.mb-5.collapsed',
+        '#__nuxt > div > div > div.page-content > div > div > div.panel_right > div.squad-panel.mb-5.collapsed',
+        '#__nuxt > div > div > div.cookie-consent',
+        '#__nuxt > div > div > div.footer-wrap',
+        '#__nuxt > div > div > header'
+    ];
+
+    // 1-2. 등록된 selector 요소 제거 + 오버스크롤 차단
+    function removeUnwantedElements() {
+        for (var i = 0; i < selectors.length; i++) {
+            var sel = selectors[i];
+            try {
+                document.querySelectorAll(sel).forEach(el => el.remove());
+            } catch (e) {
+                console.warn('[deadZoneAutoPan] Invalid selector:', sel, e);
+            }
+        }
+    }
+    removeUnwantedElements();
+
+    // 1-3. DOM 변경 감지 시 재실행 (debounced)
+    var removeScheduled = false;
+    var unwantedObserver = new MutationObserver(function() {
+        if (removeScheduled) return;
+        removeScheduled = true;
+        requestAnimationFrame(function() {
+            removeScheduled = false;
+            removeUnwantedElements();
+        });
+    });
+    if (document.body) {
+        unwantedObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
     window.__deadZoneAutoPan = function(deadZonePercent) {
-        // 1. 마커 찾기
+        // 2. 마커 찾기
         var markers = document.querySelectorAll('.marker');
         if (markers.length === 0) return JSON.stringify({ panned: false, reason: 'no-marker' });
         var marker = markers[markers.length - 1];
@@ -617,13 +654,13 @@ namespace eft_where_am_i.Classes
         var markerCX = markerRect.left + markerRect.width / 2;
         var markerCY = markerRect.top + markerRect.height / 2;
 
-        // 2. 뷰포트 계산 (#map의 부모 또는 #map 자체)
+        // 3. 뷰포트 계산 (#map의 부모 또는 #map 자체)
         var mapEl = document.querySelector('#map');
         if (!mapEl) return JSON.stringify({ panned: false, reason: 'no-map' });
         var viewportEl = mapEl.parentElement || mapEl;
         var viewportRect = viewportEl.getBoundingClientRect();
 
-        // 3. 패널 감지 (tarkov-market 사이드 패널)
+        // 4. 패널 감지 (tarkov-market 사이드 패널)
         var effectiveLeft = viewportRect.left;
         var effectiveRight = viewportRect.right;
         var effectiveTop = viewportRect.top;
@@ -645,7 +682,7 @@ namespace eft_where_am_i.Classes
             }
         }
 
-        // 4. deadZonePercent 기반 내부 경계 사각형 계산
+        // 5. deadZonePercent 기반 내부 경계 사각형 계산
         var effectiveWidth = effectiveRight - effectiveLeft;
         var effectiveHeight = effectiveBottom - effectiveTop;
         var inset = (100 - deadZonePercent) / 200;
@@ -654,20 +691,20 @@ namespace eft_where_am_i.Classes
         var boundTop = effectiveTop + effectiveHeight * inset;
         var boundBottom = effectiveBottom - effectiveHeight * inset;
 
-        // 5. 마커가 경계 안에 있으면 팬 불필요
+        // 6. 마커가 경계 안에 있으면 팬 불필요
         if (markerCX >= boundLeft && markerCX <= boundRight &&
             markerCY >= boundTop && markerCY <= boundBottom) {
             return JSON.stringify({ panned: false, reason: 'inside-boundary' });
         }
 
-        // 6. 이동량 계산
+        // 7. 이동량 계산
         var dx = 0, dy = 0;
         if (markerCX < boundLeft) dx = markerCX - boundLeft;
         else if (markerCX > boundRight) dx = markerCX - boundRight;
         if (markerCY < boundTop) dy = markerCY - boundTop;
         else if (markerCY > boundBottom) dy = markerCY - boundBottom;
 
-        // 7. pointer 이벤트 시뮬레이션으로 맵 팬
+        // 8. pointer 이벤트 시뮬레이션으로 맵 팬
         var panTarget = mapEl.parentElement || mapEl;
         var startX = effectiveLeft + effectiveWidth / 2;
         var startY = effectiveTop + effectiveHeight / 2;
