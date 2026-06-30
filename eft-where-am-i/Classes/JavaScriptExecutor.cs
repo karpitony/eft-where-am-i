@@ -68,9 +68,9 @@ namespace eft_where_am_i.Classes
         /// <param name="selector">버튼의 CSS 셀렉터</param>
         public async Task ClickButtonAsync(string selector)
         {
-            string escapedSelector = JsLiteral(selector);
+            string Selector = JsLiteral(selector);
             string script = $@"
-                var button = document.querySelector({escapedSelector});
+                var button = document.querySelector({Selector});
                 if (button) {{
                     button.click();
                     console.log('Button clicked');
@@ -122,11 +122,11 @@ namespace eft_where_am_i.Classes
         /// <param name="value">설정할 값</param>
         public async Task SetInputValueAsync(string selector, string value)
         {
-            string escapedSelector = JsLiteral(selector);
+            string Selector = JsLiteral(selector);
             string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
-                    var input = document.querySelector({escapedSelector});
+                    var input = document.querySelector({Selector});
                     if (!input) {{ console.log('Input not found'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
@@ -252,7 +252,7 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
-        /// 퀘스트 이름으로 해당 퀘스트를 선택합니다. (기존 선택 유지)
+        /// 퀘스트 이름으로 해당 퀘스트를 우클릭하여 선택합니다.
         /// </summary>
         public async Task SelectQuestByNameAsync(string questName)
         {
@@ -742,7 +742,7 @@ namespace eft_where_am_i.Classes
 
         /// <summary>
         /// 패널이 현재 숨겨져 있는지 확인합니다.
-        /// 버튼 텍스트가 "Show pannels"를 포함하면 패널이 숨겨진 상태입니다.
+        /// 버튼 텍스트가 "Show pannels/Show panels"를 포함하면 패널이 숨겨진 상태입니다.
         /// </summary>
         public async Task<bool> IsPanelHiddenAsync()
         {
@@ -751,15 +751,58 @@ namespace eft_where_am_i.Classes
                 await EnsureWebViewInitializedAsync();
                 if (webView.CoreWebView2 == null) return false;
 
-                string script = @"
-                (function() {
-                    var btn = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div.mr-15 > button');
+                string script = $@"
+                (function() {{
+                    var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR)});
                     if (!btn) return 'false';
-                    return btn.textContent.includes('Show pannels') ? 'true' : 'false';
-                })()";
+
+                    var text = (btn.textContent || '').toLowerCase();
+                    var isHidden = text.includes('show pannels') || text.includes('show panels') || text.includes('show panel');
+                    return isHidden ? 'true' : 'false';
+                }})()";
 
                 string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
                 return result?.Trim('"') == "true";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 패널이 닫혀 있으면 빠르게 열어줍니다.
+        /// </summary>
+        public async Task<bool> OpenPanelIfHiddenAsync(int attempts = 3, int delayMs = 100)
+        {
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
+                for (int i = 0; i < attempts; i++)
+                {
+                    if (!await IsPanelHiddenAsync())
+                    {
+                        return true;
+                    }
+
+                    string script = $@"
+                    (function() {{
+                        var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR)});
+                        if (!btn) return 'not-found';
+                        btn.click();
+                        return 'clicked';
+                    }})();";
+
+                    await webView.CoreWebView2.ExecuteScriptAsync(script);
+                    if (delayMs > 0)
+                    {
+                        await Task.Delay(delayMs);
+                    }
+                }
+
+                return !await IsPanelHiddenAsync();
             }
             catch
             {
