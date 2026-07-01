@@ -883,7 +883,7 @@ namespace eft_where_am_i
                 if (webView2_panel_ui.CoreWebView2 != null)
                 {
                     await webView2_panel_ui.ExecuteScriptAsync(
-                        "document.getElementById('floorDbEditorButton').textContent = 'Exit Edit Mode';");
+                        "document.getElementById('floorDbEditorButton').textContent = i18next.t('floorDbEditorExitButton') || 'Exit Edit Mode';");
                 }
             }
         }

@@ -15,6 +15,7 @@
     "autoMapDetectionLabel": "Auto Map Detection",
     "autoPanningLabel": "Auto Panning",
     "floorDbEditorButton": "Floor DB Editor",
+    "floorDbEditorExitButton": "Exit Edit Mode",
     "resetLogPathText": "Log Path Settings",
     "changeLogPathButton": "Change Path",
     "autoDetectLogButton": "Auto Detect",
