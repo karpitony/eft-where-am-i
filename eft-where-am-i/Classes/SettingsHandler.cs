@@ -302,6 +302,7 @@ namespace eft_where_am_i.Classes
         public bool auto_panning { get; set; } = true;
         public bool auto_screenshot_cleanup { get; set; } = false;
         public string language { get; set; } = "en";
+        public string theme_mode { get; set; } = "light";
         public string screenshot_path { get; set; } = string.Empty;
         public string log_path { get; set; } = string.Empty;
         public List<string> screenshot_paths_list { get; set; } = new List<string>();

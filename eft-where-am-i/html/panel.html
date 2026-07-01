@@ -20,7 +20,7 @@
 </head>
 <body class="flex items-center justify-center bg-gray-200 w-full h-full">
   <div class="grid grid-cols-4 grid-rows-3 gap-x-6 gap-y-0 w-full h-full">
- 
+
     <!-- Cell 1: Map Selection -->
     <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
       <label
@@ -178,6 +178,14 @@
       document.getElementById('autoScreenshotCleanupLabel').textContent = i18next.t('autoScreenshotCleanupLabel');
     }
 
+    function setTheme(theme) {
+      try {
+        document.body.classList.toggle('theme-dark', theme === 'dark');
+      } catch (error) {
+        console.error("setTheme 오류 발생: ", error);
+      }
+    }
+
     // C#에서 호출하는 함수: 언어 설정
     function setLanguage(language) {
       try {
@@ -209,12 +217,16 @@
 
         maps.forEach(map => {
             const option = document.createElement('option');
-            option.value = map;
-            option.textContent = map;
+            const value = typeof map === 'string' ? map : map.value;
+            const label = typeof map === 'string' ? map : map.label;
+            option.value = value;
+            option.textContent = label;
             select.appendChild(option);
         });
 
-        select.value = selectedMap;
+        if (selectedMap) {
+          select.value = selectedMap;
+        }
         console.log("기본 선택된 맵:", selectedMap); // 디버그용 출력
       } catch (error) {
           console.error("populateMapList 오류: ", error);
