@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq; 
 using System.Collections.Generic;
@@ -18,6 +19,29 @@ namespace eft_where_am_i
         private JavaScriptExecutor jsExecutor;
         private QuestRepository questRepository;
         private FloorManager floorManager;
+        private readonly Dictionary<string, string> mapDisplayNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "ground-zero", "Ground Zero" },
+            { "factory", "Factory" },
+            { "customs", "Customs" },
+            { "interchange", "Interchange" },
+            { "woods", "Woods" },
+            { "shoreline", "Shoreline" },
+            { "lighthouse", "Lighthouse" },
+            { "reserve", "Reserve" },
+            { "streets", "Streets" },
+            { "lab", "The Lab" },
+            { "labyrinth", "Labyrinth" },
+            { "terminal", "Terminal" },
+            { "icebreaker", "Icebreaker" }
+        };
+
+        private sealed class MapOption
+        {
+            public string value { get; set; } = string.Empty;
+            public string label { get; set; } = string.Empty;
+        }
+
         private string[] mapList = {
             "ground-zero",
             "factory",
@@ -49,13 +73,16 @@ namespace eft_where_am_i
             settingsHandler = SettingsHandler.Instance;             // 싱글톤 인스턴스 사용
             settingsHandler.SettingsChanged += OnSettingsChanged;   // 세팅 변경될 때마다 호출됨
             LoadSettings();                                         // 동기작업
+            appSettings ??= settingsHandler.GetSettings();
+            ApplyTheme();
+            ApplyTranslations();
             siteUrl = $"https://tarkov-market.com/maps/{appSettings.latest_map}";
 
             // Load 이벤트 핸들러 등록
             this.Load += WhereAmI_Load;
         }
 
-        private async void WhereAmI_Load(object sender, EventArgs e)
+        private async void WhereAmI_Load(object? sender, EventArgs e)
         {
             try
             {
@@ -70,10 +97,13 @@ namespace eft_where_am_i
                 questRepository = new QuestRepository();
                 floorManager = new FloorManager();
 
-                // 4. LogWatcher 초기화
+                // 4. 앱 시작 시 패널을 강제로 열어둠
+                await RestorePanelVisibilityAsync(appSettings.latest_map, forceOpen: true);
+
+                // 5. LogWatcher 초기화
                 InitializeLogWatcher();
 
-                // 5. 모든 준비가 끝난 후 WmiInitialize 호출
+                // 6. 모든 준비가 끝난 후 WmiInitialize 호출
                 WmiInitialize();
 
                 // 퀘스트 복원/리스너 주입은 NavigationCompleted 핸들러에서 처리
@@ -96,6 +126,8 @@ namespace eft_where_am_i
 
             // 화면 갱신 (언어/경로 등 UI 업데이트)
             LoadSettings();
+            ApplyTheme();
+            ApplyTranslations();
             string language = appSettings.language;
 
             // webView2_panel_ui.CoreWebView2가 null이 아닌지 확인하여
@@ -105,6 +137,9 @@ namespace eft_where_am_i
                 try
                 {
                     await webView2_panel_ui.ExecuteScriptAsync($"setLanguage('{language}')");
+                    string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(GetMapListForLanguage(language));
+                    await webView2_panel_ui.ExecuteScriptAsync($"populateMapList('{mapListJson}', '{appSettings.latest_map}')");
+                    await webView2_panel_ui.ExecuteScriptAsync($"setTheme('{appSettings.theme_mode}')");
                 }
                 catch (Exception ex)
                 {
@@ -118,6 +153,90 @@ namespace eft_where_am_i
             // 여기서 별도로 처리할 필요가 없습니다.
         }
 
+
+        private void ApplyTheme()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(ApplyTheme));
+                return;
+            }
+
+            bool isDark = string.Equals(appSettings?.theme_mode, "dark", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(SettingsHandler.Instance.GetSettings().theme_mode, "dark", StringComparison.OrdinalIgnoreCase);
+
+            Color background = isDark ? Color.FromArgb(30, 30, 30) : SystemColors.Control;
+            Color foreground = isDark ? Color.White : SystemColors.ControlText;
+
+            this.BackColor = background;
+            panel1.BackColor = background;
+
+            Color foldButtonBack = isDark ? Color.FromArgb(52, 52, 52) : Color.FromArgb(240, 240, 240);
+            Color foldButtonBorder = isDark ? Color.FromArgb(90, 90, 90) : SystemColors.ControlDark;
+            Color foldButtonHover = isDark ? Color.FromArgb(65, 65, 65) : Color.FromArgb(230, 230, 230);
+            Color foldButtonPressed = isDark ? Color.FromArgb(45, 45, 45) : Color.FromArgb(220, 220, 220);
+
+            checkBoxHide.BackColor = foldButtonBack;
+            checkBoxHide.ForeColor = foreground;
+            checkBoxHide.FlatStyle = FlatStyle.Flat;
+            checkBoxHide.FlatAppearance.BorderColor = foldButtonBorder;
+            checkBoxHide.FlatAppearance.MouseOverBackColor = foldButtonHover;
+            checkBoxHide.FlatAppearance.MouseDownBackColor = foldButtonPressed;
+        }
+
+        private void ApplyTranslations()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(ApplyTranslations));
+                return;
+            }
+
+            UpdateFoldButtonText();
+        }
+
+        private void UpdateFoldButtonText()
+        {
+            if (checkBoxHide == null)
+            {
+                return;
+            }
+
+            string key = checkBoxHide.Checked
+                ? "whereAmI_ClickToUnfold"
+                : "whereAmI_ClickToFold";
+
+            string fallback = checkBoxHide.Checked
+                ? "∨ Click to Unfold"
+                : "∧ Click to Fold";
+
+            checkBoxHide.Text = GetString(key, fallback);
+        }
+
+        private string GetString(string key, string fallback)
+        {
+            try
+            {
+                string language = appSettings?.language ?? SettingsHandler.Instance.GetSettings().language;
+                if (string.IsNullOrEmpty(language)) language = "en";
+
+                string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "translations", $"{language}.json");
+                if (File.Exists(jsonPath))
+                {
+                    string json = File.ReadAllText(jsonPath);
+                    var values = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                    if (values != null && values.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value))
+                    {
+                        return value;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            return fallback;
+        }
 
         private async Task InitializeWebViewContent()
         {
@@ -217,7 +336,7 @@ namespace eft_where_am_i
                         await webView2_panel_ui.ExecuteScriptAsync($"setLanguage('{language}')");
 
                         // 콤보박스에 맵 목록 전송
-                        string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(mapList);
+                        string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(GetMapListForLanguage(appSettings.language));
                         await webView2_panel_ui.ExecuteScriptAsync($"populateMapList('{mapListJson}', '{appSettings.latest_map}')");
 
                         // 체크박스 상태 전송
@@ -228,6 +347,9 @@ namespace eft_where_am_i
 
                         // 자동 패닝 체크박스 상태 전송
                         await webView2_panel_ui.ExecuteScriptAsync($"setAutoPanningCheckboxState({appSettings.auto_panning.ToString().ToLower()})");
+
+                        // 테마 설정 전송
+                        await webView2_panel_ui.ExecuteScriptAsync($"setTheme('{appSettings.theme_mode}')");
 
                         // 스크린샷 자동 삭제 체크박스 상태 전송
                         await webView2_panel_ui.ExecuteScriptAsync(
@@ -250,6 +372,43 @@ namespace eft_where_am_i
         }
 
         // 메시지 수신 핸들러
+        private List<MapOption> GetMapListForLanguage(string language)
+        {
+            return mapList
+                .Select(map => new MapOption
+                {
+                    value = map,
+                    label = GetLocalizedMapName(map, language)
+                })
+                .ToList();
+        }
+
+        private string GetLocalizedMapName(string mapKey, string language)
+        {
+            if (string.Equals(language, "ko", StringComparison.OrdinalIgnoreCase))
+            {
+                return mapKey switch
+                {
+                    "ground-zero" => "그라운드 제로",
+                    "factory" => "공장",
+                    "customs" => "세관",
+                    "interchange" => "인터체인지",
+                    "woods" => "삼림",
+                    "shoreline" => "해안선",
+                    "lighthouse" => "등대",
+                    "reserve" => "리저브",
+                    "streets" => "타르코프 시내",
+                    "lab" => "연구소",
+                    "labyrinth" => "미궁",
+                    "terminal" => "터미널",
+                    "icebreaker" => "쇄빙선",
+                    _ => mapDisplayNames.TryGetValue(mapKey, out var fallbackDisplay) ? fallbackDisplay : mapKey
+                };
+            }
+
+            return mapDisplayNames.TryGetValue(mapKey, out var fallbackDisplayName) ? fallbackDisplayName : mapKey;
+        }
+
         private async void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
@@ -261,6 +420,7 @@ namespace eft_where_am_i
                 // 안전하게 속성 접근
                 string action = message["action"]?.ToString() ?? "";
                 string map = message["map"]?.ToString() ?? "";
+                string theme = message["theme"]?.ToString() ?? "";
                 bool isChecked = message["isChecked"] != null && bool.Parse(message["isChecked"].ToString());
                 string url = message["url"]?.ToString() ?? "";
 
@@ -312,6 +472,14 @@ namespace eft_where_am_i
                                 logWatcher.Start();
                             else if (!isChecked && !appSettings.auto_map_detection)
                                 logWatcher.Stop();
+                        }
+                        break;
+
+                    case "theme-updated":
+                        if (!string.IsNullOrEmpty(theme))
+                        {
+                            appSettings.theme_mode = theme;
+                            SaveSettings();
                         }
                         break;
 
@@ -371,14 +539,8 @@ namespace eft_where_am_i
             // 퀘스트 컨테이너 로드 대기 (DOM 준비 완료까지 대기)
             bool containerReady = await jsExecutor.WaitForQuestContainerAsync(15000);
 
-            // 패널 숨김 상태 복원 (WaitForQuestContainer 후 = DOM 준비 완료 상태)
-            if (appSettings.panel_hidden_per_map.TryGetValue(appSettings.latest_map, out bool isHidden))
-            {
-                if (isHidden)
-                {
-                    await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
-                }
-            }
+            // 패널 상태 복원: 저장된 값이 있으면 그 상태로, 없으면 첫 실행이므로 열려 있는 상태로 맞춤
+            await RestorePanelVisibilityAsync(appSettings.latest_map);
 
             if (containerReady)
             {
@@ -416,14 +578,8 @@ namespace eft_where_am_i
                     // Nuxt 컨테이너 로드 대기
                     bool containerReady = await jsExecutor.WaitForQuestContainerAsync(15000);
 
-                    // 패널 숨김 상태 복원
-                    if (appSettings.panel_hidden_per_map.TryGetValue(appSettings.latest_map, out bool isHidden))
-                    {
-                        if (isHidden)
-                        {
-                            await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
-                        }
-                    }
+                    // 패널 상태 복원: 저장된 값이 있으면 그 상태로, 없으면 현재 맵 전환 시에도 열려 있게 유지
+                    await RestorePanelVisibilityAsync(appSettings.latest_map);
 
                     if (containerReady)
                     {
@@ -433,6 +589,36 @@ namespace eft_where_am_i
                         await RestoreQuestsAsync(appSettings.latest_map);
                     }
                 }
+            }
+        }
+
+        private async Task RestorePanelVisibilityAsync(string mapName, bool forceOpen = false)
+        {
+            if (jsExecutor == null)
+            {
+                return;
+            }
+
+            if (forceOpen)
+            {
+                await jsExecutor.OpenPanelIfHiddenAsync(3, 100);
+                return;
+            }
+
+            if (appSettings.panel_hidden_per_map.TryGetValue(mapName, out bool isHidden))
+            {
+                if (isHidden)
+                {
+                    await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
+                }
+                else
+                {
+                    await jsExecutor.OpenPanelIfHiddenAsync(3, 100);
+                }
+            }
+            else
+            {
+                await jsExecutor.OpenPanelIfHiddenAsync(3, 100);
             }
         }
 
@@ -697,7 +883,7 @@ namespace eft_where_am_i
                 if (webView2_panel_ui.CoreWebView2 != null)
                 {
                     await webView2_panel_ui.ExecuteScriptAsync(
-                        "document.getElementById('floorDbEditorButton').textContent = 'Exit Edit Mode';");
+                        "document.getElementById('floorDbEditorButton').textContent = i18next.t('floorDbEditorExitButton') || 'Exit Edit Mode';");
                 }
             }
         }
@@ -873,7 +1059,7 @@ namespace eft_where_am_i
         // Ctrl+Numpad 핫키 → 층 이름 후보 매핑 (순서대로 시도, 첫 매칭 클릭)
         private static readonly Dictionary<int, string[]> FloorHotkeyMap = new Dictionary<int, string[]>
         {
-            { 0, new[] { "Basement", "Bunker" } },  // Numpad 0 → 지하
+            { 0, new[] { "Basement", "Bunker" } },   // Numpad 0 → 지하
             { 1, new[] { "Main" } },                 // Numpad 1 → Ground/Main
             { 2, new[] { "Level 2" } },              // Numpad 2 → 2층
             { 3, new[] { "Level 3" } },              // Numpad 3 → 3층
@@ -904,15 +1090,7 @@ namespace eft_where_am_i
 
         private void checkBoxHide_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxHide.Checked == true)
-            {
-                checkBoxHide.Text = "∨ Click to Unfold";
-            }
-            else
-            {
-                checkBoxHide.Text = "∧ Click to Fold";
-            }
-
+            UpdateFoldButtonText();
             timerSliding.Start();
         }
 

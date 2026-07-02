@@ -1,5 +1,86 @@
 @import 'tailwindcss';
 
+:root {
+  color-scheme: light;
+  --app-bg: #f3f4f6;
+  --app-text: #111827;
+  --surface: #ffffff;
+  --surface-alt: #f9fafb;
+  --border: #d1d5db;
+  --muted: #6b7280;
+  --link: #2563eb;
+  --accent: #2563eb;
+  --control-bg: #ffffff;
+  --control-hover: #e5e7eb;
+}
+
+body.theme-dark {
+  color-scheme: dark;
+  --app-bg: #1e1e1e;
+  --app-text: #f9fafb;
+  --surface: #242424;
+  --surface-alt: #2f2f2f;
+  --border: #4a4a4a;
+  --muted: #b3b3b3;
+  --link: #60a5fa;
+  --accent: #60a5fa;
+  --control-bg: #2a2a2a;
+  --control-hover: #3a3a3a;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  width: 100%;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
 body {
+  min-height: 100vh;
   font-family: sans, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body.theme-dark select,
+body.theme-dark input[type="text"],
+body.theme-dark input[type="range"],
+body.theme-dark button,
+body.theme-dark .bg-white,
+body.theme-dark .bg-gray-100,
+body.theme-dark .bg-gray-300,
+body.theme-dark .bg-blue-500 {
+  background-color: var(--control-bg);
+  color: var(--app-text);
+  border-color: var(--border);
+}
+
+body.theme-dark button:hover,
+body.theme-dark .hover\:bg-gray-100:hover,
+body.theme-dark .hover\:bg-gray-400:hover,
+body.theme-dark .hover\:bg-blue-600:hover {
+  background-color: var(--control-hover);
+}
+
+body.theme-dark a,
+body.theme-dark .text-blue-600 {
+  color: var(--link);
+}
+
+body.theme-dark .text-gray-500 {
+  color: var(--muted);
+}
+
+body.theme-dark .text-gray-700 {
+  color: var(--app-text);
+}
+
+body.theme-dark input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+body.theme-dark .bg-blue-500 {
+  background-color: var(--accent);
+  color: #ffffff;
 }

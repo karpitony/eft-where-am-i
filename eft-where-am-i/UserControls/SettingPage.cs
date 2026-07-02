@@ -54,6 +54,7 @@ namespace eft_where_am_i
             string escapedLogPath = appSettings.log_path.Replace("\\", "\\\\");
             _ = webView2_Settings.ExecuteScriptAsync($"setLogPath('{escapedLogPath}')");
             _ = webView2_Settings.ExecuteScriptAsync($"setDeadZonePercent({appSettings.dead_zone_percent})");
+            _ = webView2_Settings.ExecuteScriptAsync($"setTheme('{appSettings.theme_mode}')");
         }
 
         private async Task InitializeWebViewUI()
@@ -118,6 +119,9 @@ namespace eft_where_am_i
                         // 데드존 비율 설정 전송
                         await webView2_Settings.ExecuteScriptAsync($"setDeadZonePercent({appSettings.dead_zone_percent})");
 
+                        // 테마 설정 전송
+                        await webView2_Settings.ExecuteScriptAsync($"setTheme('{appSettings.theme_mode}')");
+
                         // 앱 버전 정보 전송
                         var version = Assembly.GetExecutingAssembly()
                             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
@@ -145,6 +149,7 @@ namespace eft_where_am_i
                 // 안전하게 속성 접근
                 string action = message["action"]?.ToString() ?? "";
                 string language = message["language"]?.ToString() ?? "";
+                string theme = message["theme"]?.ToString() ?? "";
                 string path = message["path"]?.ToString() ?? "";
                 string url = message["url"]?.ToString() ?? "";
 
@@ -161,6 +166,14 @@ namespace eft_where_am_i
                             appSettings.language = language;
                             SaveSettings();  // 설정 저장
                             MessageBox.Show($"Language updated to: {language}", "Language Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        break;
+
+                    case "theme-updated":
+                        if (!string.IsNullOrEmpty(theme))
+                        {
+                            appSettings.theme_mode = theme;
+                            SaveSettings();
                         }
                         break;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -35,9 +36,11 @@ namespace eft_where_am_i
                 null, dataGridViewHistory, new object[] { true });
 
             LoadLanguage();
+            ApplyTheme();
             SettingsHandler.Instance.SettingsChanged += (s) =>
             {
                 LoadLanguage();
+                ApplyTheme();
             };
         }
 
@@ -109,6 +112,60 @@ namespace eft_where_am_i
             }
             
             ClearGeoLocationLabels();
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(ApplyTheme));
+                return;
+            }
+
+            bool isDark = string.Equals(SettingsHandler.Instance.GetSettings().theme_mode, "dark", StringComparison.OrdinalIgnoreCase);
+            Color background = isDark ? Color.FromArgb(30, 30, 30) : SystemColors.Control;
+            Color foreground = isDark ? Color.White : SystemColors.ControlText;
+            Color surface = isDark ? Color.FromArgb(38, 38, 38) : Color.White;
+            Color muted = isDark ? Color.FromArgb(180, 180, 180) : Color.Gray;
+
+            this.BackColor = background;
+            splitContainer1.BackColor = background;
+            splitContainer1.Panel1.BackColor = background;
+            splitContainer1.Panel2.BackColor = background;
+
+            groupBox1.BackColor = surface;
+            groupBox1.ForeColor = foreground;
+
+            lblCurrentLogFile.ForeColor = foreground;
+            lblHistory.ForeColor = foreground;
+            labelIpAddress.ForeColor = foreground;
+            labelCountryName.ForeColor = foreground;
+            labelRegionName.ForeColor = foreground;
+            labelCityName.ForeColor = foreground;
+
+            btnFindLatest.BackColor = isDark ? Color.FromArgb(55, 55, 55) : SystemColors.Control;
+            btnFindLatest.ForeColor = foreground;
+            btnFindLatest.FlatStyle = FlatStyle.Flat;
+            btnFindLatest.FlatAppearance.BorderColor = isDark ? Color.FromArgb(90, 90, 90) : SystemColors.ControlDark;
+
+            dataGridViewHistory.BackgroundColor = surface;
+            dataGridViewHistory.DefaultCellStyle.BackColor = surface;
+            dataGridViewHistory.DefaultCellStyle.ForeColor = foreground;
+            dataGridViewHistory.DefaultCellStyle.SelectionBackColor = isDark ? Color.FromArgb(70, 70, 70) : SystemColors.Highlight;
+            dataGridViewHistory.DefaultCellStyle.SelectionForeColor = Color.White;
+            dataGridViewHistory.GridColor = isDark ? Color.FromArgb(70, 70, 70) : SystemColors.ControlDark;
+            dataGridViewHistory.ColumnHeadersDefaultCellStyle.BackColor = isDark ? Color.FromArgb(48, 48, 48) : SystemColors.Control;
+            dataGridViewHistory.ColumnHeadersDefaultCellStyle.ForeColor = foreground;
+            dataGridViewHistory.EnableHeadersVisualStyles = false;
+
+            foreach (Control control in Controls)
+            {
+                if (control is Label label && label != lblCurrentLogFile && label != lblHistory)
+                {
+                    label.ForeColor = foreground;
+                }
+            }
         }
 
         private async void ServerLocation_Load(object sender, EventArgs e)

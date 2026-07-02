@@ -130,6 +130,16 @@
       />
       <span id="deadZoneValue" class="text-base font-medium">93%</span>
     </div>
+    <div class="mt-4">
+      <p id="themeSectionTitle" class="mb-2 text-lg font-medium">Theme</p>
+      <button
+        id="themeToggleButton"
+        onclick="toggleTheme()"
+        class="border rounded py-1.5 px-4 text-base font-medium bg-white hover:bg-gray-100"
+      >
+        Dark Mode
+      </button>
+    </div>
   </section>
 
   <!-- App Version Settings -->
@@ -212,8 +222,29 @@
       document.getElementById('changeLogPathButton').textContent = i18next.t('changeLogPathButton');
       document.getElementById('autoDetectLogButton').textContent = i18next.t('autoDetectLogButton');
       document.getElementById('deadZoneLabel').textContent = i18next.t('deadZoneLabel');
+      document.getElementById('themeSectionTitle').textContent = i18next.t('themeSectionTitle');
+      document.getElementById('themeToggleButton').textContent = i18next.t('themeToggleButton');
       document.getElementById('appVersionText').textContent = i18next.t('appVersionText');
       document.getElementById('checkUpdateButton').textContent = i18next.t('checkUpdateButton');
+    }
+
+    function setTheme(theme) {
+      try {
+        document.body.classList.toggle('theme-dark', theme === 'dark');
+        const button = document.getElementById('themeToggleButton');
+        if (button) {
+          const label = theme === 'dark' ? i18next.t('themeToggleButtonLight') : i18next.t('themeToggleButton');
+          button.textContent = label;
+        }
+      } catch (error) {
+        console.error("setTheme 오류 발생: ", error);
+      }
+    }
+
+    function toggleTheme() {
+      const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+      setTheme(nextTheme);
+      window.chrome.webview.postMessage(JSON.stringify({ action: 'theme-updated', theme: nextTheme }));
     }
 
     // 언어 선택 시 호출되는 함수
