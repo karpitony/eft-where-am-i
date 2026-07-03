@@ -553,43 +553,74 @@ namespace eft_where_am_i
 
         private async void CoreWebView2_SourceChanged(object sender, CoreWebView2SourceChangedEventArgs e)
         {
-            // URL 변경을 감지하고, "tarkov-market.com/maps/맵이름" 인 경우 내부 상태 업데이트 및 스크립트 재주입
+            // URL 변경 감지: 맵 slug(/maps/{slug})가 실제로 바뀐 경우에만 복원 로직 실행
             string currentUrl = webView2.Source?.ToString();
-            if (currentUrl != null && currentUrl.Contains("/maps/"))
+            string mapName = TryExtractMapNameFromUrl(currentUrl);
+            if (string.IsNullOrEmpty(mapName))
             {
-                string mapName = currentUrl.Substring(currentUrl.LastIndexOf('/') + 1);
+                return;
+            }
 
-                // 기존 설정과 다르다면 맵이 변경된 것으로 간주 (마켓 웹 내부에서 다른 맵을 클릭한 경우)
-                if (!string.Equals(appSettings.latest_map, mapName, StringComparison.OrdinalIgnoreCase))
+            bool mapChanged = !string.Equals(appSettings.latest_map, mapName, StringComparison.OrdinalIgnoreCase);
+            if (!mapChanged)
+            {
+                // 같은 맵 내부에서 발생한 SourceChanged(예: 퀘스트 이미지 열기)에는 패널 복원을 하지 않음
+                return;
+            }
+
+            appSettings.latest_map = mapName;
+            SaveSettings();
+
+            // UI 패널(WhereAmIPanel)의 ComboBox 상태도 함께 변경
+            if (webView2_panel_ui.CoreWebView2 != null)
+            {
+                _ = webView2_panel_ui.ExecuteScriptAsync($"document.getElementById('mapSelect').value = '{mapName}';");
+            }
+
+            // SPA 라우팅으로 맵이 실제 변경된 경우에만 각종 초기화 작업 재개
+            if (jsExecutor != null)
+            {
+                bool containerReady = await jsExecutor.WaitForQuestContainerAsync(15000);
+
+                await RestorePanelVisibilityAsync(appSettings.latest_map);
+
+                if (containerReady)
                 {
-                    appSettings.latest_map = mapName;
-                    SaveSettings();
+                    await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
+                    await jsExecutor.InjectQuestClickListenerAsync();
+                    await RestoreQuestsAsync(appSettings.latest_map);
+                }
+            }
+        }
 
-                    // UI 패널(WhereAmIPanel)의 ComboBox 상태도 함께 변경
-                    if (webView2_panel_ui.CoreWebView2 != null)
-                    {
-                        _ = webView2_panel_ui.ExecuteScriptAsync($"document.getElementById('mapSelect').value = '{mapName}';");
-                    }
+        private string TryExtractMapNameFromUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return null;
+            }
+
+            try
+            {
+                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                {
+                    return null;
                 }
 
-                // SPA 라우팅으로 인해 재생성된 DOM 요소에 대응하여 각종 초기화 작업 재개
-                if (jsExecutor != null)
+                string[] segments = uri.AbsolutePath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < segments.Length - 1; i++)
                 {
-                    // Nuxt 컨테이너 로드 대기
-                    bool containerReady = await jsExecutor.WaitForQuestContainerAsync(15000);
-
-                    // 패널 상태 복원: 저장된 값이 있으면 그 상태로, 없으면 현재 맵 전환 시에도 열려 있게 유지
-                    await RestorePanelVisibilityAsync(appSettings.latest_map);
-
-                    if (containerReady)
+                    if (string.Equals(segments[i], "maps", StringComparison.OrdinalIgnoreCase))
                     {
-                        // 맵 재생성 시 증발해버린 스크립트와 리스너를 다시 붙여줌
-                        await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
-                        await jsExecutor.InjectQuestClickListenerAsync();
-                        await RestoreQuestsAsync(appSettings.latest_map);
+                        return segments[i + 1].ToLowerInvariant();
                     }
                 }
             }
+            catch
+            {
+            }
+
+            return null;
         }
 
         private async Task RestorePanelVisibilityAsync(string mapName, bool forceOpen = false)
