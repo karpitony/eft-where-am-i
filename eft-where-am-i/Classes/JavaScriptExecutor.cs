@@ -84,6 +84,13 @@ namespace eft_where_am_i.Classes
         {
             string script = $@"
             (function() {{
+                // Prefer the specific input inside panel_top > div:nth-child(4)
+                var preferred = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div:nth-child(4) > input[type=text]');
+                if (preferred) {{
+                    const isVisibleP = preferred.offsetParent !== null;
+                    const isEnabledP = !preferred.disabled && !preferred.readOnly;
+                    if (isVisibleP && isEnabledP) return true;
+                }}
                 const buttons = document.querySelectorAll('button');
                 for (const btn of buttons) {{
                     if (btn.textContent.trim() === 'Where am i?') {{
@@ -127,19 +134,51 @@ namespace eft_where_am_i.Classes
             string script = $@"
                 (function() {{
                     var input = document.querySelector({Selector});
-                    if (!input) {{ console.log('Input not found'); return; }}
+
+                    // Prefer specific input inside panel_top > div:nth-child(4)
+                    try {{
+                        var preferred = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div:nth-child(4) > input[type=text]');
+                        if (preferred) input = preferred;
+                    }} catch(e) {{}}
+
+                    // Fallbacks: try to locate input near a 'Where' button, placeholder inputs, or any text input
+                    if (!input) {{
+                        try {{
+                            var buttons = document.querySelectorAll('button');
+                            for (var i=0;i<buttons.length;i++) {{
+                                var t = (buttons[i].textContent || '').toLowerCase();
+                                if (t.indexOf('where') !== -1 || t.indexOf('where am') !== -1) {{
+                                    var p = buttons[i].parentElement || buttons[i].closest('div');
+                                    if (p) {{
+                                        input = p.querySelector('input, input[type=text]');
+                                        if (input) break;
+                                    }}
+                                }}
+                            }}
+                        }} catch (e) {{ console.log('Fallback button search failed: ' + e.message); }}
+                    }}
+
+                    if (!input) {{
+                        input = document.querySelector('input[placeholder]') || document.querySelector('input[type=text]') || document.querySelector('input');
+                    }}
+
+                    if (!input) {{ console.log('Input not found (all fallbacks)'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
                     var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
                     nativeSetter.call(input, {escapedValue});
 
                     // Dispatch multiple events for framework compatibility
-                    input.dispatchEvent(new InputEvent('input', {{ bubbles: true, cancelable: true, inputType: 'insertText', data: {escapedValue} }}));
+                    try {{
+                        input.dispatchEvent(new InputEvent('input', {{ bubbles: true, cancelable: true, inputType: 'insertText', data: {escapedValue} }}));
+                    }} catch(e) {{
+                        // Some browsers/environments may not support InputEvent constructor
+                        var ev = document.createEvent('Event'); ev.initEvent('input', true, true); input.dispatchEvent(ev);
+                    }}
                     input.dispatchEvent(new Event('change', {{ bubbles: true }}));
 
                     // Also try focus/blur to trigger validation
-                    input.focus();
-                    input.blur();
+                    try {{ input.focus(); input.blur(); }} catch(e) {{}}
 
                     console.log('Input value set to: ' + input.value);
                 }})();";
