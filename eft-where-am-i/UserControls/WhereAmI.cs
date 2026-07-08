@@ -549,6 +549,23 @@ namespace eft_where_am_i
                 // 퀘스트 복원
                 await RestoreQuestsAsync(appSettings.latest_map);
             }
+
+            // 새로고침의 경우 Where Am I 패널과 방향 표시를 다시 적용
+            try
+            {
+                if (!whereAmIClick)
+                {
+                    whereAmIClick = true;
+                    await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
+                    await Task.Delay(300);
+                }
+
+                await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Warn("WhereAmI", $"Post-navigation reapply failed: {ex.Message}");
+            }
         }
 
         private async void CoreWebView2_SourceChanged(object sender, CoreWebView2SourceChangedEventArgs e)
