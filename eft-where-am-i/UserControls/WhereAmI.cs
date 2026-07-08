@@ -1,4 +1,3 @@
-#nullable disable
 using System;
 using System.Drawing;
 using System.IO;
@@ -17,9 +16,9 @@ namespace eft_where_am_i
     {
         private readonly SettingsHandler settingsHandler; // SettingsHandler 인스턴스
         private AppSettings appSettings; // AppSettings 참조
-        private JavaScriptExecutor jsExecutor = null!;
-        private QuestRepository questRepository = null!;
-        private FloorManager floorManager = null!;
+        private JavaScriptExecutor jsExecutor;
+        private QuestRepository questRepository;
+        private FloorManager floorManager;
         private readonly Dictionary<string, string> mapDisplayNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             { "ground-zero", "Ground Zero" },
@@ -58,15 +57,15 @@ namespace eft_where_am_i
             "terminal",
             "icebreaker"
         };
-        private string siteUrl = string.Empty;
+        private string siteUrl;
         private bool whereAmIClick = false;
-        private string screenshotPath = string.Empty;
-        private FileSystemWatcher watcher = null!;
-        private LogWatcherService logWatcher = null!;
+        private string screenshotPath;
+        private FileSystemWatcher watcher;
+        private LogWatcherService logWatcher;
 
         private bool chkAutoScreenshot;
         private bool isFloorEditMode = false;
-        private GlobalHotkeyManager hotkeyManager = null!;
+        private GlobalHotkeyManager hotkeyManager;
 
         public WhereAmI()
         {
@@ -112,51 +111,11 @@ namespace eft_where_am_i
                 // 6. 글로벌 핫키 매니저 초기화 (EFT 활성 시 Ctrl+Numpad로 층 전환)
                 hotkeyManager = new GlobalHotkeyManager();
                 hotkeyManager.FloorHotkeyPressed += OnFloorHotkeyPressed;
-                // 입력창이 자동으로 닫히는 현상에 대응하기 위한 감시 루프 시작
-                _ = MonitorInputVisibilityLoopAsync();
             }
             catch (Exception ex)
             {
                 // Initialize... 메서드에서 throw한 예외를 여기서 최종 처리
                 MessageBox.Show($"WebView 초기화 중 심각한 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 입력창의 가시성을 주기적으로 확인하고 닫히면 재오픈 시도
-        private async Task MonitorInputVisibilityLoopAsync()
-        {
-            try
-            {
-                while (!this.IsDisposed)
-                {
-                    try
-                    {
-                        // 체크 간격: 700ms
-                        await Task.Delay(700);
-
-                        if (jsExecutor == null) continue;
-
-                        bool inputAble = await jsExecutor.CheckInputAble();
-                        if (!inputAble)
-                        {
-                            // 패널이 숨겨져 있으면 열고, Where Am I 버튼 클릭하여 입력창 복구 시도
-                            await jsExecutor.OpenPanelIfHiddenAsync(2, 150);
-                            await Task.Delay(200);
-                            await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
-                            await Task.Delay(250);
-                        }
-                    }
-                    catch (OperationCanceledException) { break; }
-                    catch (Exception ex)
-                    {
-                        // 로그로만 남기고 루프는 계속
-                        AppLogger.Warn("WhereAmI", $"Monitor loop error: {ex.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Error("WhereAmI", $"MonitorInputVisibilityLoop failed: {ex.Message}");
             }
         }
 
@@ -309,8 +268,6 @@ namespace eft_where_am_i
 
             // 페이지 로드 완료 핸들러 등록 (퀘스트 복원/리스너 주입을 페이지 로드 완료 후 수행)
             webView2.NavigationCompleted += WebView2_NavigationCompleted;
-
-            // (콘솔 메시지 필터링은 CoreWebView2 버전에 따라 지원되지 않을 수 있어 생략)
 
             // SPA (Single Page Application) 내부 라우팅 감지 핸들러 등록
             webView2.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
@@ -575,10 +532,6 @@ namespace eft_where_am_i
 
             // jsExecutor가 아직 초기화되지 않은 경우 무시
             if (jsExecutor == null) return;
-
-            // 새로고침/내부 네비게이션 시 기존 클릭 상태를 초기화하여
-            // Where Am I 버튼을 강제로 다시 클릭하도록 함
-            whereAmIClick = false;
 
             // 데드존 auto-pan 스크립트 재주입 (새 페이지 로드 시)
             await jsExecutor.ExecuteScriptAsync(Constants.DEAD_ZONE_AUTO_PAN_SCRIPT);
