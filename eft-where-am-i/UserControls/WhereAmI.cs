@@ -82,7 +82,7 @@ namespace eft_where_am_i
             this.Load += WhereAmI_Load;
         }
 
-        private async void WhereAmI_Load(object sender, EventArgs e)
+        private async void WhereAmI_Load(object? sender, EventArgs e)
         {
             try
             {
