@@ -298,37 +298,41 @@ namespace eft_where_am_i.Classes
             string escapedName = JsLiteral(questName);
             string script = $@"
             (function() {{
-                console.log('[Quest Load] Searching for:', {escapedName});
-
                 const container = document.querySelector('div.items.scroll');
                 if (!container) {{
-                    console.log('[Quest Load] Container not found');
                     return;
                 }}
 
-                const items = container.querySelectorAll('div.no-wrap.d-flex');
-                console.log('[Quest Load] Items count:', items.length);
+                const items = container.querySelectorAll('div.no-wrap.d-flex, div.no-wrap, .quest, .quest-item, [data-quest-name]');
+                const isSelectedState = (el) => {{
+                    if (!el) return false;
+                    if (el.getAttribute('data-quest-selected') === 'true') return true;
+                    if (el.classList.contains('selected')) return true;
+                    if (el.classList.contains('active')) return true;
+                    if (el.getAttribute('aria-selected') === 'true') return true;
+                    if (el.getAttribute('data-selected') === 'true') return true;
+                    if (el.getAttribute('data-state') === 'selected') return true;
+                    if (el.getAttribute('aria-pressed') === 'true') return true;
+                    return false;
+                }};
 
-                // Set flag to prevent observer from triggering during operations
-                window.__questRestoreInProgress = true;
-
-                // Find and select ONLY the target quest (add to existing selections)
                 for (const item of items) {{
                     const span = item.querySelector('span:not(.alt)');
-                    if (span && span.innerText.trim() === {escapedName}) {{
-                        console.log('[Quest Load] Found, marking as selected');
-                        // Use data attribute as source of truth - don't clear others
-                        item.setAttribute('data-quest-selected', 'true');
-                        item.classList.add('selected', 'active');
-                        item.setAttribute('aria-selected', 'true');
-                        setTimeout(() => {{ window.__questRestoreInProgress = false; }}, 300);
-                        return;
-                    }}
-                }}
+                    if (!span) continue;
+                    if (span.innerText.trim() !== {escapedName}) continue;
 
-                window.__questRestoreInProgress = false;
-                console.log('[Quest Load] Quest not found in list');
-            }})()";
+                    if (!isSelectedState(item)) {{
+                        const event = new MouseEvent('contextmenu', {{
+                            bubbles: true,
+                            cancelable: true,
+                            button: 2,
+                            view: window
+                        }});
+                        item.dispatchEvent(event);
+                    }}
+                    return;
+                }}
+            }})();";
 
             await ExecuteScriptAsync(script);
         }
@@ -910,21 +914,12 @@ namespace eft_where_am_i.Classes
                     if (!span) return;
 
                     const questName = span.innerText.trim();
+                    const wasSelected = lastSentState.get(item);
                     const isSelected = isSelectedState(item);
-                    const previous = lastSentState.get(item);
-                    if (previous === isSelected) return;
+                    if (wasSelected === isSelected) return;
                     lastSentState.set(item, isSelected);
 
                     console.log('[Quest Save]', questName, 'isSelected:', isSelected);
-
-                    if (!isSelected) {
-                        clearSelectionForItem(item);
-                    } else {
-                        // Mark as selected using data attribute
-                        item.setAttribute('data-quest-selected', 'true');
-                        item.classList.add('selected', 'active');
-                        item.setAttribute('aria-selected', 'true');
-                    }
 
                     window.chrome.webview.postMessage(JSON.stringify({
                         action: 'quest-toggled',
@@ -939,10 +934,22 @@ namespace eft_where_am_i.Classes
                     pendingTimer = setTimeout(() => sendQuestState(item), 180);
                 };
 
+                const handlePotentialToggle = (item) => {
+                    if (!item || window.__questRestoreInProgress) return;
+                    queueQuestState(item);
+                };
+
                 container.addEventListener('contextmenu', function(e) {
                     const item = findQuestItem(e.target);
                     if (!item) return;
-                    queueQuestState(item);
+                    handlePotentialToggle(item);
+                }, true);
+
+                container.addEventListener('mousedown', function(e) {
+                    if (e.button !== 2) return;
+                    const item = findQuestItem(e.target);
+                    if (!item) return;
+                    handlePotentialToggle(item);
                 }, true);
 
                 const observer = new MutationObserver((mutations) => {
