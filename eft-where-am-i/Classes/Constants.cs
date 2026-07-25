@@ -705,9 +705,9 @@ namespace eft_where_am_i.Classes
         else if (markerCY > boundBottom) dy = markerCY - boundBottom;
 
         // 8. pointer 이벤트 시뮬레이션으로 맵 팬
-        var panTarget = mapEl.parentElement || mapEl;
-        var startX = effectiveLeft + effectiveWidth / 2;
-        var startY = effectiveTop + effectiveHeight / 2;
+        var panTarget = mapEl;
+        var startX = viewportRect.left + viewportRect.width / 2;
+        var startY = viewportRect.top + viewportRect.height / 2;
         var endX = startX - dx;
         var endY = startY - dy;
 
@@ -732,6 +732,14 @@ namespace eft_where_am_i.Classes
         pointerOpts.clientY = endY;
         pointerOpts.buttons = 0;
         panTarget.dispatchEvent(new PointerEvent('pointerup', pointerOpts));
+
+        try {
+            panTarget.dispatchEvent(new PointerEvent('pointercancel', Object.assign({}, pointerOpts)));
+        } catch (e) {}
+
+        try {
+            panTarget.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: endX, clientY: endY, button: 0 }));
+        } catch (e) {}
 
         return JSON.stringify({ panned: true, dx: Math.round(dx), dy: Math.round(dy), method: 'pointer' });
     };
