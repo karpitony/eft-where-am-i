@@ -18,154 +18,109 @@
     }
   </style>
 </head>
-<body class="flex items-center justify-center bg-gray-200 w-full h-full">
-  <div class="grid grid-cols-4 grid-rows-3 gap-x-6 gap-y-0 w-full h-full">
-
-    <!-- Cell 1: Map Selection -->
-    <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 1;">
-      <label
-        id="mapSelectionLabel"
-        class="text-sm lg:text-base xl:text-lg font-semibold"
-      >
+<body class="toolbar-body">
+  <main class="top-toolbar">
+    <section class="toolbar-card toolbar-map-card" aria-labelledby="mapSelectionLabel">
+      <label id="mapSelectionLabel" for="mapSelect" class="toolbar-card-title">
         Select The Map
       </label>
-    </section>
-    <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 2;">
-      <select
-        id="mapSelect"
-        onchange="mapSelected()"
-        class="border rounded mx-4 px-2 py-0.5 text-xs lg:text-sm xl:text-base font-medium bg-white w-full"
-      >
-        <!-- C#에서 맵 목록 추가 -->
-      </select>
-    </section>
-
-    <!-- Cell 2: Full Screen and Tarkov Market display settings -->
-    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
-      <button
-        id="fullScreenButton"
-        onclick="fullScreen()"
-        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
-      >
-        Full Screen
-      </button>
-    </section>
-    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 3;">
-      <div class="flex items-center justify-center gap-1 w-full">
-        <input
-          type="checkbox"
-          id="showTarkovMarketHeader"
-          class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5"
-          onchange="tarkovMarketHeaderToggle()"
-        >
-        <label
-          id="showTarkovMarketHeaderLabel"
-          for="showTarkovMarketHeader"
-          class="text-xs lg:text-sm xl:text-base font-medium whitespace-nowrap"
-        >
-          Show Header
-        </label>
-        <select
-          id="tarkovMarketLanguageSelect"
-          aria-label="Tarkov Market Language"
-          onchange="tarkovMarketLanguageChanged()"
-          class="border rounded px-1 py-0.5 text-xs lg:text-sm font-medium bg-white"
-          style="width: auto; max-width: 6.5rem; margin-left: 1rem;"
-        >
-          <option value="en">English</option>
-          <option value="ko">한국어</option>
-          <option value="ja">日本語</option>
-          <option value="zh">中文</option>
+      <div class="toolbar-card-body toolbar-map-body">
+        <select id="mapSelect" onchange="mapSelected()" class="toolbar-select toolbar-map-select">
+          <!-- C#에서 맵 목록 추가 -->
         </select>
       </div>
     </section>
 
-    <!-- Cell 3: Screenshot Detection -->
-    <section class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 1;">
-      <div class="flex items-center">
-        <input type="checkbox" id="autoDetect" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="checkboxChanged()">
-        <label
-          id="autoScreenshotDetectionLabel"
-          for="autoDetect"
-          class="text-xs lg:text-sm xl:text-base font-medium"
-        >
-          Auto Screenshot Detection
-        </label>
+    <section class="toolbar-card toolbar-view-card" aria-labelledby="viewSectionTitle">
+      <div id="viewSectionTitle" class="toolbar-card-title">View</div>
+      <div class="toolbar-card-body toolbar-view-body">
+        <button id="fullScreenButton" type="button" onclick="fullScreen()" class="toolbar-button">
+          Full Screen
+        </button>
+        <div class="toolbar-view-options">
+          <label class="toolbar-check-option" for="showTarkovMarketHeader">
+            <input
+              type="checkbox"
+              id="showTarkovMarketHeader"
+              class="toolbar-checkbox"
+              onchange="tarkovMarketHeaderToggle()"
+            >
+            <span id="showTarkovMarketHeaderLabel">Show Header</span>
+          </label>
+          <label class="toolbar-language-field" for="tarkovMarketLanguageSelect">
+            <span id="tarkovMarketLanguageLabel" class="toolbar-field-label">Map language</span>
+            <select
+              id="tarkovMarketLanguageSelect"
+              aria-labelledby="tarkovMarketLanguageLabel"
+              onchange="tarkovMarketLanguageChanged()"
+              class="toolbar-select toolbar-language-select"
+            >
+              <option value="en">English</option>
+              <option value="ko">한국어</option>
+              <option value="ja">日本語</option>
+              <option value="zh">中文</option>
+            </select>
+          </label>
+        </div>
       </div>
-    </section>
-    <section class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 2;">
-      <button
-        id="forceRunButton"
-        onclick="forceRun()"
-        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
-      >
-        Force Run
-      </button>
     </section>
 
-    <!-- Cell 4: Auto Map Detection and Links -->
-    <section class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 1;">
-      <div class="flex items-center">
-        <input type="checkbox" id="autoMapDetect" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoMapToggle()">
-        <label
-          id="autoMapDetectionLabel"
-          for="autoMapDetect"
-          class="text-xs lg:text-sm xl:text-base font-medium"
-        >
-          Auto Map Detection
+    <section class="toolbar-card toolbar-automation-card" aria-labelledby="automationSectionTitle">
+      <div id="automationSectionTitle" class="toolbar-card-title">Automation</div>
+      <div class="toolbar-card-body toolbar-automation-grid">
+        <label class="toolbar-check-option" for="autoDetect">
+          <input type="checkbox" id="autoDetect" class="toolbar-checkbox" onchange="checkboxChanged()">
+          <span id="autoScreenshotDetectionLabel">Auto Screenshot Detection</span>
+        </label>
+        <label class="toolbar-check-option" for="autoMapDetect">
+          <input type="checkbox" id="autoMapDetect" class="toolbar-checkbox" onchange="autoMapToggle()">
+          <span id="autoMapDetectionLabel">Auto Map Detection</span>
+        </label>
+        <label class="toolbar-check-option" for="autoPanning">
+          <input type="checkbox" id="autoPanning" class="toolbar-checkbox" onchange="autoPanningToggle()">
+          <span id="autoPanningLabel">Auto Panning</span>
+        </label>
+        <label class="toolbar-check-option" for="autoScreenshotCleanup">
+          <input
+            type="checkbox"
+            id="autoScreenshotCleanup"
+            class="toolbar-checkbox"
+            onchange="autoScreenshotCleanupToggle()"
+          >
+          <span id="autoScreenshotCleanupLabel">Auto Screenshot Cleanup</span>
         </label>
       </div>
-    </section>
-    <section class="flex justify-center items-center w-full gap-3" style="grid-column: 4; grid-row: 2;">
-      <a
-        id="howToUseLink"
-        href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md"
-        class="text-blue-600 hover:underline text-xs lg:text-sm xl:text-base font-semibold"
-      >
-        How To Use
-      </a>
-      <a
-        id="bugLink"
-        href="https://github.com/karpitony/eft-where-am-i/issues"
-        class="text-blue-600 hover:underline text-xs lg:text-sm xl:text-base font-semibold"
-      >
-        Bug Report
-      </a>
     </section>
 
-    <!-- Row 3: Auto Panning and Floor DB Editor (Debug mode only) -->
-    <section class="flex justify-center items-center w-full" style="grid-column: 1; grid-row: 3;">
-      <div class="flex items-center">
-        <input type="checkbox" id="autoPanning" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoPanningToggle()">
-        <label
-          id="autoPanningLabel"
-          for="autoPanning"
-          class="text-xs lg:text-sm xl:text-base font-medium"
+    <section class="toolbar-card toolbar-actions-card" aria-labelledby="actionsSectionTitle">
+      <div class="toolbar-card-title-row">
+        <div id="actionsSectionTitle" class="toolbar-card-title">Actions</div>
+        <button
+          id="floorDbEditorButton"
+          type="button"
+          onclick="toggleFloorEditMode()"
+          class="toolbar-debug-button"
+          style="display: none;"
         >
-          Auto Panning
-        </label>
+          Floor DB Editor
+        </button>
+      </div>
+      <div class="toolbar-card-body toolbar-actions-body">
+        <button id="forceRunButton" type="button" onclick="forceRun()" class="toolbar-button toolbar-button-primary">
+          Force Run
+        </button>
+        <nav class="toolbar-links" aria-label="Help links">
+          <a id="howToUseLink" href="https://github.com/karpitony/eft-where-am-i/blob/main/README.md">
+            How To Use
+          </a>
+          <span class="toolbar-link-divider" aria-hidden="true"></span>
+          <a id="bugLink" href="https://github.com/karpitony/eft-where-am-i/issues">
+            Bug Report
+          </a>
+        </nav>
       </div>
     </section>
-    <section class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 3;">
-      <button
-        id="floorDbEditorButton"
-        onclick="toggleFloorEditMode()"
-        style="display: none;"
-        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
-      >
-        Floor DB Editor
-      </button>
-    </section>
-    <section class="flex justify-center items-center w-full" style="grid-column: 3; grid-row: 3;">
-      <div class="flex items-center">
-        <input type="checkbox" id="autoScreenshotCleanup" class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 mr-1" onchange="autoScreenshotCleanupToggle()">
-        <label id="autoScreenshotCleanupLabel" for="autoScreenshotCleanup"
-          class="text-xs lg:text-sm xl:text-base font-medium">
-          Auto Screenshot Cleanup
-        </label>
-      </div>
-    </section>
-  </div>
+  </main>
 
   <script>
     i18next
@@ -186,9 +141,13 @@
     // DOM에 번역 적용 함수
     function updateContent() {
       document.getElementById('mapSelectionLabel').textContent = i18next.t('mapSelectionLabel');
+      document.getElementById('viewSectionTitle').textContent = i18next.t('viewSectionTitle');
+      document.getElementById('automationSectionTitle').textContent = i18next.t('automationSectionTitle');
+      document.getElementById('actionsSectionTitle').textContent = i18next.t('actionsSectionTitle');
       document.getElementById('autoScreenshotDetectionLabel').textContent = i18next.t('autoScreenshotDetectionLabel');
       document.getElementById('fullScreenButton').textContent = i18next.t('fullScreenButton');
       document.getElementById('showTarkovMarketHeaderLabel').textContent = i18next.t('showTarkovMarketHeaderLabel');
+      document.getElementById('tarkovMarketLanguageLabel').textContent = i18next.t('tarkovMarketLanguageLabel');
       document.getElementById('forceRunButton').textContent = i18next.t('forceRunButton');
       document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
       document.getElementById('bugLink').textContent = i18next.t('bugLink');
@@ -368,7 +327,7 @@
     function setDebugMode(isDebug) {
       try {
         const btn = document.getElementById('floorDbEditorButton');
-        btn.style.display = isDebug ? 'block' : 'none';
+        btn.style.display = isDebug ? 'inline-flex' : 'none';
       } catch (error) {
         console.error("setDebugMode error:", error);
       }

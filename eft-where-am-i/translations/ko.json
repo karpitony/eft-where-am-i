@@ -1,7 +1,11 @@
 {
     "mapSelectionLabel": "맵을 선택해주세요.",
+    "viewSectionTitle": "화면",
+    "automationSectionTitle": "자동화",
+    "actionsSectionTitle": "실행",
     "fullScreenButton": "전체 화면",
     "showTarkovMarketHeaderLabel": "헤더 보이기",
+    "tarkovMarketLanguageLabel": "지도 언어",
     "autoScreenshotDetectionLabel": "스크린샷 자동 감지",
     "forceRunButton": "강제 실행",
 
