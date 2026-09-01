@@ -451,6 +451,11 @@ namespace eft_where_am_i
                         UpdateWatcherState(isChecked);
                         break;
 
+                    case "hide-show-panel":
+                        await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
+                        await SavePanelStateAsync();
+                        break;
+
                     case "tarkov-market-language-changed":
                         string normalizedLanguage = NormalizeTarkovMarketLanguage(language);
                         if (!string.IsNullOrEmpty(normalizedLanguage))

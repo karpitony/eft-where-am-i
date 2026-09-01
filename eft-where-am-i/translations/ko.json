@@ -3,6 +3,7 @@
     "viewSectionTitle": "화면",
     "automationSectionTitle": "자동화",
     "actionsSectionTitle": "실행",
+    "hideShowPanelsButton": "패널 숨기기/보이기",
     "fullScreenButton": "전체 화면",
     "tarkovMarketLanguageLabel": "지도 언어",
     "autoScreenshotDetectionLabel": "스크린샷 자동 감지",

@@ -149,8 +149,9 @@ body.theme-dark .bg-blue-500 {
 }
 
 .toolbar-map-body {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  gap: 8px;
 }
 
 .toolbar-select,
@@ -258,17 +259,21 @@ body.theme-dark .bg-blue-500 {
 }
 
 .toolbar-language-field {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(84px, 100px);
   min-width: 0;
   align-items: center;
   gap: 7px;
 }
 
 .toolbar-field-label {
+  min-width: 0;
   color: var(--muted);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toolbar-language-select {
@@ -400,11 +405,12 @@ body.theme-dark .toolbar-button-primary:hover {
   }
 
   .toolbar-language-field {
+    grid-template-columns: 1fr;
     gap: 5px;
   }
 
   .toolbar-language-select {
-    width: 100px;
+    width: 100%;
   }
 }
 

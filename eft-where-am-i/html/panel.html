@@ -28,6 +28,20 @@
         <select id="mapSelect" onchange="mapSelected()" class="toolbar-select toolbar-map-select">
           <!-- C#에서 맵 목록 추가 -->
         </select>
+        <label class="toolbar-language-field" for="tarkovMarketLanguageSelect">
+          <span id="tarkovMarketLanguageLabel" class="toolbar-field-label">Map language</span>
+          <select
+            id="tarkovMarketLanguageSelect"
+            aria-labelledby="tarkovMarketLanguageLabel"
+            onchange="tarkovMarketLanguageChanged()"
+            class="toolbar-select toolbar-language-select"
+          >
+            <option value="en">English</option>
+            <option value="ko">한국어</option>
+            <option value="ja">日本語</option>
+            <option value="zh">中文</option>
+          </select>
+        </label>
       </div>
     </section>
 
@@ -37,22 +51,9 @@
         <button id="fullScreenButton" type="button" onclick="fullScreen()" class="toolbar-button">
           Full Screen
         </button>
-        <div class="toolbar-view-options">
-          <label class="toolbar-language-field" for="tarkovMarketLanguageSelect">
-            <span id="tarkovMarketLanguageLabel" class="toolbar-field-label">Map language</span>
-            <select
-              id="tarkovMarketLanguageSelect"
-              aria-labelledby="tarkovMarketLanguageLabel"
-              onchange="tarkovMarketLanguageChanged()"
-              class="toolbar-select toolbar-language-select"
-            >
-              <option value="en">English</option>
-              <option value="ko">한국어</option>
-              <option value="ja">日本語</option>
-              <option value="zh">中文</option>
-            </select>
-          </label>
-        </div>
+        <button id="hideShowPanelsButton" type="button" onclick="hideShowPanel()" class="toolbar-button">
+          Hide/Show Panels
+        </button>
       </div>
     </section>
 
@@ -136,6 +137,7 @@
       document.getElementById('automationSectionTitle').textContent = i18next.t('automationSectionTitle');
       document.getElementById('actionsSectionTitle').textContent = i18next.t('actionsSectionTitle');
       document.getElementById('autoScreenshotDetectionLabel').textContent = i18next.t('autoScreenshotDetectionLabel');
+      document.getElementById('hideShowPanelsButton').textContent = i18next.t('hideShowPanelsButton');
       document.getElementById('fullScreenButton').textContent = i18next.t('fullScreenButton');
       document.getElementById('tarkovMarketLanguageLabel').textContent = i18next.t('tarkovMarketLanguageLabel');
       document.getElementById('forceRunButton').textContent = i18next.t('forceRunButton');
@@ -220,6 +222,13 @@
       const isChecked = document.getElementById('autoDetect').checked;
       console.log("Checkbox state changed to:", isChecked);  // 디버그용 콘솔 출력
       window.chrome.webview.postMessage(JSON.stringify({ action: 'checkbox-updated', isChecked: isChecked }));
+    }
+
+    // Tarkov Market 패널 표시 상태 토글
+    function hideShowPanel() {
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'hide-show-panel'
+      }));
     }
 
     // C#에서 호출: Tarkov Market 언어 상태 설정
