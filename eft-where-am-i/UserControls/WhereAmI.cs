@@ -65,6 +65,7 @@ namespace eft_where_am_i
 
         private bool chkAutoScreenshot;
         private bool isFloorEditMode = false;
+        private bool isTarkovMarketFullScreen = false;
         private GlobalHotkeyManager hotkeyManager;
 
         public WhereAmI()
@@ -140,12 +141,18 @@ namespace eft_where_am_i
                     string mapListJson = Newtonsoft.Json.JsonConvert.SerializeObject(GetMapListForLanguage(language));
                     await webView2_panel_ui.ExecuteScriptAsync($"populateMapList('{mapListJson}', '{appSettings.latest_map}')");
                     await webView2_panel_ui.ExecuteScriptAsync($"setTheme('{appSettings.theme_mode}')");
+                    await SetTarkovMarketPreferencesInPanelAsync();
                 }
                 catch (Exception ex)
                 {
                     // 초기화 직후 드물게 발생하는 예외를 대비한 방어 코드
                     MessageBox.Show($"설정 변경 중 스크립트 실행 오류: {ex.Message}", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
+            }
+
+            if (jsExecutor != null)
+            {
+                await ApplyTarkovMarketPreferencesAsync();
             }
             // 만약 null이라면 (아직 초기화 전),
             // 어차피 InitializeWebViewUI()의 NavigationCompleted 이벤트 핸들러가
@@ -355,6 +362,9 @@ namespace eft_where_am_i
                         await webView2_panel_ui.ExecuteScriptAsync(
                             $"setAutoScreenshotCleanupCheckboxState({appSettings.auto_screenshot_cleanup.ToString().ToLower()})");
 
+                        // Tarkov Market 헤더 표시 및 언어 선택 상태 전송
+                        await SetTarkovMarketPreferencesInPanelAsync();
+
                         // 디버그 모드 플래그 전송
 #if DEBUG
                         await webView2_panel_ui.ExecuteScriptAsync("setDebugMode(true)");
@@ -421,6 +431,7 @@ namespace eft_where_am_i
                 string action = message["action"]?.ToString() ?? "";
                 string map = message["map"]?.ToString() ?? "";
                 string theme = message["theme"]?.ToString() ?? "";
+                string language = message["language"]?.ToString() ?? "";
                 bool isChecked = message["isChecked"] != null && bool.Parse(message["isChecked"].ToString());
                 string url = message["url"]?.ToString() ?? "";
 
@@ -441,9 +452,17 @@ namespace eft_where_am_i
                         break;
 
                     case "hide-show-panel":
-                        btnHideShowPannel_Click(null, null);
-                        // 패널 상태 저장 (클릭 처리 후 딜레이를 두고 상태 읽기)
-                        _ = SavePanelStateAsync();
+                        await jsExecutor.ClickButtonAsync(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR);
+                        await SavePanelStateAsync();
+                        break;
+
+                    case "tarkov-market-language-changed":
+                        string normalizedLanguage = NormalizeTarkovMarketLanguage(language);
+                        if (!string.IsNullOrEmpty(normalizedLanguage))
+                        {
+                            appSettings.tarkov_market_language = normalizedLanguage;
+                            SaveSettings();
+                        }
                         break;
 
                     case "full-screen":
@@ -518,12 +537,48 @@ namespace eft_where_am_i
                 appSettings.latest_map = selectedMap;
                 SaveSettings();  // 설정 저장
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
+                isTarkovMarketFullScreen = false;
                 webView2.Source = new Uri(siteUrl);
                 whereAmIClick = false;
                 WmiInitialize();
 
                 // 퀘스트 복원/리스너 주입은 NavigationCompleted 핸들러에서 처리
             }
+        }
+
+        private static string NormalizeTarkovMarketLanguage(string language)
+        {
+            return (language ?? string.Empty).ToLowerInvariant() switch
+            {
+                "en" => "en",
+                "ko" => "ko",
+                "ja" => "ja",
+                "zh" => "zh",
+                _ => string.Empty
+            };
+        }
+
+        private async Task SetTarkovMarketPreferencesInPanelAsync()
+        {
+            if (webView2_panel_ui.CoreWebView2 == null) return;
+
+            string language = NormalizeTarkovMarketLanguage(appSettings.tarkov_market_language);
+            if (string.IsNullOrEmpty(language)) language = "en";
+
+            string languageJson = Newtonsoft.Json.JsonConvert.SerializeObject(language);
+            await webView2_panel_ui.ExecuteScriptAsync(
+                $"setTarkovMarketPreferences({languageJson})");
+        }
+
+        private async Task ApplyTarkovMarketPreferencesAsync()
+        {
+            if (jsExecutor == null) return;
+
+            string language = NormalizeTarkovMarketLanguage(appSettings.tarkov_market_language);
+            if (string.IsNullOrEmpty(language)) language = "en";
+
+            await jsExecutor.SetTarkovMarketHeaderVisibilityAsync(!isTarkovMarketFullScreen);
+            await jsExecutor.SetTarkovMarketLanguageAsync(language);
         }
 
         private async void WebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
@@ -533,8 +588,14 @@ namespace eft_where_am_i
             // jsExecutor가 아직 초기화되지 않은 경우 무시
             if (jsExecutor == null) return;
 
+            // 새 페이지는 일반 화면 상태로 시작합니다.
+            isTarkovMarketFullScreen = false;
+
             // 데드존 auto-pan 스크립트 재주입 (새 페이지 로드 시)
             await jsExecutor.ExecuteScriptAsync(Constants.DEAD_ZONE_AUTO_PAN_SCRIPT);
+
+            // Tarkov Market 헤더 표시 및 언어 상태 적용
+            await ApplyTarkovMarketPreferencesAsync();
 
             // 퀘스트 컨테이너 로드 대기 (DOM 준비 완료까지 대기)
             bool containerReady = await jsExecutor.WaitForQuestContainerAsync(15000);
@@ -719,7 +780,7 @@ namespace eft_where_am_i
         private async void WmiInitialize()
         {
             await Task.Delay(4000);
-            await jsExecutor.ClickButtonAsync(Constants.FULL_SCREEN_BUTTON_SELECTOR);
+            await ToggleTarkovMarketFullScreenAsync();
             if (!whereAmIClick)
             {
                 whereAmIClick = true;
@@ -874,7 +935,14 @@ namespace eft_where_am_i
 
         private async void btnFullScreen_Click(object sender, EventArgs e)
         {
+            await ToggleTarkovMarketFullScreenAsync();
+        }
+
+        private async Task ToggleTarkovMarketFullScreenAsync()
+        {
             await jsExecutor.ClickButtonAsync(Constants.FULL_SCREEN_BUTTON_SELECTOR);
+            isTarkovMarketFullScreen = !isTarkovMarketFullScreen;
+            await jsExecutor.SetTarkovMarketHeaderVisibilityAsync(!isTarkovMarketFullScreen);
         }
 
         private async void btnForceRun_Click(object sender, EventArgs e)

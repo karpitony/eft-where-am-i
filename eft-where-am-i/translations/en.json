@@ -1,7 +1,11 @@
 {
     "mapSelectionLabel": "Select The Map",
+    "viewSectionTitle": "View",
+    "automationSectionTitle": "Automation",
+    "actionsSectionTitle": "Actions",
     "hideShowPanelsButton": "Hide/Show Panels",
     "fullScreenButton": "Full Screen",
+    "tarkovMarketLanguageLabel": "Map language",
     "autoScreenshotDetectionLabel": "Auto Screenshot Detection",
     "forceRunButton": "Force Run",
 

@@ -784,6 +784,138 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
+        /// Tarkov Market 헤더를 DOM에서 제거하지 않고 표시/숨김 처리합니다.
+        /// 스타일 요소를 사용하므로 SPA가 헤더를 다시 렌더링해도 설정이 유지됩니다.
+        /// </summary>
+        public async Task SetTarkovMarketHeaderVisibilityAsync(bool showHeader)
+        {
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return;
+
+                string script = $@"
+                (function() {{
+                    var styleId = '__eft_where_am_i_header_visibility';
+                    var style = document.getElementById(styleId);
+
+                    if ({showHeader.ToString().ToLowerInvariant()}) {{
+                        if (style) style.remove();
+                        return 'shown';
+                    }}
+
+                    if (!style) {{
+                        style = document.createElement('style');
+                        style.id = styleId;
+                        (document.head || document.documentElement).appendChild(style);
+                    }}
+
+                    style.textContent = 'header.maps-site-chrome, #__nuxt > div > div > header {{ display: none !important; }}';
+                    return 'hidden';
+                }})()";
+
+                await webView.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TarkovMarketHeader] Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Tarkov Market 헤더의 언어 드롭다운과 언어 항목을 순서대로 클릭합니다.
+        /// 사이트 언어 코드는 En/Kr/Jp/Ch를 사용합니다.
+        /// </summary>
+        public async Task<bool> SetTarkovMarketLanguageAsync(string language)
+        {
+            string targetCode = (language ?? string.Empty).ToLowerInvariant() switch
+            {
+                "en" => "En",
+                "ko" => "Kr",
+                "ja" => "Jp",
+                "zh" => "Ch",
+                _ => string.Empty
+            };
+
+            if (string.IsNullOrEmpty(targetCode)) return false;
+
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
+                string script = $@"
+                (async function() {{
+                    var targetCode = {JsLiteral(targetCode)};
+                    var supportedCodes = ['en', 'kr', 'jp', 'ch'];
+                    var normalizeCode = function(text) {{
+                        return (text || '').trim().split(/\s+/)[0].toLowerCase();
+                    }};
+
+                    var header = document.querySelector('header.maps-site-chrome, #__nuxt > div > div > header');
+                    if (!header) return 'header-not-found';
+
+                    var triggers = Array.from(header.querySelectorAll('.dropdown.h-sm .dd-link .dd-text'));
+                    var trigger = triggers.find(function(element) {{
+                        return supportedCodes.includes(normalizeCode(element.textContent));
+                    }});
+                    if (!trigger) return 'trigger-not-found';
+
+                    if (normalizeCode(trigger.textContent) === targetCode.toLowerCase()) {{
+                        return 'already-selected';
+                    }}
+
+                    var clickableTrigger = trigger.closest('.dd-link') || trigger;
+                    clickableTrigger.click();
+
+                    for (var attempt = 0; attempt < 10; attempt++) {{
+                        await new Promise(function(resolve) {{ setTimeout(resolve, 50); }});
+
+                        var languageItems = Array.from(header.querySelectorAll(
+                            '.dd-content .lang-switch a, .sub-menu .sub-menu-item a'
+                        ));
+                        var targetItem = languageItems.find(function(element) {{
+                            var firstPart = element.querySelector('span');
+                            return normalizeCode(firstPart ? firstPart.textContent : element.textContent)
+                                === targetCode.toLowerCase();
+                        }});
+
+                        if (targetItem) {{
+                            targetItem.click();
+                            return 'clicked';
+                        }}
+                    }}
+
+                    return 'language-item-not-found';
+                }})()";
+
+                for (int attempt = 0; attempt < 5; attempt++)
+                {
+                    string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
+                    string status = JsonConvert.DeserializeObject<string>(result) ?? string.Empty;
+
+                    if (status == "clicked" || status == "already-selected")
+                    {
+                        return true;
+                    }
+
+                    if (status != "header-not-found" && status != "trigger-not-found")
+                    {
+                        return false;
+                    }
+
+                    await Task.Delay(250);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TarkovMarketLanguage] Error: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// 패널이 현재 숨겨져 있는지 확인합니다.
         /// 버튼 텍스트가 "Show panels"를 포함하면 패널이 숨겨진 상태입니다.
         /// </summary>

@@ -84,3 +84,338 @@ body.theme-dark .bg-blue-500 {
   background-color: var(--accent);
   color: #ffffff;
 }
+
+/* Where Am I top toolbar */
+.toolbar-body {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.top-toolbar {
+  display: grid;
+  grid-template-columns: 0.82fr 1.34fr 2fr 0.82fr;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  padding: 8px 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 16px;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.toolbar-card:last-child {
+  border-right: 0;
+}
+
+.toolbar-card-title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.toolbar-card-title {
+  min-width: 0;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar-card-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.toolbar-map-body {
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.toolbar-select,
+.toolbar-button {
+  min-height: 36px;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--control-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.toolbar-select {
+  padding: 0 28px 0 10px;
+  cursor: pointer;
+}
+
+.toolbar-map-select {
+  width: 100%;
+}
+
+.toolbar-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.toolbar-button:hover {
+  background: var(--control-hover);
+  border-color: var(--muted);
+}
+
+.toolbar-button:active {
+  background: var(--surface-alt);
+}
+
+.toolbar-button-primary {
+  color: var(--app-text);
+  background: var(--control-bg);
+  border-color: var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+.toolbar-button-primary:hover {
+  color: var(--app-text);
+  background: var(--control-hover);
+  border-color: var(--muted);
+  border-left-color: var(--accent);
+}
+
+.toolbar-view-body {
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.toolbar-view-options {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+
+.toolbar-check-option {
+  display: flex;
+  min-width: 0;
+  min-height: 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.toolbar-check-option:hover {
+  background: transparent;
+  color: var(--link);
+}
+
+.toolbar-check-option span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar-checkbox {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.toolbar-language-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(84px, 100px);
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+}
+
+.toolbar-field-label {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar-language-select {
+  width: 100px;
+  min-height: 30px;
+  padding-left: 8px;
+  font-size: 13px;
+}
+
+.toolbar-automation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(30px, 1fr));
+  align-content: center;
+  gap: 5px 8px;
+}
+
+.toolbar-actions-body {
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.toolbar-links {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.toolbar-links a {
+  min-width: 0;
+  color: var(--link);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+.toolbar-links a:hover {
+  text-decoration: underline;
+}
+
+.toolbar-link-divider {
+  width: 1px;
+  height: 12px;
+  flex: 0 0 auto;
+  background: var(--border);
+}
+
+.toolbar-debug-button {
+  display: inline-flex;
+  min-height: 20px;
+  max-width: 120px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toolbar-select:hover,
+.toolbar-select:focus-visible,
+.toolbar-button:focus-visible,
+.toolbar-checkbox:focus-visible,
+.toolbar-debug-button:focus-visible,
+.toolbar-links a:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+body.theme-dark .toolbar-button-primary {
+  color: var(--app-text);
+  background: var(--control-bg);
+  border-color: var(--border);
+  border-left-color: var(--accent);
+}
+
+body.theme-dark .toolbar-button-primary:hover {
+  color: var(--app-text);
+  background: var(--control-hover);
+  border-color: var(--muted);
+  border-left-color: var(--accent);
+}
+
+@media (max-width: 1120px) {
+  .top-toolbar {
+    gap: 0;
+    padding: 6px 8px;
+  }
+
+  .toolbar-card {
+    gap: 7px;
+    padding: 6px 10px;
+  }
+
+  .toolbar-card-title {
+    font-size: 13px;
+  }
+
+  .toolbar-view-options {
+    gap: 7px;
+  }
+
+  .toolbar-check-option {
+    gap: 6px;
+    padding-inline: 0;
+    font-size: 13px;
+  }
+
+  .toolbar-links {
+    font-size: 11px;
+  }
+
+  .toolbar-field-label {
+    display: none;
+  }
+
+  .toolbar-language-field {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .toolbar-language-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 980px) {
+  .top-toolbar {
+    grid-template-columns: 0.75fr 1.3fr 2.1fr 0.8fr;
+  }
+}
