@@ -302,7 +302,6 @@ namespace eft_where_am_i.Classes
         public bool auto_panning { get; set; } = true;
         public bool auto_screenshot_cleanup { get; set; } = false;
         public string language { get; set; } = "en";
-        public bool show_tarkov_market_header { get; set; } = false;
         public string tarkov_market_language { get; set; } = "en";
         public string theme_mode { get; set; } = "light";
         public string screenshot_path { get; set; } = string.Empty;

@@ -213,9 +213,9 @@ body.theme-dark .bg-blue-500 {
 }
 
 .toolbar-view-options {
-  display: grid;
-  grid-template-columns: minmax(105px, 1fr) auto;
+  display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   min-width: 0;
 }

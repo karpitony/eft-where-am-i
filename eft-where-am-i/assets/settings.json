@@ -5,7 +5,6 @@
   "auto_map_detection": true,
   "auto_panning": true,
   "auto_screenshot_cleanup": false,
-  "show_tarkov_market_header": false,
   "tarkov_market_language": "en",
   "log_path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Escape from Tarkov\\build\\Logs",
   "screenshot_paths_list": [

@@ -38,15 +38,6 @@
           Full Screen
         </button>
         <div class="toolbar-view-options">
-          <label class="toolbar-check-option" for="showTarkovMarketHeader">
-            <input
-              type="checkbox"
-              id="showTarkovMarketHeader"
-              class="toolbar-checkbox"
-              onchange="tarkovMarketHeaderToggle()"
-            >
-            <span id="showTarkovMarketHeaderLabel">Show Header</span>
-          </label>
           <label class="toolbar-language-field" for="tarkovMarketLanguageSelect">
             <span id="tarkovMarketLanguageLabel" class="toolbar-field-label">Map language</span>
             <select
@@ -146,7 +137,6 @@
       document.getElementById('actionsSectionTitle').textContent = i18next.t('actionsSectionTitle');
       document.getElementById('autoScreenshotDetectionLabel').textContent = i18next.t('autoScreenshotDetectionLabel');
       document.getElementById('fullScreenButton').textContent = i18next.t('fullScreenButton');
-      document.getElementById('showTarkovMarketHeaderLabel').textContent = i18next.t('showTarkovMarketHeaderLabel');
       document.getElementById('tarkovMarketLanguageLabel').textContent = i18next.t('tarkovMarketLanguageLabel');
       document.getElementById('forceRunButton').textContent = i18next.t('forceRunButton');
       document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
@@ -232,23 +222,13 @@
       window.chrome.webview.postMessage(JSON.stringify({ action: 'checkbox-updated', isChecked: isChecked }));
     }
 
-    // C#에서 호출: Tarkov Market 헤더/언어 상태 설정
-    function setTarkovMarketPreferences(showHeader, language) {
+    // C#에서 호출: Tarkov Market 언어 상태 설정
+    function setTarkovMarketPreferences(language) {
       try {
-        document.getElementById('showTarkovMarketHeader').checked = showHeader;
         document.getElementById('tarkovMarketLanguageSelect').value = language;
       } catch (error) {
         console.error("setTarkovMarketPreferences error:", error);
       }
-    }
-
-    // Tarkov Market 헤더 표시 토글
-    function tarkovMarketHeaderToggle() {
-      const isChecked = document.getElementById('showTarkovMarketHeader').checked;
-      window.chrome.webview.postMessage(JSON.stringify({
-        action: 'tarkov-market-header-toggle',
-        isChecked: isChecked
-      }));
     }
 
     // Tarkov Market 언어 변경
