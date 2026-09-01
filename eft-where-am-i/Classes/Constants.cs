@@ -614,8 +614,7 @@ namespace eft_where_am_i.Classes
         '#__nuxt > div > div > div.page-content > div > div > div.panel_right > div.user-layers-panel.mb-5.collapsed',
         '#__nuxt > div > div > div.page-content > div > div > div.panel_right > div.squad-panel.mb-5.collapsed',
         '#__nuxt > div > div > div.cookie-consent',
-        '#__nuxt > div > div > div.footer-wrap',
-        '#__nuxt > div > div > header'
+        '#__nuxt > div > div > div.footer-wrap'
     ];
 
     // 1-2. 등록된 selector 요소 제거 + 오버스크롤 차단

@@ -1,7 +1,7 @@
 {
     "mapSelectionLabel": "맵을 선택해주세요.",
-    "hideShowPanelsButton": "패널 숨기기/보이기",
     "fullScreenButton": "전체 화면",
+    "showTarkovMarketHeaderLabel": "헤더 보이기",
     "autoScreenshotDetectionLabel": "스크린샷 자동 감지",
     "forceRunButton": "강제 실행",
 

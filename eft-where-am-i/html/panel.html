@@ -40,16 +40,7 @@
       </select>
     </section>
 
-    <!-- Cell 2: Hide/Show and Full Screen -->
-    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 1;">
-      <button
-        id="hideShowPanelsButton"
-        onclick="hideShowPanel()"
-        class="bg-white border rounded py-1 px-2 text-xs lg:text-sm xl:text-base font-medium hover:bg-gray-100 w-full"
-      >
-        Hide/Show Panels
-      </button>
-    </section>
+    <!-- Cell 2: Full Screen and Tarkov Market display settings -->
     <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 2;">
       <button
         id="fullScreenButton"
@@ -58,6 +49,35 @@
       >
         Full Screen
       </button>
+    </section>
+    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 3;">
+      <div class="flex items-center justify-center gap-1 w-full">
+        <input
+          type="checkbox"
+          id="showTarkovMarketHeader"
+          class="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5"
+          onchange="tarkovMarketHeaderToggle()"
+        >
+        <label
+          id="showTarkovMarketHeaderLabel"
+          for="showTarkovMarketHeader"
+          class="text-xs lg:text-sm xl:text-base font-medium whitespace-nowrap"
+        >
+          Show Header
+        </label>
+        <select
+          id="tarkovMarketLanguageSelect"
+          aria-label="Tarkov Market Language"
+          onchange="tarkovMarketLanguageChanged()"
+          class="border rounded px-1 py-0.5 text-xs lg:text-sm font-medium bg-white"
+          style="width: auto; max-width: 6.5rem; margin-left: 1rem;"
+        >
+          <option value="en">English</option>
+          <option value="ko">한국어</option>
+          <option value="ja">日本語</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
     </section>
 
     <!-- Cell 3: Screenshot Detection -->
@@ -126,7 +146,7 @@
         </label>
       </div>
     </section>
-    <section class="flex justify-center items-center w-full" style="grid-column: 2; grid-row: 3;">
+    <section class="flex justify-center items-center w-full" style="grid-column: 4; grid-row: 3;">
       <button
         id="floorDbEditorButton"
         onclick="toggleFloorEditMode()"
@@ -167,8 +187,8 @@
     function updateContent() {
       document.getElementById('mapSelectionLabel').textContent = i18next.t('mapSelectionLabel');
       document.getElementById('autoScreenshotDetectionLabel').textContent = i18next.t('autoScreenshotDetectionLabel');
-      document.getElementById('hideShowPanelsButton').textContent = i18next.t('hideShowPanelsButton');
       document.getElementById('fullScreenButton').textContent = i18next.t('fullScreenButton');
+      document.getElementById('showTarkovMarketHeaderLabel').textContent = i18next.t('showTarkovMarketHeaderLabel');
       document.getElementById('forceRunButton').textContent = i18next.t('forceRunButton');
       document.getElementById('howToUseLink').textContent = i18next.t('howToUseLink');
       document.getElementById('bugLink').textContent = i18next.t('bugLink');
@@ -189,11 +209,6 @@
     // C#에서 호출하는 함수: 언어 설정
     function setLanguage(language) {
       try {
-        // 언어 선택 <select> 요소의 값을 변경
-        const select = document.getElementById('languageSelect');
-        if(select) {
-          select.value = language;
-        }
         // i18next를 통해 언어 변경 (비동기 처리는 필요시 then()으로 체이닝 가능)
         i18next.changeLanguage(language)
           .then(() => {
@@ -258,10 +273,31 @@
       window.chrome.webview.postMessage(JSON.stringify({ action: 'checkbox-updated', isChecked: isChecked }));
     }
 
-    // Hide/Show Panel 버튼 클릭 시
-    function hideShowPanel() {
+    // C#에서 호출: Tarkov Market 헤더/언어 상태 설정
+    function setTarkovMarketPreferences(showHeader, language) {
+      try {
+        document.getElementById('showTarkovMarketHeader').checked = showHeader;
+        document.getElementById('tarkovMarketLanguageSelect').value = language;
+      } catch (error) {
+        console.error("setTarkovMarketPreferences error:", error);
+      }
+    }
+
+    // Tarkov Market 헤더 표시 토글
+    function tarkovMarketHeaderToggle() {
+      const isChecked = document.getElementById('showTarkovMarketHeader').checked;
       window.chrome.webview.postMessage(JSON.stringify({
-          action: 'hide-show-panel'
+        action: 'tarkov-market-header-toggle',
+        isChecked: isChecked
+      }));
+    }
+
+    // Tarkov Market 언어 변경
+    function tarkovMarketLanguageChanged() {
+      const language = document.getElementById('tarkovMarketLanguageSelect').value;
+      window.chrome.webview.postMessage(JSON.stringify({
+        action: 'tarkov-market-language-changed',
+        language: language
       }));
     }
 

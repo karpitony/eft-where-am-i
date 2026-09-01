@@ -1,7 +1,7 @@
 {
     "mapSelectionLabel": "Select The Map",
-    "hideShowPanelsButton": "Hide/Show Panels",
     "fullScreenButton": "Full Screen",
+    "showTarkovMarketHeaderLabel": "Show Header",
     "autoScreenshotDetectionLabel": "Auto Screenshot Detection",
     "forceRunButton": "Force Run",
 
