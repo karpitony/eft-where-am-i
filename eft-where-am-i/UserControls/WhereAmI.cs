@@ -247,8 +247,10 @@ namespace eft_where_am_i
 
         private async Task InitializeWebViewContent()
         {
-            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
-            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2_Content", Guid.NewGuid().ToString());
+            // 앱 실행 사이에도 쿠키와 사이트 저장소가 유지되도록 고정된 프로필 사용
+            string userDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "EFT-Where-Am-I", "WebView2", "Content");
             CoreWebView2Environment env = null;
             try
             {
@@ -293,8 +295,10 @@ namespace eft_where_am_i
 
         private async Task InitializeWebViewUI()
         {
-            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
-            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2", Guid.NewGuid().ToString());
+            // UI 프로필을 고정하여 WebView2 저장소를 불필요하게 초기화하지 않음
+            string userDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "EFT-Where-Am-I", "WebView2", "PanelUI");
             CoreWebView2Environment env = null;
             try
             {
@@ -551,11 +555,27 @@ namespace eft_where_am_i
             return (language ?? string.Empty).ToLowerInvariant() switch
             {
                 "en" => "en",
-                "ko" => "ko",
-                "ja" => "ja",
-                "zh" => "zh",
+                "ko" or "kr" => "ko",
+                "ja" or "jp" => "ja",
+                "zh" or "ch" => "zh",
                 _ => string.Empty
             };
+        }
+
+        private async Task SyncTarkovMarketLanguageFromCookieAsync()
+        {
+            if (jsExecutor == null) return;
+
+            string cookieLanguage = NormalizeTarkovMarketLanguage(
+                await jsExecutor.GetTarkovMarketLanguageCookieAsync());
+            string configuredLanguage = NormalizeTarkovMarketLanguage(
+                appSettings.tarkov_market_language);
+
+            if (string.IsNullOrEmpty(cookieLanguage) || cookieLanguage == configuredLanguage)
+                return;
+
+            appSettings.tarkov_market_language = cookieLanguage;
+            SaveSettings();
         }
 
         private async Task SetTarkovMarketPreferencesInPanelAsync()
@@ -593,6 +613,9 @@ namespace eft_where_am_i
 
             // 데드존 auto-pan 스크립트 재주입 (새 페이지 로드 시)
             await jsExecutor.ExecuteScriptAsync(Constants.DEAD_ZONE_AUTO_PAN_SCRIPT);
+
+            // 외부 쿠키와 앱 설정을 먼저 조정한 뒤 페이지에 앱 설정을 적용합니다.
+            await SyncTarkovMarketLanguageFromCookieAsync();
 
             // Tarkov Market 헤더 표시 및 언어 상태 적용
             await ApplyTarkovMarketPreferencesAsync();
@@ -724,10 +747,6 @@ namespace eft_where_am_i
                 {
                     await jsExecutor.OpenPanelIfHiddenAsync(3, 100);
                 }
-            }
-            else
-            {
-                await jsExecutor.OpenPanelIfHiddenAsync(3, 100);
             }
         }
 
