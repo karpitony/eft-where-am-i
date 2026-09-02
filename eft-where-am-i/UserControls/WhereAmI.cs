@@ -247,8 +247,10 @@ namespace eft_where_am_i
 
         private async Task InitializeWebViewContent()
         {
-            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
-            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2_Content", Guid.NewGuid().ToString());
+            // 앱 실행 사이에도 쿠키와 사이트 저장소가 유지되도록 고정된 프로필 사용
+            string userDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "EFT-Where-Am-I", "WebView2", "Content");
             CoreWebView2Environment env = null;
             try
             {
@@ -293,8 +295,10 @@ namespace eft_where_am_i
 
         private async Task InitializeWebViewUI()
         {
-            // 고유한 사용자 데이터 폴더 생성 (임시 폴더 + GUID 사용)
-            string userDataFolder = Path.Combine(Path.GetTempPath(), "MyAppWebView2", Guid.NewGuid().ToString());
+            // UI 프로필을 고정하여 WebView2 저장소를 불필요하게 초기화하지 않음
+            string userDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "EFT-Where-Am-I", "WebView2", "PanelUI");
             CoreWebView2Environment env = null;
             try
             {
