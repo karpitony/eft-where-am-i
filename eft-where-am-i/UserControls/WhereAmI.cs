@@ -58,7 +58,6 @@ namespace eft_where_am_i
             "icebreaker"
         };
         private string siteUrl;
-        private bool whereAmIClick = false;
         private string screenshotPath;
         private FileSystemWatcher watcher;
         private LogWatcherService logWatcher;
@@ -543,7 +542,6 @@ namespace eft_where_am_i
                 siteUrl = $"https://tarkov-market.com/maps/{selectedMap}";
                 isTarkovMarketFullScreen = false;
                 webView2.Source = new Uri(siteUrl);
-                whereAmIClick = false;
                 WmiInitialize();
 
                 // 퀘스트 복원/리스너 주입은 NavigationCompleted 핸들러에서 처리
@@ -637,12 +635,7 @@ namespace eft_where_am_i
             // 새로고침의 경우 Where Am I 패널과 방향 표시를 다시 적용
             try
             {
-                if (!whereAmIClick)
-                {
-                    whereAmIClick = true;
-                    await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
-                    await Task.Delay(300);
-                }
+                await jsExecutor.EnsureWhereAmIInputAsync();
 
                 await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
             }
@@ -800,12 +793,7 @@ namespace eft_where_am_i
         {
             await Task.Delay(4000);
             await ToggleTarkovMarketFullScreenAsync();
-            if (!whereAmIClick)
-            {
-                whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
-                await Task.Delay(500);
-            }
+            await jsExecutor.EnsureWhereAmIInputAsync();
             await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
             await jsExecutor.ExecuteScriptAsync(Constants.DEAD_ZONE_AUTO_PAN_SCRIPT);
         }
@@ -815,15 +803,18 @@ namespace eft_where_am_i
             string screenshot = GetLatestFile();
             if (screenshot == null) return;
 
-            if (!await jsExecutor.CheckInputAble())
+            if (!await jsExecutor.EnsureWhereAmIInputAsync())
             {
-                whereAmIClick = true;
-                await jsExecutor.ClickButtonAsync(Constants.WHERE_AM_I_BUTTON_SELECTOR);
-                await Task.Delay(500);
+                AppLogger.Warn("WhereAmI", "Location input could not be opened.");
+                return;
             }
 
             string filenameWithoutExt = screenshot.Replace(".png", "");
-            await jsExecutor.SetInputValueAsync("input[type=\"text\"]", filenameWithoutExt);
+            if (!await jsExecutor.SetWhereAmIInputValueAsync(filenameWithoutExt))
+            {
+                AppLogger.Warn("WhereAmI", "Location input could not be updated.");
+                return;
+            }
 
             // Z좌표 파싱 후 자동 층 전환
             await AutoSwitchFloorAsync(filenameWithoutExt);
