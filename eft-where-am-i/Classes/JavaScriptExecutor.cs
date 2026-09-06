@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
@@ -14,6 +15,7 @@ namespace eft_where_am_i.Classes
     public class JavaScriptExecutor
     {
         private readonly WebView2 webView;
+        private readonly SemaphoreSlim whereAmIInputLock = new SemaphoreSlim(1, 1);
 
         public JavaScriptExecutor(WebView2 webView)
         {
@@ -80,39 +82,24 @@ namespace eft_where_am_i.Classes
             await ExecuteScriptAsync(script);
         }
 
-        public async Task<bool> CheckInputAble()
+        /// <summary>
+        /// Where Am I 위치 입력창이 열려 있고 입력 가능한지 확인합니다.
+        /// </summary>
+        private async Task<bool> IsWhereAmIInputAvailableAsync()
         {
+            string selector = JsLiteral(Constants.WHERE_AM_I_INPUT_SELECTOR);
             string script = $@"
-            (function() {{
-                // Prefer the specific input inside panel_top > div:nth-child(4)
-                var preferred = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div:nth-child(4) > input[type=text]');
-                if (preferred) {{
-                    const isVisibleP = preferred.offsetParent !== null;
-                    const isEnabledP = !preferred.disabled && !preferred.readOnly;
-                    if (isVisibleP && isEnabledP) return true;
-                }}
-                const buttons = document.querySelectorAll('button');
-                for (const btn of buttons) {{
-                    if (btn.textContent.trim() === 'Where am i?') {{
-                        const parent = btn.parentElement;
-                        if (!parent) return false;
-
-                        const input = parent.querySelector('input');
-                        if (!input) return false;
-
-                        const isVisible = input.offsetParent !== null;
-                        const isEnabled = !input.disabled && !input.readOnly;
-
-                        return isVisible && isEnabled;
-                    }}
-                }}
-                return false;
-            }})()
-            ";
+                (function() {{
+                    var input = document.querySelector({selector});
+                    return !!input && input.offsetParent !== null && !input.disabled && !input.readOnly;
+                }})()";
             try
             {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
                 string result = await webView.ExecuteScriptAsync(script);
-                return result.Trim().ToLower() == "true";
+                return result.Trim().ToLowerInvariant() == "true";
             }
             catch (Exception ex)
             {
@@ -122,47 +109,104 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
-        /// 텍스트 입력 필드에 값을 설정하는 JavaScript 코드 실행
+        /// Where Am I 패널을 열고 위치 입력창이 준비될 때까지 기다립니다.
+        /// 버튼 문구는 사이트 언어에 따라 바뀌므로 알려진 문구를 우선 사용하고,
+        /// 그 외 언어에서는 회전 버튼 바로 다음의 컨트롤 그룹을 사용합니다.
+        /// </summary>
+        public async Task<bool> EnsureWhereAmIInputAsync(int attempts = 10, int delayMs = 100)
+        {
+            string inputSelector = JsLiteral(Constants.WHERE_AM_I_INPUT_SELECTOR);
+            string script = $@"
+                (function() {{
+                    var panel = document.querySelector('.panel_top');
+                    if (!panel) return 'panel-not-found';
+
+                    var input = panel.querySelector({inputSelector});
+                    if (input && input.offsetParent !== null && !input.disabled && !input.readOnly) {{
+                        return 'ready';
+                    }}
+
+                    var buttons = Array.from(panel.querySelectorAll('button'));
+                    var normalizedLabels = ['where am i?', '내 위치는?'];
+                    var button = buttons.find(function(candidate) {{
+                        return normalizedLabels.includes((candidate.textContent || '').trim().toLowerCase());
+                    }});
+
+                    if (!button) {{
+                        var rotateButton = buttons.find(function(candidate) {{
+                            var label = ((candidate.getAttribute('aria-label') || '') + ' ' +
+                                (candidate.getAttribute('title') || '')).toLowerCase();
+                            var text = (candidate.textContent || '').trim();
+                            return label.includes('rotate') || label.includes('회전') || text.includes('°');
+                        }});
+                        var nextGroup = rotateButton && rotateButton.parentElement
+                            ? rotateButton.parentElement.nextElementSibling
+                            : null;
+                        if (nextGroup && nextGroup.matches('.d-flex.ml-15')) {{
+                            button = nextGroup.querySelector(':scope > button');
+                        }}
+                    }}
+
+                    if (!button) return 'button-not-found';
+                    button.click();
+                    return 'clicked';
+                }})()";
+
+            await whereAmIInputLock.WaitAsync();
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
+                bool clickIssued = false;
+                for (int attempt = 0; attempt < attempts; attempt++)
+                {
+                    if (await IsWhereAmIInputAvailableAsync()) return true;
+
+                    if (!clickIssued)
+                    {
+                        string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
+                        string status = JsonConvert.DeserializeObject<string>(result) ?? string.Empty;
+                        if (status == "ready") return true;
+                        clickIssued = status == "clicked";
+                    }
+
+                    if (delayMs > 0)
+                    {
+                        await Task.Delay(delayMs);
+                    }
+                }
+
+                return await IsWhereAmIInputAvailableAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WhereAmI] Failed to open location input: {ex.Message}");
+            }
+            finally
+            {
+                whereAmIInputLock.Release();
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Where Am I 위치 입력 필드에 값을 설정하는 JavaScript 코드 실행
         /// Vue/React 호환 방식으로 nativeInputValueSetter + InputEvent를 사용합니다.
         /// </summary>
-        /// <param name="selector">입력 필드의 CSS 셀렉터</param>
         /// <param name="value">설정할 값</param>
-        public async Task SetInputValueAsync(string selector, string value)
+        public async Task<bool> SetWhereAmIInputValueAsync(string value)
         {
-            string Selector = JsLiteral(selector);
+            string selector = JsLiteral(Constants.WHERE_AM_I_INPUT_SELECTOR);
             string escapedValue = JsLiteral(value);
             string script = $@"
                 (function() {{
-                    var input = document.querySelector({Selector});
-
-                    // Prefer specific input inside panel_top > div:nth-child(4)
-                    try {{
-                        var preferred = document.querySelector('#__nuxt > div > div > div.page-content > div > div > div.panel_top > div > div:nth-child(4) > input[type=text]');
-                        if (preferred) input = preferred;
-                    }} catch(e) {{}}
-
-                    // Fallbacks: try to locate input near a 'Where' button, placeholder inputs, or any text input
-                    if (!input) {{
-                        try {{
-                            var buttons = document.querySelectorAll('button');
-                            for (var i=0;i<buttons.length;i++) {{
-                                var t = (buttons[i].textContent || '').toLowerCase();
-                                if (t.indexOf('where') !== -1 || t.indexOf('where am') !== -1) {{
-                                    var p = buttons[i].parentElement || buttons[i].closest('div');
-                                    if (p) {{
-                                        input = p.querySelector('input, input[type=text]');
-                                        if (input) break;
-                                    }}
-                                }}
-                            }}
-                        }} catch (e) {{ console.log('Fallback button search failed: ' + e.message); }}
+                    var input = document.querySelector({selector});
+                    if (!input || input.offsetParent === null || input.disabled || input.readOnly) {{
+                        console.log('Where Am I input not found or unavailable');
+                        return false;
                     }}
-
-                    if (!input) {{
-                        input = document.querySelector('input[placeholder]') || document.querySelector('input[type=text]') || document.querySelector('input');
-                    }}
-
-                    if (!input) {{ console.log('Input not found (all fallbacks)'); return; }}
 
                     // Use native setter to bypass Vue/React getter/setter
                     var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
@@ -181,8 +225,22 @@ namespace eft_where_am_i.Classes
                     try {{ input.focus(); input.blur(); }} catch(e) {{}}
 
                     console.log('Input value set to: ' + input.value);
+                    return true;
                 }})();";
-            await ExecuteScriptAsync(script);
+
+            try
+            {
+                await EnsureWebViewInitializedAsync();
+                if (webView.CoreWebView2 == null) return false;
+
+                string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
+                return result.Trim().ToLowerInvariant() == "true";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WhereAmI] Failed to set location input: {ex.Message}");
+                return false;
+            }
         }
 
         /// <summary>
@@ -530,7 +588,7 @@ namespace eft_where_am_i.Classes
 
         /// <summary>
         /// C# 오케스트레이션 방식 캘리브레이션.
-        /// 기존에 잘 되는 SetInputValueAsync를 사용하여 프로브 좌표를 입력하고,
+        /// SetWhereAmIInputValueAsync를 사용하여 프로브 좌표를 입력하고,
         /// 마커의 CSS left/top으로 pixel 좌표를 읽습니다.
         /// </summary>
         public async Task<bool> CalibrateMapAsync()
@@ -547,8 +605,9 @@ namespace eft_where_am_i.Classes
                 }
 
                 // Save original input value
+                string inputSelector = JsLiteral(Constants.WHERE_AM_I_INPUT_SELECTOR);
                 string origRaw = await webView.CoreWebView2.ExecuteScriptAsync(
-                    "(function(){ var i = document.querySelector('input[type=\"text\"]'); return i ? i.value : ''; })()");
+                    $"(function(){{ var i = document.querySelector({inputSelector}); return i ? i.value : ''; }})()");
                 string originalValue = origRaw?.Trim('"') ?? "";
                 AppLogger.Debug("Calibration", $"Original input value: [{originalValue}]");
 
@@ -556,14 +615,14 @@ namespace eft_where_am_i.Classes
                 // Format: YYYY-MM-DD[HH-MM]_x, y, z_quatX, quatY, quatZ, quatW_speed
                 string probeA = "2000-01-01[00-00]_0.00, 0.00, 0.00_0.00, 0.00, 0.00, 1.00_0.00";
                 AppLogger.Debug("Calibration", $"Setting probe A: {probeA}");
-                await SetInputValueAsync("input[type=\"text\"]", probeA);
+                await SetWhereAmIInputValueAsync(probeA);
                 await Task.Delay(2000);
 
                 var posA = await ReadMarkerPositionAsync();
                 if (!posA.found)
                 {
                     AppLogger.Error("Calibration", "Probe A: no marker found");
-                    await SetInputValueAsync("input[type=\"text\"]", originalValue);
+                    await SetWhereAmIInputValueAsync(originalValue);
                     return false;
                 }
                 AppLogger.Info("Calibration", $"Probe A: left={posA.left}, top={posA.top}");
@@ -572,14 +631,14 @@ namespace eft_where_am_i.Classes
                 // Note: y is height in Tarkov, so we change x and z for map X/Y axes
                 string probeB = "2000-01-01[00-00]_1000.00, 0.00, 1000.00_0.00, 0.00, 0.00, 1.00_0.00";
                 AppLogger.Debug("Calibration", $"Setting probe B: {probeB}");
-                await SetInputValueAsync("input[type=\"text\"]", probeB);
+                await SetWhereAmIInputValueAsync(probeB);
                 await Task.Delay(2000);
 
                 var posB = await ReadMarkerPositionAsync();
                 if (!posB.found)
                 {
                     AppLogger.Error("Calibration", "Probe B: no marker found");
-                    await SetInputValueAsync("input[type=\"text\"]", originalValue);
+                    await SetWhereAmIInputValueAsync(originalValue);
                     return false;
                 }
                 AppLogger.Info("Calibration", $"Probe B: left={posB.left}, top={posB.top}");
@@ -588,7 +647,7 @@ namespace eft_where_am_i.Classes
                 if (Math.Abs(posA.left - posB.left) < 1 && Math.Abs(posA.top - posB.top) < 1)
                 {
                     AppLogger.Error("Calibration", "Probes at same position - marker did not move");
-                    await SetInputValueAsync("input[type=\"text\"]", originalValue);
+                    await SetWhereAmIInputValueAsync(originalValue);
                     return false;
                 }
 
@@ -609,7 +668,7 @@ namespace eft_where_am_i.Classes
                 await webView.CoreWebView2.ExecuteScriptAsync(injectScript);
 
                 // Restore original input
-                await SetInputValueAsync("input[type=\"text\"]", originalValue);
+                await SetWhereAmIInputValueAsync(originalValue);
 
                 return true;
             }
