@@ -133,6 +133,13 @@ namespace eft_where_am_i.Classes
                     }});
 
                     if (!button) {{
+                        button = panel.querySelector(
+                            '.toolbar-group.primary-tools > button:first-child, ' +
+                            '.d-flex.ml-15 > button'
+                        );
+                    }}
+
+                    if (!button) {{
                         var rotateButton = buttons.find(function(candidate) {{
                             var label = ((candidate.getAttribute('aria-label') || '') + ' ' +
                                 (candidate.getAttribute('title') || '')).toLowerCase();
@@ -1004,7 +1011,7 @@ namespace eft_where_am_i.Classes
 
         /// <summary>
         /// 패널이 현재 숨겨져 있는지 확인합니다.
-        /// 버튼 텍스트가 "Show panels"를 포함하면 패널이 숨겨진 상태입니다.
+        /// 새 UI의 aria-label/aria-pressed 상태와 이전 UI의 버튼 텍스트를 함께 확인합니다.
         /// </summary>
         public async Task<bool> IsPanelHiddenAsync()
         {
@@ -1015,11 +1022,17 @@ namespace eft_where_am_i.Classes
 
                 string script = $@"
                 (function() {{
-                    var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR)});
+                    var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANEL_BUTTON_SELECTOR)});
                     if (!btn) return 'false';
 
-                    var text = (btn.textContent || '').toLowerCase();
-                    var isHidden = text.includes('show pannels') || text.includes('show panels') || text.includes('show panel');
+                    var label = ((btn.getAttribute('aria-label') || '') + ' ' +
+                        (btn.getAttribute('title') || '') + ' ' +
+                        (btn.textContent || '')).toLowerCase();
+                    var pressed = btn.getAttribute('aria-pressed');
+                    var isHidden = label.includes('show pannels') ||
+                        label.includes('show panels') ||
+                        label.includes('show panel') ||
+                        (pressed !== null && pressed.toLowerCase() === 'false');
                     return isHidden ? 'true' : 'false';
                 }})()";
 
@@ -1051,7 +1064,7 @@ namespace eft_where_am_i.Classes
 
                     string script = $@"
                     (function() {{
-                        var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANNE_BUTTON_SELECTOR)});
+                        var btn = document.querySelector({JsLiteral(Constants.HIDE_SHOW_PANEL_BUTTON_SELECTOR)});
                         if (!btn) return 'not-found';
                         btn.click();
                         return 'clicked';
