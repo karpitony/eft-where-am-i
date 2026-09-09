@@ -57,6 +57,23 @@ namespace eft_where_am_i.Classes
     // 사용자가 제공한 SVG 데이터 URL 직접 사용
     const svgDataUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDEwIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0LCA0KSBzY2FsZSgwLjcpIHRyYW5zbGF0ZSgtNCwgLTQpIj48cG9seWdvbiBwb2ludHM9IjQsMCA3LjUsOCAwLjUsOCIgZmlsbD0iIzhhMmJlMiIgc3Ryb2tlPSIjNzBhODAwIiBzdHJva2Utd2lkdGg9IjAuNSIvPjwvZz48L3N2Zz4=';
 
+    // Tarkov Market는 게임 좌표를 지도 좌표로 바꿀 때 지도마다 다른 회전을 적용합니다.
+    const mapTransformRotations = Object.freeze({
+        'dev': 180,
+        'ground-zero': 90,
+        'factory': 0,
+        'customs': 90,
+        'interchange': 90,
+        'woods': 90,
+        'shoreline': 90,
+        'lab': 180,
+        'reserve': 105,
+        'lighthouse': 90,
+        'streets': 90,
+        'labyrinth': 180,
+        'icebreaker': 90
+    });
+
     function injectStyle() {
         const style = document.createElement('style');
         style.id = 'triangle-indicator-style';
@@ -91,6 +108,13 @@ namespace eft_where_am_i.Classes
         );
     }
 
+    function getMapTransformRotation() {
+        const mapSlug = location.pathname.match(/\/maps\/([^/?#]+)/)?.[1]?.toLowerCase();
+
+        // 알 수 없는 신규 지도에서는 기존 동작과 같은 +180도 보정을 유지합니다.
+        return mapTransformRotations[mapSlug] ?? 90;
+    }
+
     function getHeadingDegrees(value) {
         const parts = (value || '').trim().split('_');
         if (parts.length < 3) return null;
@@ -102,8 +126,12 @@ namespace eft_where_am_i.Classes
         const x = quat[0], y = quat[1], z = quat[2], w = quat[3];
         const fx = 2 * (x * z + w * y);
         const fz = 1 - 2 * (x * x + y * y);
-        // 게임의 forward 벡터와 표시용 삼각형의 기준 방향이 반대이므로 180도를 보정합니다.
-        return Math.atan2(fx, fz) * 180 / Math.PI + 180;
+        const rawHeading = Math.atan2(fx, fz) * 180 / Math.PI;
+
+        // Tarkov Market의 방향 변환식: raw heading + (270 - map transform rotation).
+        // 사용자가 누르는 지도 회전값은 부모 마커에서 상속되므로 여기에는 더하지 않습니다.
+        const correctedHeading = rawHeading + (270 - getMapTransformRotation());
+        return ((correctedHeading % 360) + 360) % 360;
     }
 
     function updateTriangle(marker) {
