@@ -69,13 +69,13 @@ namespace eft_where_am_i.Classes
             height: 60px !important;
             background-image: url('${svgDataUrl}') !important;
             background-repeat: no-repeat !important;
-            background-position: center 5px !important;
+            background-position: center 8px !important;
             background-size: 100% 100% !important;
             pointer-events: none !important;
             z-index: 9999 !important;
             transform: translate(-50%, -100%) !important;
             transform-origin: 50% 100% !important;
-            transition: transform 0.1s ease !important;
+            transition: none !important;
         }`;
 
         const existingStyle = document.getElementById('triangle-indicator-style');
@@ -102,7 +102,8 @@ namespace eft_where_am_i.Classes
         const x = quat[0], y = quat[1], z = quat[2], w = quat[3];
         const fx = 2 * (x * z + w * y);
         const fz = 1 - 2 * (x * x + y * y);
-        return Math.atan2(fx, fz) * 180 / Math.PI;
+        // 게임의 forward 벡터와 표시용 삼각형의 기준 방향이 반대이므로 180도를 보정합니다.
+        return Math.atan2(fx, fz) * 180 / Math.PI + 180;
     }
 
     function updateTriangle(marker) {
