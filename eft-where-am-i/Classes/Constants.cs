@@ -63,16 +63,17 @@ namespace eft_where_am_i.Classes
         style.textContent = `
         .triangle-indicator {
             position: absolute !important;
-            top: 0% !important;
+            top: 50% !important;
             left: 50% !important;
             width: 25px !important;
             height: 60px !important;
             background-image: url('${svgDataUrl}') !important;
             background-repeat: no-repeat !important;
+            background-position: center 5px !important;
             background-size: 100% 100% !important;
             pointer-events: none !important;
             z-index: 9999 !important;
-            transform: translate(-50%, -65%) !important;
+            transform: translate(-50%, -100%) !important;
             transform-origin: 50% 100% !important;
             transition: transform 0.1s ease !important;
         }`;
@@ -116,7 +117,12 @@ namespace eft_where_am_i.Classes
         const inputEl = marker.querySelector('input[type=text]') || getPositionInput();
         const degrees = inputEl ? getHeadingDegrees(inputEl.value) : null;
         if (degrees !== null) {
-            triangle.style.transform = `translate(-50%, -65%) rotate(${degrees}deg)`;
+            // 기본 스타일의 !important보다 회전값이 우선하도록 같은 우선순위로 설정합니다.
+            triangle.style.setProperty(
+                'transform',
+                `translate(-50%, -100%) rotate(${degrees}deg)`,
+                'important'
+            );
         }
     }
 
