@@ -220,9 +220,9 @@ namespace eft_where_am_i.Classes
                 overlayContext.setTransform(state.point);
                 overlayContext.rotate(heading * Math.PI / 180);
                 overlayContext.beginPath();
-                overlayContext.moveTo(0, -44);
-                overlayContext.lineTo(9, -18);
-                overlayContext.lineTo(-9, -18);
+                overlayContext.moveTo(0, -34);
+                overlayContext.lineTo(8, -16);
+                overlayContext.lineTo(-8, -16);
                 overlayContext.closePath();
                 overlayContext.fillStyle = '#8a2be2';
                 overlayContext.strokeStyle = '#70a800';
