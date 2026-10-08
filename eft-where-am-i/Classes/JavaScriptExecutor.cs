@@ -116,47 +116,25 @@ namespace eft_where_am_i.Classes
         public async Task<bool> EnsureWhereAmIInputAsync(int attempts = 10, int delayMs = 100)
         {
             string inputSelector = JsLiteral(Constants.WHERE_AM_I_INPUT_SELECTOR);
-            string script = $@"
+            string scriptTemplate = $@"
                 (function() {{
-                    var panel = document.querySelector('.panel_top');
-                    if (!panel) return 'panel-not-found';
+                    var more = document.querySelector(
+                        '#__nuxt > div > div > div.page-content > div > div > div.panel_top.desktop-panel > div > div.dropdown.toolbar-more'
+                    );
+                    if (!more) return 'menu-not-found';
 
-                    var input = panel.querySelector({inputSelector});
-                    if (input && input.offsetParent !== null && !input.disabled && !input.readOnly) {{
-                        return 'ready';
+                    var coordinateButton = more.querySelector('.dd-content > div > button:nth-child(2)');
+                    if (coordinateButton && coordinateButton.offsetParent !== null) {{
+                        coordinateButton.click();
+                        return 'coordinate-button-clicked';
                     }}
 
-                    var buttons = Array.from(panel.querySelectorAll('button'));
-                    var normalizedLabels = ['where am i?', '내 위치는?'];
-                    var button = buttons.find(function(candidate) {{
-                        return normalizedLabels.includes((candidate.textContent || '').trim().toLowerCase());
-                    }});
+                    if (__MENU_OPENED__) return 'waiting-for-menu';
 
-                    if (!button) {{
-                        button = panel.querySelector(
-                            '.toolbar-group.primary-tools > button:first-child, ' +
-                            '.d-flex.ml-15 > button'
-                        );
-                    }}
-
-                    if (!button) {{
-                        var rotateButton = buttons.find(function(candidate) {{
-                            var label = ((candidate.getAttribute('aria-label') || '') + ' ' +
-                                (candidate.getAttribute('title') || '')).toLowerCase();
-                            var text = (candidate.textContent || '').trim();
-                            return label.includes('rotate') || label.includes('회전') || text.includes('°');
-                        }});
-                        var nextGroup = rotateButton && rotateButton.parentElement
-                            ? rotateButton.parentElement.nextElementSibling
-                            : null;
-                        if (nextGroup && nextGroup.matches('.d-flex.ml-15')) {{
-                            button = nextGroup.querySelector(':scope > button');
-                        }}
-                    }}
-
-                    if (!button) return 'button-not-found';
-                    button.click();
-                    return 'clicked';
+                    var menuButton = more.querySelector(':scope > div > button');
+                    if (!menuButton) return 'menu-button-not-found';
+                    menuButton.click();
+                    return 'menu-opened';
                 }})()";
 
             await whereAmIInputLock.WaitAsync();
@@ -165,6 +143,7 @@ namespace eft_where_am_i.Classes
                 await EnsureWebViewInitializedAsync();
                 if (webView.CoreWebView2 == null) return false;
 
+                bool menuOpened = false;
                 bool clickIssued = false;
                 for (int attempt = 0; attempt < attempts; attempt++)
                 {
@@ -172,10 +151,14 @@ namespace eft_where_am_i.Classes
 
                     if (!clickIssued)
                     {
+                        string script = scriptTemplate.Replace(
+                            "__MENU_OPENED__",
+                            menuOpened ? "true" : "false");
                         string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
                         string status = JsonConvert.DeserializeObject<string>(result) ?? string.Empty;
                         if (status == "ready") return true;
-                        clickIssued = status == "clicked";
+                        if (status == "menu-opened") menuOpened = true;
+                        clickIssued = status == "coordinate-button-clicked";
                     }
 
                     if (delayMs > 0)
