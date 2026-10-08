@@ -812,6 +812,9 @@ namespace eft_where_am_i
                 return;
             }
 
+            // 첫 스크린샷이 초기화 지연보다 먼저 도착해도 Canvas 렌더링을 놓치지 않습니다.
+            await jsExecutor.ExecuteScriptAsync(Constants.ADD_DIRECTION_INDICATORS_SCRIPT);
+
             string filenameWithoutExt = screenshot.Replace(".png", "");
             if (!await jsExecutor.SetWhereAmIInputValueAsync(filenameWithoutExt))
             {
