@@ -157,6 +157,117 @@ namespace eft_where_am_i.Classes
 
     function updateAllMarkers() {
         document.querySelectorAll('.marker').forEach(updateTriangle);
+        document.querySelectorAll('canvas.players-canvas').forEach(canvas => {
+            canvas.__eftWhereAmIHeading?.render();
+        });
+    }
+
+    function getCanvasHeadingDegrees() {
+        const input = getPositionInput();
+        const heading = input ? getHeadingDegrees(input.value) : null;
+        if (heading === null) return null;
+
+        // Canvas 마커는 화면 좌표에 그려지므로 사용자가 회전한 각도를 직접 더합니다.
+        const rotationButton = document.querySelector('.panel_top .toolbar-rotation');
+        const rotationText = rotationButton?.getAttribute('aria-label') || rotationButton?.textContent || '';
+        const rotation = Number(rotationText.match(/(-?\d+(?:\.\d+)?)\s*°/)?.[1] || 0);
+        return heading + rotation;
+    }
+
+    function bindPlayerCanvas(canvas) {
+        if (canvas.__eftWhereAmIHeading) {
+            canvas.__eftWhereAmIHeading.getHeading = getCanvasHeadingDegrees;
+            canvas.__eftWhereAmIHeading.render();
+            return;
+        }
+
+        const context = canvas.getContext('2d');
+        if (!context) return;
+
+        // 최신 지도는 .marker 대신 players-canvas에 위치 점을 그립니다.
+        // 해당 Canvas 인스턴스만 관찰하고 사이트의 그리기 결과는 그대로 유지합니다.
+        const overlay = document.createElement('canvas');
+        overlay.className = 'eft-heading-canvas';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.style.cssText = 'position:absolute;pointer-events:none;';
+        canvas.insertAdjacentElement('afterend', overlay);
+        const overlayContext = overlay.getContext('2d');
+        if (!overlayContext) {
+            overlay.remove();
+            return;
+        }
+
+        const state = {
+            getHeading: getCanvasHeadingDegrees,
+            point: null,
+            circle: null,
+            handled: false,
+            render: () => {
+                if (overlay.width !== canvas.width) overlay.width = canvas.width;
+                if (overlay.height !== canvas.height) overlay.height = canvas.height;
+                overlay.style.left = `${canvas.offsetLeft}px`;
+                overlay.style.top = `${canvas.offsetTop}px`;
+                overlay.style.width = `${canvas.clientWidth}px`;
+                overlay.style.height = `${canvas.clientHeight}px`;
+                overlay.style.zIndex = getComputedStyle(canvas).zIndex;
+
+                overlayContext.setTransform(1, 0, 0, 1, 0, 0);
+                overlayContext.clearRect(0, 0, overlay.width, overlay.height);
+                const heading = state.getHeading();
+                if (!state.point || heading === null) return;
+
+                overlayContext.save();
+                overlayContext.setTransform(state.point);
+                overlayContext.rotate(heading * Math.PI / 180);
+                overlayContext.beginPath();
+                overlayContext.moveTo(0, -44);
+                overlayContext.lineTo(9, -18);
+                overlayContext.lineTo(-9, -18);
+                overlayContext.closePath();
+                overlayContext.fillStyle = '#8a2be2';
+                overlayContext.strokeStyle = '#70a800';
+                overlayContext.lineWidth = 2;
+                overlayContext.fill();
+                overlayContext.stroke();
+                overlayContext.restore();
+            }
+        };
+        canvas.__eftWhereAmIHeading = state;
+
+        const originalClearRect = context.clearRect;
+        const originalBeginPath = context.beginPath;
+        const originalArc = context.arc;
+        const originalStroke = context.stroke;
+        context.clearRect = function (...args) {
+            const result = originalClearRect.apply(this, args);
+            state.point = null;
+            state.circle = null;
+            state.handled = false;
+            state.render();
+            return result;
+        };
+        context.beginPath = function (...args) {
+            state.circle = null;
+            return originalBeginPath.apply(this, args);
+        };
+        context.arc = function (x, y, radius, start, end, ...args) {
+            state.circle = x === 0 && y === 0 && radius > 0 &&
+                Math.abs(end - start) >= Math.PI * 2;
+            return originalArc.call(this, x, y, radius, start, end, ...args);
+        };
+        context.stroke = function (...args) {
+            const result = originalStroke.apply(this, args);
+            if (!state.handled) {
+                // 자신의 마커가 항상 먼저 그려집니다. 팀원의 점에는 화살표를 붙이지 않습니다.
+                // 사이트가 자체 방향 마커를 그리면 중복 표시도 생기지 않습니다.
+                state.handled = true;
+                if (state.circle) {
+                    state.point = this.getTransform();
+                    state.render();
+                }
+            }
+            return result;
+        };
     }
 
     function bindPositionInput() {
@@ -175,6 +286,7 @@ namespace eft_where_am_i.Classes
 
     function initMarkers() {
         bindPositionInput();
+        document.querySelectorAll('canvas.players-canvas').forEach(bindPlayerCanvas);
         updateAllMarkers();
     }
 
@@ -197,6 +309,12 @@ namespace eft_where_am_i.Classes
                         updateTriangle(node);
                     } else {
                         node.querySelectorAll('.marker').forEach(updateTriangle);
+                    }
+
+                    if (node.matches('canvas.players-canvas')) {
+                        bindPlayerCanvas(node);
+                    } else {
+                        node.querySelectorAll('canvas.players-canvas').forEach(bindPlayerCanvas);
                     }
 
                     if (node.matches('#map-position-file, .position-controls') ||
