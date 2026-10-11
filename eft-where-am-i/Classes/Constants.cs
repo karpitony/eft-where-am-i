@@ -805,33 +805,38 @@ namespace eft_where_am_i.Classes
         '.panel_right .squad-panel.collapsed',
         '.cookie-consent',
         '.footer-wrap.maps-site-chrome'
-    ];
+    ].join(',');
 
-    // 1-2. 등록된 selector 요소 제거 + 오버스크롤 차단
-    function removeUnwantedElements() {
-        for (var i = 0; i < selectors.length; i++) {
-            var sel = selectors[i];
-            try {
-                document.querySelectorAll(sel).forEach(el => el.remove());
-            } catch (e) {
-                console.warn('[deadZoneAutoPan] Invalid selector:', sel, e);
-            }
+    // 1-2. 새로 추가된 DOM 하위에서만 제거 대상 요소를 찾습니다.
+    function removeUnwantedElements(root) {
+        if (root.nodeType !== Node.ELEMENT_NODE) return;
+
+        if (root.matches(selectors)) {
+            root.remove();
+            return;
         }
-    }
-    removeUnwantedElements();
 
-    // 1-3. DOM 변경 감지 시 재실행 (debounced)
-    var removeScheduled = false;
-    var unwantedObserver = new MutationObserver(function() {
-        if (removeScheduled) return;
-        removeScheduled = true;
-        requestAnimationFrame(function() {
-            removeScheduled = false;
-            removeUnwantedElements();
+        root.querySelectorAll(selectors).forEach(function(element) {
+            element.remove();
         });
-    });
-    if (document.body) {
-        unwantedObserver.observe(document.body, { childList: true, subtree: true });
+    }
+    // 1-3. DOM 변경을 문서 생성 시점부터 감시하고 요소를 바로 제거합니다.
+    if (!window.__deadZoneUnwantedObserver) {
+        document.querySelectorAll(selectors).forEach(function(element) {
+            element.remove();
+        });
+
+        window.__deadZoneUnwantedObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    removeUnwantedElements(node);
+                });
+            });
+        });
+        window.__deadZoneUnwantedObserver.observe(
+            document.documentElement || document,
+            { childList: true, subtree: true }
+        );
     }
 
     window.__deadZoneAutoPan = function(deadZonePercent) {

@@ -961,38 +961,6 @@ namespace eft_where_am_i.Classes
         }
 
         /// <summary>
-        /// Tarkov Market의 언어 쿠키를 읽습니다.
-        /// </summary>
-        public async Task<string> GetTarkovMarketLanguageCookieAsync()
-        {
-            try
-            {
-                await EnsureWebViewInitializedAsync();
-                if (webView.CoreWebView2 == null) return string.Empty;
-
-                var cookies = await webView.CoreWebView2.CookieManager.GetCookiesAsync(
-                    "https://tarkov-market.com/");
-                string[] languageCookieNames = { "tm_locale", "language", "lang", "locale", "i18nextLng", "i18next" };
-
-                foreach (var cookie in cookies)
-                {
-                    if (!languageCookieNames.Contains(cookie.Name, StringComparer.OrdinalIgnoreCase))
-                        continue;
-
-                    string value = cookie.Value?.Trim().ToLowerInvariant();
-                    if (value is "en" or "ko" or "kr" or "ja" or "jp" or "zh" or "ch")
-                        return value;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[TarkovMarketLanguageCookie] Error: {ex.Message}");
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
         /// 패널이 현재 숨겨져 있는지 확인합니다.
         /// 새 UI의 aria-label/aria-pressed 상태와 이전 UI의 버튼 텍스트를 함께 확인합니다.
         /// </summary>

@@ -86,24 +86,32 @@ namespace eft_where_am_i
         {
             try
             {
-                // 1. UI용 WebView2 초기화
-                await InitializeWebViewUI();
+                // 1. UI와 콘텐츠 WebView2를 동시에 초기화
+                await Task.WhenAll(
+                    InitializeWebViewUI(),
+                    InitializeWebViewContent());
 
-                // 2. 콘텐츠용 WebView2 초기화
-                await InitializeWebViewContent();
-
-                // 3. 모든 WebView가 초기화된 후에 jsExecutor 생성
+                // 2. WebView 초기화와 핸들러 등록이 끝난 뒤 콘텐츠 탐색을 시작
                 jsExecutor = new JavaScriptExecutor(webView2);
                 questRepository = new QuestRepository();
                 floorManager = new FloorManager();
+                try
+                {
+                    webView2.Source = new Uri(siteUrl);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"웹 콘텐츠 URL 설정 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    throw;
+                }
 
-                // 4. 앱 시작 시 패널을 강제로 열어둠
+                // 3. 앱 시작 시 패널을 강제로 열어둠
                 await RestorePanelVisibilityAsync(appSettings.latest_map, forceOpen: true);
 
-                // 5. LogWatcher 초기화
+                // 4. LogWatcher 초기화
                 InitializeLogWatcher();
 
-                // 6. 모든 준비가 끝난 후 WmiInitialize 호출
+                // 5. 모든 준비가 끝난 후 WmiInitialize 호출
                 WmiInitialize();
 
                 // 퀘스트 복원/리스너 주입은 NavigationCompleted 핸들러에서 처리
@@ -280,16 +288,6 @@ namespace eft_where_am_i
             // SPA (Single Page Application) 내부 라우팅 감지 핸들러 등록
             webView2.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
 
-            // 외부 URL 로드 (예외 처리 포함)
-            try
-            {
-                webView2.Source = new Uri(siteUrl);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"웹 콘텐츠 URL 설정 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw;
-            }
         }
 
         private async Task InitializeWebViewUI()
@@ -560,22 +558,6 @@ namespace eft_where_am_i
             };
         }
 
-        private async Task SyncTarkovMarketLanguageFromCookieAsync()
-        {
-            if (jsExecutor == null) return;
-
-            string cookieLanguage = NormalizeTarkovMarketLanguage(
-                await jsExecutor.GetTarkovMarketLanguageCookieAsync());
-            string configuredLanguage = NormalizeTarkovMarketLanguage(
-                appSettings.tarkov_market_language);
-
-            if (string.IsNullOrEmpty(cookieLanguage) || cookieLanguage == configuredLanguage)
-                return;
-
-            appSettings.tarkov_market_language = cookieLanguage;
-            SaveSettings();
-        }
-
         private async Task SetTarkovMarketPreferencesInPanelAsync()
         {
             if (webView2_panel_ui.CoreWebView2 == null) return;
@@ -612,10 +594,7 @@ namespace eft_where_am_i
             // 데드존 auto-pan 스크립트 재주입 (새 페이지 로드 시)
             await jsExecutor.ExecuteScriptAsync(Constants.DEAD_ZONE_AUTO_PAN_SCRIPT);
 
-            // 외부 쿠키와 앱 설정을 먼저 조정한 뒤 페이지에 앱 설정을 적용합니다.
-            await SyncTarkovMarketLanguageFromCookieAsync();
-
-            // Tarkov Market 헤더 표시 및 언어 상태 적용
+            // 앱에 저장된 Tarkov Market 언어 설정 적용
             await ApplyTarkovMarketPreferencesAsync();
 
             // 퀘스트 컨테이너 로드 대기 (DOM 준비 완료까지 대기)
