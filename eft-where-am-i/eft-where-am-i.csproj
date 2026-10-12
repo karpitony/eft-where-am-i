@@ -52,8 +52,13 @@
     <None Update="assets\js\i18nextHttpBackend.min.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="assets\settings.json">
+    <None Update="assets\settings.defaults.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+    <None Update="assets\settings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
     <None Update="eft-where-am-i.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
