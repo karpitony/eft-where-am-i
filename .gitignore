@@ -411,3 +411,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp
+
+# Legacy user settings; packaged defaults live in settings.defaults.json.
+eft-where-am-i/assets/settings.json

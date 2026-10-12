@@ -117,6 +117,10 @@ If the program does nothing when you open it or throws a system error, you likel
 
 On first launch, the tool automatically detects your EFT screenshot and log folder paths. If the detected paths are incorrect, you can change them manually in Settings or use the `Auto Find` button.
 
+User settings are stored in `%LOCALAPPDATA%\EFT-Where-Am-I\settings.json` and survive automatic updates. An existing `assets\settings.json` is imported on first launch if no user settings file exists yet.
+
+Before your first update from an older version, close the app and copy its `assets\settings.json` to the path above. Settings already deleted or overwritten by the older updater cannot be recovered automatically.
+
 ## How to Use
 
 ### Basic Usage

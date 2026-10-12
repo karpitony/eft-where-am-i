@@ -9,7 +9,7 @@ namespace eft_where_am_i.Classes
 {
     internal class SettingsHandler
     {
-        private static SettingsHandler _instance;
+        private static SettingsHandler? _instance;
         public static SettingsHandler Instance
         {
             get
@@ -20,14 +20,27 @@ namespace eft_where_am_i.Classes
             }
         }
 
-        private static readonly string DefaultFilePath = Path.Combine("assets", "settings.json");
+        private static readonly string UserFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "EFT-Where-Am-I", "settings.json");
         private readonly string _filePath;
-        private AppSettings _settings;
-        public event Action<AppSettings> SettingsChanged;
+        private readonly string _legacyFilePath;
+        private readonly string _defaultFilePath;
+        private AppSettings _settings = new AppSettings();
+        public event Action<AppSettings>? SettingsChanged;
 
         private SettingsHandler()
+            : this(UserFilePath,
+                Path.Combine(AppContext.BaseDirectory, "assets", "settings.json"),
+                Path.Combine(AppContext.BaseDirectory, "assets", "settings.defaults.json"))
         {
-            _filePath = DefaultFilePath;
+        }
+
+        internal SettingsHandler(string filePath, string legacyFilePath, string defaultFilePath)
+        {
+            _filePath = filePath;
+            _legacyFilePath = legacyFilePath;
+            _defaultFilePath = defaultFilePath;
             EnsureDirectoryExists();
             Load();
         }
@@ -52,7 +65,11 @@ namespace eft_where_am_i.Classes
                 }
                 else
                 {
-                    _settings = new AppSettings();
+                    // Migrate existing settings once; packaged defaults are only for a new user.
+                    string sourcePath = File.Exists(_legacyFilePath) ? _legacyFilePath : _defaultFilePath;
+                    _settings = File.Exists(sourcePath)
+                        ? JsonConvert.DeserializeObject<AppSettings>(File.ReadAllText(sourcePath)) ?? new AppSettings()
+                        : new AppSettings();
                     Save();
                 }
             }
