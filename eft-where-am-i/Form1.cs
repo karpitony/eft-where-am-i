@@ -1,15 +1,23 @@
 using System;
 using System.Drawing;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using eft_where_am_i;
+using eft_where_am_i.Classes;
 using Velopack;
 using Velopack.Sources;
 namespace eft_where_am_i_chasrp
 {
     public partial class Form1 : Form
     {
+        private const uint DwmwaUseImmersiveDarkMode = 20;
+        private const uint DwmwaUseImmersiveDarkModeBeforeWindows11 = 19;
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, ref int pvAttribute, uint cbAttribute);
+
         private string currentScreen = "WhereAmI";
 
         // UserControl을 캐싱해서 상태 유지
@@ -27,7 +35,43 @@ namespace eft_where_am_i_chasrp
                           ControlStyles.UserPaint |
                           ControlStyles.OptimizedDoubleBuffer, true);
 
+            SettingsHandler.Instance.SettingsChanged += OnSettingsChanged;
             InitializeScreens();
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            ApplyTitleBarTheme(SettingsHandler.Instance.GetSettings().theme_mode);
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            SettingsHandler.Instance.SettingsChanged -= OnSettingsChanged;
+            base.OnFormClosed(e);
+        }
+
+        private void OnSettingsChanged(AppSettings updatedSettings)
+        {
+            if (IsDisposed || !IsHandleCreated)
+                return;
+
+            if (InvokeRequired)
+            {
+                BeginInvoke(() => ApplyTitleBarTheme(updatedSettings.theme_mode));
+                return;
+            }
+
+            ApplyTitleBarTheme(updatedSettings.theme_mode);
+        }
+
+        private void ApplyTitleBarTheme(string theme)
+        {
+            int useDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            int result = DwmSetWindowAttribute(Handle, DwmwaUseImmersiveDarkMode, ref useDarkMode, sizeof(int));
+
+            if (result < 0)
+                _ = DwmSetWindowAttribute(Handle, DwmwaUseImmersiveDarkModeBeforeWindows11, ref useDarkMode, sizeof(int));
         }
 
         private void InitializeScreens()
